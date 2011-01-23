@@ -23,7 +23,7 @@ namespace DataSequenceGraph
             List<string> srcData = new List<string>() { "A","B","C" };
             DataChunkRoute<string> route = new DataChunkRoute<string>(srcData,list);
             Assert.AreSame(srcData, route.SourceData);
-            StartNode firstNode = route.InitialNode;
+            StartNode<string> firstNode = route.InitialNode;
             Assert.IsNotNull(firstNode);
         }
     }

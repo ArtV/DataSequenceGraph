@@ -5,20 +5,20 @@ using System.Text;
 
 namespace DataSequenceGraph
 {
-    public abstract class Node
+    public abstract class Node<T>
     {
-        public IEnumerable<Route> OutgoingRoutes { get; private set; }
+        public IEnumerable<Route<T>> OutgoingRoutes { get; private set; }
         public int SequenceNumber { get; private set; }
 
         public Node(int SequenceNumber)
         {
-            OutgoingRoutes = new List<Route>();
+            OutgoingRoutes = new List<Route<T>>();
             this.SequenceNumber = SequenceNumber;
         }
 
-        public void AddOutgoingRoute(Route route)
+        public void AddOutgoingRoute(Route<T> route)
         {
-            OutgoingRoutes = OutgoingRoutes.Concat(new List<Route>() { route });
+            OutgoingRoutes = OutgoingRoutes.Concat(new List<Route<T>>() { route });
         }
     }
 }

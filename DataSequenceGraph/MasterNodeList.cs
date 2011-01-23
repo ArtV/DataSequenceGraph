@@ -7,7 +7,7 @@ namespace DataSequenceGraph
 {
     public class MasterNodeList<T>
     {
-        private List<Node> nodeList = new List<Node>();
+        private List<Node<T>> nodeList = new List<Node<T>>();
 
         public IEnumerable<ValueNode<T>> getValueNodesByValue(T desiredValue)
         {
@@ -21,14 +21,14 @@ namespace DataSequenceGraph
             return newNode;
         }
 
-        public Node nodeByNumber(int index)
+        public Node<T> nodeByNumber(int index)
         {
-            return nodeList.ElementAt<Node>(index);
+            return nodeList.ElementAt<Node<T>>(index);
         }
 
-        public StartNode newStartNode()
+        public StartNode<T> newStartNode()
         {
-            StartNode newNode = new StartNode(nodeList.Count);
+            StartNode<T> newNode = new StartNode<T>(nodeList.Count);
             nodeList.Add(newNode);
             return newNode;
         }

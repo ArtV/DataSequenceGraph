@@ -19,7 +19,7 @@ namespace DataSequenceGraph
             nodeList = new MasterNodeList<string>();
             vn = nodeList.newValueNodeFromValue("A");
             vn2 = nodeList.newValueNodeFromValue("B");
-            Route.newRouteBetween(vn, vn2);
+            Route<string>.newRouteBetween(vn, vn2);
         }
 
         [Test]
@@ -37,6 +37,21 @@ namespace DataSequenceGraph
         {
             Assert.AreEqual(1,vn.OutgoingRoutes.Count());
             Assert.AreEqual(0, vn2.OutgoingRoutes.Count());
+        }
+
+        [Test]
+        public void findMatchingRoutes()
+        {
+            IEnumerable<string> stringSeq = new List<string>() { "A","B" };
+            IEnumerable<Node<string>> previousNodes = new List<StartNode<string>>();
+            RouteCriterion<string> criterion = new RouteCriterion<string>() { 
+                desiredSequence = stringSeq, previousNodes = previousNodes };
+            IEnumerable<Route<string>> matchingRoutes = vn.findMatchingRoutes(criterion);
+            Assert.AreEqual(1, matchingRoutes.Count());
+
+            criterion.desiredSequence = new List<string>() { "A", "C" };
+            matchingRoutes = vn.findMatchingRoutes(criterion);
+            Assert.AreEqual(0, matchingRoutes.Count());
         }
     }
 }

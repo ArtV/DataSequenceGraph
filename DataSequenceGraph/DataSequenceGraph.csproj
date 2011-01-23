@@ -44,6 +44,7 @@
     <Compile Include="MasterNodeList.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="Route.cs" />
+    <Compile Include="RouteCriterion.cs" />
     <Compile Include="StartNode.cs" />
     <Compile Include="ValueNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

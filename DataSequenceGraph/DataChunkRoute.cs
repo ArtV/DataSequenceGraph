@@ -8,7 +8,7 @@ namespace DataSequenceGraph
     public class DataChunkRoute<T>
     {
         public IEnumerable<T> SourceData { get; private set; }
-        public StartNode InitialNode { get; private set; }
+        public StartNode<T> InitialNode { get; private set; }
         public MasterNodeList<T> nodeList { get; private set; }
 
         public DataChunkRoute(IEnumerable<T> sourceData,MasterNodeList<T> nodeList)

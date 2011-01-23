@@ -15,8 +15,8 @@ namespace DataSequenceGraph
         private ValueNode<string> nodeC;
         private ValueNode<string> nodeD;
 
-        private Route routeAB;
-        private Route routeCD;
+        private Route<string> routeAB;
+        private Route<string> routeCD;
 
         [SetUp]
         public void SetUp()
@@ -27,24 +27,28 @@ namespace DataSequenceGraph
             nodeC = list.newValueNodeFromValue("C");
             nodeD = list.newValueNodeFromValue("D");
 
-            routeAB = Route.newRouteBetween(nodeA, nodeB);
-            routeCD = Route.newRouteBetween(nodeC, nodeD);
+            routeAB = Route<string>.newRouteBetween(nodeA, nodeB);
+            routeCD = Route<string>.newRouteBetween(nodeC, nodeD);
         }
 
         [Test]
         public void newRouteFromNodes()
         {
-            Route route = Route.newRouteBetween(nodeA, nodeB);
+            Route<string> route = Route<string>.newRouteBetween(nodeA, nodeB);
             Assert.AreSame(nodeA, route.startNode);
             Assert.AreSame(nodeB, route.connectedNodes.ElementAt(1));
         }
 
         [Test]
-        public void newRouteFromRoutes()
+        public void routeMatches()
         {
-            Route route = Route.connectRoutes(routeAB, routeCD);
-            Assert.AreSame(nodeA, route.startNode);
-            Assert.AreSame(nodeD, route.connectedNodes.ElementAt(3));
+            RouteCriterion<string> criterion = new RouteCriterion<string>()
+            {
+                desiredSequence = new List<string>() { "A", "B" },
+                previousNodes = new List<ValueNode<string>>()
+            };
+            Assert.IsTrue(routeAB.matches(criterion));
         }
+
     }
 }
