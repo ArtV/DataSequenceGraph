@@ -31,5 +31,13 @@ namespace DataSequenceGraph
             ValueNode<string> nodeB = (ValueNode<string>) list.nodeByNumber(1);            
             Assert.AreEqual("B", nodeB.Value);
         }
+
+        [Test]
+        public void getValueNodesByValue()
+        {
+            IEnumerable<ValueNode<string>> matchedNodes = list.getValueNodesByValue("A");
+            Assert.AreEqual(1, matchedNodes.Count());
+            Assert.AreEqual("A", matchedNodes.ElementAt(0).Value);
+        }
     }
 }
