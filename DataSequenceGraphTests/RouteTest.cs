@@ -40,8 +40,7 @@ namespace DataSequenceGraph
         public void newRouteFromEdges()
         {
             Edge<string> newEdge = new Edge<string>() { from = nodeA, to = nodeB };
-            // the same edge wouldn't be passed twice in real situations
-            Route<string> route = Route<string>.newRouteBetween(newEdge,new List<Edge<string>>() { newEdge });
+            Route<string> route = Route<string>.newRouteBetween(newEdge,new List<Edge<string>>());
             Assert.AreSame(nodeA, route.startNode);
             Assert.AreSame(nodeB, route.connectedNodes.ElementAt(1));
         }
@@ -56,6 +55,5 @@ namespace DataSequenceGraph
             };
             Assert.IsTrue(routeAB.matches(criterion));
         }
-
     }
 }

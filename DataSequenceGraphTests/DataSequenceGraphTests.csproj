@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataChunkRouteTest.cs" />
+    <Compile Include="EdgeTest.cs" />
     <Compile Include="RouteTest.cs" />
     <Compile Include="MasterNodeListTest.cs" />
     <Compile Include="StartNodeTest.cs" />
