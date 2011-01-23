@@ -12,6 +12,7 @@ namespace DataSequenceGraph
         private MasterNodeList<string> nodeList;
         private ValueNode<string> vn;
         private ValueNode<string> vn2;
+        private Edge<string> edge;
 
         [SetUp]
         public void SetUp()
@@ -19,7 +20,8 @@ namespace DataSequenceGraph
             nodeList = new MasterNodeList<string>();
             vn = nodeList.newValueNodeFromValue("A");
             vn2 = nodeList.newValueNodeFromValue("B");
-            Route<string>.newRouteBetween(vn, vn2);
+            edge = new Edge<string>() { from = vn, to = vn2 };
+            Route<string>.newRouteBetween(edge, new List<Edge<string>>());
         }
 
         [Test]
@@ -43,9 +45,9 @@ namespace DataSequenceGraph
         public void findMatchingRoutes()
         {
             IEnumerable<string> stringSeq = new List<string>() { "A","B" };
-            IEnumerable<Node<string>> previousNodes = new List<StartNode<string>>();
+            IEnumerable<Edge<string>> previousEdges = new List<Edge<string>>();
             RouteCriterion<string> criterion = new RouteCriterion<string>() { 
-                desiredSequence = stringSeq, previousNodes = previousNodes };
+                desiredSequence = stringSeq, previousEdges = previousEdges };
             IEnumerable<Route<string>> matchingRoutes = vn.findMatchingRoutes(criterion);
             Assert.AreEqual(1, matchingRoutes.Count());
 

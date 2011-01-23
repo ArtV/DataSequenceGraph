@@ -19,13 +19,19 @@ namespace DataSequenceGraph
             get;
             private set;
         }
+        public IEnumerable<Edge<T>> requisiteEdges
+        {
+            get;
+            private set;
+        }
 
-        public Route(Node<T> from, Node<T> to)
+        public Route(Edge<T> baseNodes,IEnumerable<Edge<T>> requisiteEdges)
         {
             connectedNodes = new List<Node<T>>()
             {
-                from, to
-            };            
+                baseNodes.from, baseNodes.to
+            };
+            this.requisiteEdges = requisiteEdges;
         }
 
         private Route(IEnumerable<Node<T>> connectedNodes)
@@ -33,10 +39,10 @@ namespace DataSequenceGraph
             this.connectedNodes = connectedNodes;
         }
 
-        public static Route<T> newRouteBetween(Node<T> from, Node<T> to)
+        public static Route<T> newRouteBetween(Edge<T> baseNodes,IEnumerable<Edge<T>> requisiteEdges)
         {
-            Route<T> newRoute = new Route<T>(from, to);
-            from.AddOutgoingRoute(newRoute);
+            Route<T> newRoute = new Route<T>(baseNodes, requisiteEdges);
+            baseNodes.from.AddOutgoingRoute(newRoute);
             return newRoute;
         }
 

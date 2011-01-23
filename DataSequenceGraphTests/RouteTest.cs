@@ -10,13 +10,16 @@ namespace DataSequenceGraph
     class RouteTest
     {
         private MasterNodeList<string> list;
+
         private ValueNode<string> nodeA;
         private ValueNode<string> nodeB;
         private ValueNode<string> nodeC;
         private ValueNode<string> nodeD;
 
         private Route<string> routeAB;
+        private Edge<string> edgeAB;
         private Route<string> routeCD;
+        private Edge<string> edgeCD;
 
         [SetUp]
         public void SetUp()
@@ -27,14 +30,18 @@ namespace DataSequenceGraph
             nodeC = list.newValueNodeFromValue("C");
             nodeD = list.newValueNodeFromValue("D");
 
-            routeAB = Route<string>.newRouteBetween(nodeA, nodeB);
-            routeCD = Route<string>.newRouteBetween(nodeC, nodeD);
+            edgeAB = new Edge<string>() { from = nodeA, to = nodeB };
+            routeAB = Route<string>.newRouteBetween(edgeAB,new List<Edge<string>>());
+            edgeCD = new Edge<string>() { from = nodeC, to = nodeD };
+            routeCD = Route<string>.newRouteBetween(edgeCD,new List<Edge<string>>());
         }
 
         [Test]
-        public void newRouteFromNodes()
+        public void newRouteFromEdges()
         {
-            Route<string> route = Route<string>.newRouteBetween(nodeA, nodeB);
+            Edge<string> newEdge = new Edge<string>() { from = nodeA, to = nodeB };
+            // the same edge wouldn't be passed twice in real situations
+            Route<string> route = Route<string>.newRouteBetween(newEdge,new List<Edge<string>>() { newEdge });
             Assert.AreSame(nodeA, route.startNode);
             Assert.AreSame(nodeB, route.connectedNodes.ElementAt(1));
         }
@@ -45,7 +52,7 @@ namespace DataSequenceGraph
             RouteCriterion<string> criterion = new RouteCriterion<string>()
             {
                 desiredSequence = new List<string>() { "A", "B" },
-                previousNodes = new List<ValueNode<string>>()
+                previousEdges = new List<Edge<string>>()
             };
             Assert.IsTrue(routeAB.matches(criterion));
         }

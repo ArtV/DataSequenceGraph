@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataChunkRoute.cs" />
+    <Compile Include="Edge.cs" />
     <Compile Include="MasterNodeList.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="Route.cs" />
