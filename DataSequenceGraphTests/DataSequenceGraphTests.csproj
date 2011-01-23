@@ -44,8 +44,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataChunkRouteTest.cs" />
     <Compile Include="RouteTest.cs" />
     <Compile Include="MasterNodeListTest.cs" />
+    <Compile Include="StartNodeTest.cs" />
     <Compile Include="ValueNodeTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -9,14 +9,9 @@ namespace DataSequenceGraph
     {
         private List<Node> nodeList = new List<Node>();
 
-        public IEnumerable<ValueNode<T>> getValueNodes()
-        {
-            return nodeList.OfType<ValueNode<T>>();
-        }
-
         public IEnumerable<ValueNode<T>> getValueNodesByValue(T desiredValue)
         {
-            return getValueNodes().Where(node => node.Value.Equals(desiredValue));
+            return nodeList.OfType<ValueNode<T>>().Where(node => node.Value.Equals(desiredValue));
         }
 
         public ValueNode<T> newValueNodeFromValue(T newValue)
@@ -30,6 +25,12 @@ namespace DataSequenceGraph
         {
             return nodeList.ElementAt<Node>(index);
         }
-        
+
+        public StartNode newStartNode()
+        {
+            StartNode newNode = new StartNode(nodeList.Count);
+            nodeList.Add(newNode);
+            return newNode;
+        }
     }
 }

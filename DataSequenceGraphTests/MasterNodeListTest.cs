@@ -20,12 +20,6 @@ namespace DataSequenceGraph
         }
 
         [Test]
-        public void getValueNodes()
-        {
-            IEnumerable<ValueNode<string>> nodeList = list.getValueNodes();
-        }
-
-        [Test]
         public void getNodeBySequenceNumber()
         {
             ValueNode<string> nodeB = (ValueNode<string>) list.nodeByNumber(1);            
