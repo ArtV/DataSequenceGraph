@@ -7,5 +7,6 @@ namespace DataSequenceGraph
 {
     public interface Node
     {
+        void AddOutgoingRoute(Route route);
     }
 }

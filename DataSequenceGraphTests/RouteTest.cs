@@ -21,7 +21,7 @@ namespace DataSequenceGraph
         [SetUp]
         public void SetUp()
         {
-            MasterNodeList<string> list = new MasterNodeList<string>();
+            list = new MasterNodeList<string>();
             nodeA = list.newValueNodeFromValue("A");
             nodeB = list.newValueNodeFromValue("B");
             nodeC = list.newValueNodeFromValue("C");

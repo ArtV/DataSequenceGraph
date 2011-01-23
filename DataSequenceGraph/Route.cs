@@ -20,7 +20,7 @@ namespace DataSequenceGraph
             private set;
         }
 
-        private Route(Node from, Node to)
+        public Route(Node from, Node to)
         {
             connectedNodes = new List<Node>()
             {
@@ -38,14 +38,16 @@ namespace DataSequenceGraph
             return new Route(this.connectedNodes.Concat(other.connectedNodes));
         }
 
-        public static Route newRouteBetween(Node from, Node to)
-        {
-            return new Route(from, to);
-        }
-
         public static Route connectRoutes(Route first, Route second)
         {            
             return first.addRoute(second);
+        }
+
+        public static Route newRouteBetween(Node from, Node to)
+        {
+            Route newRoute = new Route(from, to);
+            from.AddOutgoingRoute(newRoute);
+            return newRoute;
         }
     }
 }
