@@ -32,5 +32,12 @@ namespace DataSequenceGraph
             nodeList.Add(newNode);
             return newNode;
         }
+
+        public EndNode<T> newEndNode()
+        {
+            EndNode<T> newNode = new EndNode<T>(nodeList.Count);
+            nodeList.Add(newNode);
+            return newNode;
+        }
     }
 }

@@ -44,6 +44,7 @@
     <Compile Include="CompositeRoute.cs" />
     <Compile Include="DataChunkRoute.cs" />
     <Compile Include="Edge.cs" />
+    <Compile Include="EndNode.cs" />
     <Compile Include="MasterNodeList.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="EdgeRoute.cs" />
