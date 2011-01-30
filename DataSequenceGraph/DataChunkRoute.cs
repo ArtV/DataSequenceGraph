@@ -47,37 +47,23 @@ namespace DataSequenceGraph
 
         public void appendToRoute()
         {
-            var nextValue = SourceData.Skip(sourceDataIndex).Take(1);
-            if (nextValue.Count() > 0 && !routePrefixDictionary.ContainsKey(nextValue))
+            var nextValueSequence = SourceData.Skip(sourceDataIndex).Take(1);
+            if (nextValueSequence.Count() > 0)
             {
-                ValueNode<T> newValueNode = nodeList.newValueNodeFromValue(nextValue.ElementAt(0));
-                Node<T> previousLastNode = connectedNodes[connectedNodes.Count - 1];
-                Edge<T> newEdge;
-                if (previousLastNode.GetType() == typeof(StartNode<T>))
+                if (!routePrefixDictionary.ContainsKey(nextValueSequence))
                 {
-                    newEdge =
-                        new Edge<T>()
-                        {
-                            from = previousLastNode,
-                            to = newValueNode
-                        };
+                    T nextValue = nextValueSequence.ElementAt(0);
+                    IEnumerable<ValueNode<T>> matchingUnusedNodes =
+                        nodeList.getValueNodesByValue(nextValue).Except(connectedNodes.OfType<ValueNode<T>>());
+                    if (matchingUnusedNodes.Count() == 0)
+                    {
+                        makeNewNode(nextValue);
+                    }
+                    else
+                    {
+                        appendEdgeTo(matchingUnusedNodes.ElementAt(0));
+                    }
                 }
-                else
-                {
-                    Edge<T> lastAddedEdge = addedEdges[addedEdges.Count - 1];
-                    newEdge =
-                        new Edge<T>()
-                        {
-                            from = previousLastNode,
-                            to = newValueNode,
-                            requisiteEdgeFrom = lastAddedEdge.from,
-                            requisiteEdgeTo = lastAddedEdge.to
-                        };
-                }
-                addedEdges.Add(newEdge);
-                Route<T> newRoute = new RouteFactory<T>().newRouteFromEdge(newEdge);
-                previousLastNode.AddOutgoingRoute(newRoute);
-                connectedNodes.Add(newValueNode);
             }
 
             sourceDataIndex++;
@@ -87,6 +73,43 @@ namespace DataSequenceGraph
                 connectedNodes.Add(endNode);
                 this.Done = true;
             }
+        }
+
+        private void makeNewNode(T newValue)
+        {
+            ValueNode<T> newValueNode = nodeList.newValueNodeFromValue(newValue);
+            appendEdgeTo(newValueNode);
+        }
+
+        private void appendEdgeTo(Node<T> nextNode)
+        {
+            Node<T> previousLastNode = connectedNodes[connectedNodes.Count - 1];
+            Edge<T> newEdge;
+            if (previousLastNode.GetType() == typeof(StartNode<T>))
+            {
+                newEdge =
+                    new Edge<T>()
+                    {
+                        from = previousLastNode,
+                        to = nextNode
+                    };
+            }
+            else
+            {
+                Edge<T> lastAddedEdge = addedEdges[addedEdges.Count - 1];
+                newEdge =
+                    new Edge<T>()
+                    {
+                        from = previousLastNode,
+                        to = nextNode,
+                        requisiteEdgeFrom = lastAddedEdge.from,
+                        requisiteEdgeTo = lastAddedEdge.to
+                    };
+            }
+            addedEdges.Add(newEdge);
+            Route<T> newRoute = new RouteFactory<T>().newRouteFromEdge(newEdge);
+            previousLastNode.AddOutgoingRoute(newRoute);
+            connectedNodes.Add(nextNode);
         }
     }
 }
