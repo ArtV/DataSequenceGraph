@@ -12,7 +12,9 @@ namespace DataSequenceGraph
         private MasterNodeList<string> nodeList;
         private ValueNode<string> vn;
         private ValueNode<string> vn2;
+        private ValueNode<string> vn3;
         private Edge<string> edge;
+        private Edge<string> edge2;
 
         [SetUp]
         public void SetUp()
@@ -20,8 +22,11 @@ namespace DataSequenceGraph
             nodeList = new MasterNodeList<string>();
             vn = nodeList.newValueNodeFromValue("A");
             vn2 = nodeList.newValueNodeFromValue("B");
+            vn3 = nodeList.newValueNodeFromValue("C");
             edge = new Edge<string>() { from = vn, to = vn2 };
-            Route<string>.newRouteBetween(edge, new List<Edge<string>>());
+            edge2 = new Edge<string>() { from = vn3, to = vn };
+            RouteFactory<string> routeFactory = new RouteFactory<string>();
+            routeFactory.newRouteBetween(edge,edge2);
         }
 
         [Test]

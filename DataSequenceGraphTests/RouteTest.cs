@@ -11,6 +11,8 @@ namespace DataSequenceGraph
     {
         private MasterNodeList<string> list;
 
+        private RouteFactory<string> routeFactory;
+
         private ValueNode<string> nodeA;
         private ValueNode<string> nodeB;
         private ValueNode<string> nodeC;
@@ -30,30 +32,32 @@ namespace DataSequenceGraph
             nodeC = list.newValueNodeFromValue("C");
             nodeD = list.newValueNodeFromValue("D");
 
+            routeFactory = new RouteFactory<string>();
+
             edgeAB = new Edge<string>() { from = nodeA, to = nodeB };
-            routeAB = Route<string>.newRouteBetween(edgeAB,new List<Edge<string>>());
             edgeCD = new Edge<string>() { from = nodeC, to = nodeD };
-            routeCD = Route<string>.newRouteBetween(edgeCD,new List<Edge<string>>());
+            routeAB = routeFactory.newRouteBetween(edgeAB,edgeCD);
+            routeCD = routeFactory.newRouteBetween(edgeCD,edgeAB);
         }
 
         [Test]
         public void newRouteFromEdges()
         {
             Edge<string> newEdge = new Edge<string>() { from = nodeA, to = nodeB };
-            Route<string> route = Route<string>.newRouteBetween(newEdge,new List<Edge<string>>());
+            Route<string> route = routeFactory.newRouteBetween(newEdge,edgeCD);
             Assert.AreSame(nodeA, route.startNode);
             Assert.AreSame(nodeB, route.connectedNodes.ElementAt(1));
         }
 
         [Test]
-        public void routeMatches()
+        public void routePrefixMatches()
         {
             RouteCriterion<string> criterion = new RouteCriterion<string>()
             {
                 desiredSequence = new List<string>() { "A", "B" },
                 previousEdges = new List<Edge<string>>()
             };
-            Assert.IsTrue(routeAB.matches(criterion));
+            Assert.IsTrue(routeAB.prefixMatches(criterion));
         }
     }
 }

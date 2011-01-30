@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VisualState xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ShowCheckBoxes="false">
+  <TopNode>[0-1000]C:\Users\Administrator\DataSequenceGraph\DataSequenceGraphTests\DataSequenceGraphTests.nunit</TopNode>
+  <SelectedNode>[0-1000]C:\Users\Administrator\DataSequenceGraph\DataSequenceGraphTests\DataSequenceGraphTests.nunit</SelectedNode>
+  <ExcludeCategories>false</ExcludeCategories>
+  <Nodes>
+    <Node UniqueName="[0-1000]C:\Users\Administrator\DataSequenceGraph\DataSequenceGraphTests\DataSequenceGraphTests.nunit" Expanded="true" />
+    <Node UniqueName="[0-1016]C:\Users\Administrator\DataSequenceGraph\DataSequenceGraphTests\bin\Release\DataSequenceGraphTests.dll" Expanded="true" />
+    <Node UniqueName="[0-1017]DataSequenceGraph" Expanded="true" />
+    <Node UniqueName="[0-1012]DataSequenceGraph.DataChunkRouteTest" Expanded="true" />
+    <Node UniqueName="[0-1014]DataSequenceGraph.EdgeTest" Expanded="true" />
+    <Node UniqueName="[0-1005]DataSequenceGraph.MasterNodeListTest" Expanded="true" />
+    <Node UniqueName="[0-1008]DataSequenceGraph.RouteTest" Expanded="true" />
+    <Node UniqueName="[0-1001]DataSequenceGraph.ValueNodeTest" Expanded="true" />
+  </Nodes>
+</VisualState>
