@@ -23,10 +23,10 @@ namespace DataSequenceGraph
             vn = nodeList.newValueNodeFromValue("A");
             vn2 = nodeList.newValueNodeFromValue("B");
             vn3 = nodeList.newValueNodeFromValue("C");
-            edge = new Edge<string>() { from = vn, to = vn2 };
+            edge = new Edge<string>() { from = vn, to = vn2, requisiteEdgeFrom = vn3, requisiteEdgeTo = vn };
             edge2 = new Edge<string>() { from = vn3, to = vn };
             RouteFactory<string> routeFactory = new RouteFactory<string>();
-            routeFactory.newRouteBetween(edge,edge2);
+            routeFactory.newRouteFromEdge(edge);
         }
 
         [Test]

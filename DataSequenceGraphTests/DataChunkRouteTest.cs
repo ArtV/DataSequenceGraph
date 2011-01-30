@@ -12,12 +12,14 @@ namespace DataSequenceGraph
         List<string> srcData = new List<string>() { "A", "B", "C" };
         private MasterNodeList<string> list;
         private DataChunkRoute<string> chunkRoute;
+        private Dictionary<IEnumerable<string>, Route<string>> routePrefixDictionary;
 
         [SetUp]
         public void SetUp()
         {
             list = new MasterNodeList<string>();
-            chunkRoute = new DataChunkRoute<string>(srcData, list);
+            routePrefixDictionary = new Dictionary<IEnumerable<string>, Route<string>>();
+            chunkRoute = new DataChunkRoute<string>(srcData, list,routePrefixDictionary);
         }
 
         [Test]
@@ -33,7 +35,10 @@ namespace DataSequenceGraph
         {
             chunkRoute.appendToRoute();
             Assert.AreEqual(2, chunkRoute.connectedNodes.Count());
-            Assert.AreEqual("A", ((ValueNode<string>)chunkRoute.connectedNodes.ElementAt(1)).Value);
+            ValueNode<string> Anode = ((ValueNode<string>)chunkRoute.connectedNodes.ElementAt(1));
+            Assert.AreEqual("A", Anode.Value);
+            Route<string> startToA = chunkRoute.InitialNode.OutgoingRoutes.ElementAt(0);
+            Assert.AreSame(Anode, startToA.connectedNodes.Last());
         }
 
         [Test]

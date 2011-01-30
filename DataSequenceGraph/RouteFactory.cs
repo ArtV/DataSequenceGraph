@@ -7,9 +7,9 @@ namespace DataSequenceGraph
 {
     public class RouteFactory<T>
     {
-        public Route<T> newRouteBetween(Edge<T> baseNodes, Edge<T> requisiteEdge)
+        public Route<T> newRouteFromEdge(Edge<T> baseNodes)
         {
-            Route<T> newRoute = new EdgeRoute<T>(baseNodes, requisiteEdge);
+            Route<T> newRoute = new EdgeRoute<T>(baseNodes);
             baseNodes.from.AddOutgoingRoute(newRoute);
             return newRoute;
         }

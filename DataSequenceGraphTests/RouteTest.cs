@@ -34,17 +34,17 @@ namespace DataSequenceGraph
 
             routeFactory = new RouteFactory<string>();
 
-            edgeAB = new Edge<string>() { from = nodeA, to = nodeB };
-            edgeCD = new Edge<string>() { from = nodeC, to = nodeD };
-            routeAB = routeFactory.newRouteBetween(edgeAB,edgeCD);
-            routeCD = routeFactory.newRouteBetween(edgeCD,edgeAB);
+            edgeAB = new Edge<string>() { from = nodeA, to = nodeB, requisiteEdgeFrom = nodeC, requisiteEdgeTo = nodeD };
+            edgeCD = new Edge<string>() { from = nodeC, to = nodeD, requisiteEdgeFrom = nodeA, requisiteEdgeTo = nodeB };
+            routeAB = routeFactory.newRouteFromEdge(edgeAB);
+            routeCD = routeFactory.newRouteFromEdge(edgeCD);
         }
 
         [Test]
         public void newRouteFromEdges()
         {
-            Edge<string> newEdge = new Edge<string>() { from = nodeA, to = nodeB };
-            Route<string> route = routeFactory.newRouteBetween(newEdge,edgeCD);
+            Edge<string> newEdge = new Edge<string>() { from = nodeA, to = nodeB, requisiteEdgeFrom = nodeC, requisiteEdgeTo = nodeD };
+            Route<string> route = routeFactory.newRouteFromEdge(newEdge);
             Assert.AreSame(nodeA, route.startNode);
             Assert.AreSame(nodeB, route.connectedNodes.ElementAt(1));
         }

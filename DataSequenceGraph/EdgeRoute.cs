@@ -8,7 +8,6 @@ namespace DataSequenceGraph
     public class EdgeRoute<T> : BaseRoute<T>,Route<T>
     {
         private Edge<T> edge;
-        private Edge<T> requisiteEdge;
 
         public override Node<T> startNode 
         {
@@ -33,15 +32,14 @@ namespace DataSequenceGraph
             {
                 return new List<Edge<T>>()
                 {
-                    requisiteEdge
+                    new Edge<T>() { from = edge.requisiteEdgeFrom, to = edge.requisiteEdgeTo }
                 };
             }
         }
 
-        public EdgeRoute(Edge<T> baseNodes,Edge<T> requisiteEdge)
+        public EdgeRoute(Edge<T> baseNodes)
         {
             this.edge = baseNodes;
-            this.requisiteEdge = requisiteEdge;
         }
 
 
