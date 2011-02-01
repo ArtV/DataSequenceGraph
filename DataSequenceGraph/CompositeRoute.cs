@@ -5,7 +5,7 @@ using System.Text;
 
 namespace DataSequenceGraph
 {
-    public class CompositeRoute<T> : BaseRoute<T>,Route<T>
+    public class CompositeRoute<T> : Route<T>
     {
         private IEnumerable<Route<T>> componentRoutes;
 

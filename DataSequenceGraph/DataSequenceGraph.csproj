@@ -40,7 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseRoute.cs" />
+    <Compile Include="Route.cs" />
     <Compile Include="CompositeRoute.cs" />
     <Compile Include="DataChunkRoute.cs" />
     <Compile Include="Edge.cs" />
@@ -48,7 +48,6 @@
     <Compile Include="MasterNodeList.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="EdgeRoute.cs" />
-    <Compile Include="Route.cs" />
     <Compile Include="RouteCriterion.cs" />
     <Compile Include="RouteFactory.cs" />
     <Compile Include="StartNode.cs" />

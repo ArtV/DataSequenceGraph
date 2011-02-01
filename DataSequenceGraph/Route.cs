@@ -5,11 +5,25 @@ using System.Text;
 
 namespace DataSequenceGraph
 {
-    public interface Route<T>
+    public abstract class Route<T>
     {
-        bool prefixMatches(RouteCriterion<T> criterion);
-        Node<T> startNode { get; }
-        IEnumerable<Node<T>> connectedNodes { get; }
-        IEnumerable<Edge<T>> requisiteEdges { get; }
+        public abstract Node<T> startNode { get; }
+        public abstract IEnumerable<Node<T>> connectedNodes { get; }
+        public abstract IEnumerable<Edge<T>> requisiteEdges { get; }
+
+        public bool prefixMatches(RouteCriterion<T> criterion)
+        {
+            IEnumerable<ValueNode<T>> routeValueNodes = connectedNodes.OfType<ValueNode<T>>();
+            int desiredCount = criterion.desiredSequence.Count();
+            if (routeValueNodes.Count() < desiredCount)
+            {
+                return false;
+            }
+            else
+            {
+                IEnumerable<T> routeValues = routeValueNodes.Take(desiredCount).Select(node => node.Value);
+                return routeValues.SequenceEqual(criterion.desiredSequence);
+            }
+        }
     }
 }

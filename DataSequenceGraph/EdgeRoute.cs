@@ -5,7 +5,7 @@ using System.Text;
 
 namespace DataSequenceGraph
 {
-    public class EdgeRoute<T> : BaseRoute<T>,Route<T>
+    public class EdgeRoute<T> : Route<T>
     {
         private Edge<T> edge;
 
