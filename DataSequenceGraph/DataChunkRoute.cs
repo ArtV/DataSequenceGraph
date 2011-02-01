@@ -15,7 +15,8 @@ namespace DataSequenceGraph
                 return connectedNodes.ElementAt(0) as StartNode<T>;
             }
         }
-        public MasterNodeList<T> nodeList { get; private set; }
+        public MasterNodeList<T> nodeList { get; set; }
+        public Dictionary<IEnumerable<T>, Route<T>> routePrefixDictionary { get; set; }
         public List<Node<T>> connectedNodes { get; private set; }
         public EndNode<T> finishNode 
         {
@@ -27,7 +28,6 @@ namespace DataSequenceGraph
         public bool Done { get; private set; }
 
         private int sourceDataIndex;
-        private Dictionary<IEnumerable<T>, Route<T>> routePrefixDictionary;
         private List<Edge<T>> addedEdges { get; set; }
 
         public DataChunkRoute(IEnumerable<T> sourceData,MasterNodeList<T> nodeList,
@@ -35,7 +35,7 @@ namespace DataSequenceGraph
         {
             this.Done = false;
             this.SourceData = sourceData;
-            sourceDataIndex = 0;
+            this.sourceDataIndex = 0;
             this.nodeList = nodeList;
             this.connectedNodes = new List<Node<T>>()
             {
