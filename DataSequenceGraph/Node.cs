@@ -9,6 +9,13 @@ namespace DataSequenceGraph
     {
         public IEnumerable<Route<T>> OutgoingRoutes { get; private set; }
         public int SequenceNumber { get; private set; }
+        public virtual bool isStartNode
+        {
+            get
+            {
+                return false;
+            }
+        }
 
         public Node(int SequenceNumber)
         {
