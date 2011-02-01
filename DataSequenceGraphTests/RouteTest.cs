@@ -55,7 +55,7 @@ namespace DataSequenceGraph
             RouteCriterion<string> criterion = new RouteCriterion<string>()
             {
                 desiredSequence = new List<string>() { "A", "B" },
-                previousEdges = new List<Edge<string>>()
+                previousNodeSequence = new List<Node<string>>()
             };
             Assert.IsTrue(routeAB.prefixMatches(criterion));
         }

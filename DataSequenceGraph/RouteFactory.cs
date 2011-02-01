@@ -13,5 +13,11 @@ namespace DataSequenceGraph
             baseNodes.from.AddOutgoingRoute(newRoute);
             return newRoute;
         }
+
+        public Route<T> newRouteFromConnectedRoutes(Route<T> firstRoute, Route<T> secondRoute)
+        {
+            Route<T> newRoute = new CompositeRoute<T>(new List<Route<T>>() { firstRoute, secondRoute });
+            return newRoute;
+        }
     }
 }

@@ -50,9 +50,9 @@ namespace DataSequenceGraph
         public void findMatchingRoutes()
         {
             IEnumerable<string> stringSeq = new List<string>() { "A","B" };
-            IEnumerable<Edge<string>> previousEdges = new List<Edge<string>>();
+            IEnumerable<Node<string>> previousNodes = new List<Node<string>>();
             RouteCriterion<string> criterion = new RouteCriterion<string>() { 
-                desiredSequence = stringSeq, previousEdges = previousEdges };
+                desiredSequence = stringSeq, previousNodeSequence = previousNodes };
             IEnumerable<Route<string>> matchingRoutes = vn.findMatchingRoutes(criterion);
             Assert.AreEqual(1, matchingRoutes.Count());
 

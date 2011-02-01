@@ -16,6 +16,13 @@ namespace DataSequenceGraph
                 return connectedNodes.ElementAt(0);
             }
         }
+        public override Route<T> startRoute
+        {
+            get
+            {
+                return this;
+            }
+        }
         public override IEnumerable<Node<T>> connectedNodes
         {
             get
@@ -41,7 +48,6 @@ namespace DataSequenceGraph
         {
             this.edge = baseNodes;
         }
-
 
     }
 }

@@ -22,6 +22,14 @@ namespace DataSequenceGraph
             }
         }
 
+        public override Route<T> startRoute
+        {
+            get 
+            {
+                return componentRoutes.FirstOrDefault<Route<T>>();
+            }
+        }
+
         public override IEnumerable<Node<T>> connectedNodes
         {
             get
