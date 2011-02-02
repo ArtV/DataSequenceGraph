@@ -20,11 +20,14 @@ namespace DataSequenceGraph
         List<string> srcData3 = new List<string>() { "A", "A", "E" };
         private DataChunkRoute<string> chunkRoute3;
 
-        List<string> srcData4 = new List<string>() { "A", "B", "C", "D", "E" };
+        List<string> srcData4 = new List<string>() { "A", "B", "C", "D", "E", "F" };
         private DataChunkRoute<string> chunkRoute4;
 
-        List<string> srcData5 = new List<string>() { "C", "D", "B", "E" };
+        List<string> srcData5 = new List<string>() { "G", "B", "C", "D", "J", "K" };
         private DataChunkRoute<string> chunkRoute5;
+
+        List<string> srcData6 = new List<string>() { "G", "B", "D", "M", "N", "O" };
+        private DataChunkRoute<string> chunkRoute6;
 
         [SetUp]
         public void SetUp()
@@ -40,6 +43,8 @@ namespace DataSequenceGraph
             chunkRoute4 = new DataChunkRoute<string>(srcData4, list, routePrefixDictionary);
 
             chunkRoute5 = new DataChunkRoute<string>(srcData5, list, routePrefixDictionary);
+
+            chunkRoute6 = new DataChunkRoute<string>(srcData6, list, routePrefixDictionary);
         }
 
         [Test]
@@ -124,13 +129,17 @@ namespace DataSequenceGraph
         {
             chunkRoute4.computeFullRoute();
             chunkRoute5.computeFullRoute();
+            chunkRoute6.computeFullRoute();
 
-            ValueNode<string> Cnode = chunkRoute5.connectedNodes.ElementAt(1) as ValueNode<string>;
-            Route<string> CDroute4 = Cnode.OutgoingRoutes.First(route =>
-                ((ValueNode<string>)route.connectedNodes.ElementAt(1)).Value.Equals("D"));
-            Route<string> CDroute5 = Cnode.OutgoingRoutes.Last(route =>
-                ((ValueNode<string>)route.connectedNodes.ElementAt(1)).Value.Equals("D"));
-            Assert.AreNotSame(CDroute4, CDroute5);
+            ValueNode<string> Dnode = chunkRoute5.connectedNodes.ElementAt(4) as ValueNode<string>;
+            Assert.AreEqual("D", Dnode.Value);
+            Route<string> DJroute = Dnode.OutgoingRoutes.First(route =>
+                ((ValueNode<string>)route.connectedNodes.ElementAt(1)).Value.Equals("J"));
+            Route<string> DMroute = Dnode.OutgoingRoutes.Last(route =>
+                ((ValueNode<string>)route.connectedNodes.ElementAt(1)).Value.Equals("M"));
+            int DJrouteIndex = chunkRoute6.connectedNodes.FindIndex(node => node == DJroute.requisiteLinks.First().from);
+            int DMrouteIndex = chunkRoute6.connectedNodes.FindIndex(node => node == DMroute.requisiteLinks.First().from);
+            Assert.Less(DMrouteIndex, DJrouteIndex);
         }
     }
 }

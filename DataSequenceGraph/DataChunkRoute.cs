@@ -28,7 +28,7 @@ namespace DataSequenceGraph
         public bool Done { get; private set; }
 
         private int sourceDataIndex;
-        private List<Edge<T>> addedEdges { get; set; }
+        private List<DirectedPair<T>> addedLinks { get; set; }
 
         public DataChunkRoute(IEnumerable<T> sourceData,MasterNodeList<T> nodeList,
             Dictionary<Node<T>, List<Route<T>>> nodeRoutesDictionary)
@@ -42,7 +42,7 @@ namespace DataSequenceGraph
                 nodeList.newStartNode()
             };
             this.nodeRoutesDictionary = nodeRoutesDictionary;
-            this.addedEdges = new List<Edge<T>>();
+            this.addedLinks = new List<DirectedPair<T>>();
         }
 
         public void computeFullRoute()
@@ -263,39 +263,65 @@ namespace DataSequenceGraph
         {
             Node<T> previousLastNode = connectedNodes[connectedNodes.Count - 1];
             Edge<T> newEdge;
+            DirectedPair<T> newLink = new DirectedPair<T>()
+            {
+                from = previousLastNode,
+                to = nextNode
+            };
             if (previousLastNode.GetType() == typeof(StartNode<T>))
             {
                 newEdge =
                     new Edge<T>()
                     {
-                        link = new DirectedPair<T>() 
-                        { 
-                            from = previousLastNode, 
-                            to = nextNode 
-                        }
+                        link = newLink
                     };
             }
             else
             {
-                Edge<T> lastAddedEdge = addedEdges[addedEdges.Count - 1];
+                DirectedPair<T> lastAddedLink = latestLinkBeforeOtherRouteReqs(previousLastNode);
                 newEdge =
                     new Edge<T>()
                     {
-                        link = new DirectedPair<T>()
-                        {
-                            from = previousLastNode,
-                            to = nextNode
-                        },
-                        requisiteLink = new DirectedPair<T>()
-                        {
-                            from = lastAddedEdge.link.from,
-                            to = lastAddedEdge.link.to
-                        }
+                        link = newLink,
+                        requisiteLink = lastAddedLink
                     };
             }
-            addedEdges.Add(newEdge);
+            addNewLinkIfDifferent(newLink);            
             Route<T> newRoute = new RouteFactory<T>().newRouteFromEdge(newEdge);
             connectedNodes.Add(nextNode);
+        }
+
+        private DirectedPair<T> latestLinkBeforeOtherRouteReqs(Node<T> node)
+        {
+            int earliestRequisiteIndex = connectedNodes.FindIndex(connectedNode =>
+                node.OutgoingRoutes.Any(route => route.edge.requisiteLink.from == connectedNode));
+            if (earliestRequisiteIndex == -1)
+            {
+                return addedLinks[addedLinks.Count - 1];
+            }
+            else
+            {
+                int linkPositionInNodes;
+                for (int linkIndex = addedLinks.Count - 1; linkIndex >= 0; linkIndex--)
+                {
+                    linkPositionInNodes = connectedNodes.FindIndex(connectedNode =>
+                        connectedNode == addedLinks[linkIndex].from);
+                    if (linkPositionInNodes < earliestRequisiteIndex)
+                    {
+                        return addedLinks[linkIndex];
+                    }
+                }
+                return addedLinks[0];
+            }
+        }
+
+        private void addNewLinkIfDifferent(DirectedPair<T> newLink)
+        {
+            Node<T> fromNode = newLink.from;
+            if (!fromNode.OutgoingRoutes.Any(oldRoute => oldRoute.edge.link.to == newLink.to))
+            {
+                addedLinks.Add(newLink);
+            }
         }
     }
 }

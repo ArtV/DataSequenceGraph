@@ -7,7 +7,7 @@ namespace DataSequenceGraph
 {
     public class EdgeRoute<T> : Route<T>
     {
-        private Edge<T> edge;
+        public Edge<T> edge { get; private set; }
 
         public override Node<T> startNode 
         {

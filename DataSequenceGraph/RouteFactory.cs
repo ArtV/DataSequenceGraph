@@ -9,7 +9,7 @@ namespace DataSequenceGraph
     {
         public Route<T> newRouteFromEdge(Edge<T> baseNodes)
         {
-            Route<T> newRoute = new EdgeRoute<T>(baseNodes);
+            EdgeRoute<T> newRoute = new EdgeRoute<T>(baseNodes);
             baseNodes.link.from.AddOutgoingRoute(newRoute);
             return newRoute;
         }

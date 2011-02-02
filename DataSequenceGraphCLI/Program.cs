@@ -12,7 +12,7 @@ namespace DataSequenceGraphCLI
         {
             List<string> srcData = new List<string>() { "A", "B", "C" };
             List<string> srcData2 = new List<string>() { "A", "A", "D" };
-            List<string> srcData3 = new List<string>() { "A", "D", "E" };
+            List<string> srcData3 = new List<string>() { "A", "A", "E" };
 
             DataChunkRoute<string> chunkRoute = new DataChunkRoute<string>(srcData, masterNodeList, routePrefixDictionary);
             DataChunkRoute<string> chunkRoute2 = new DataChunkRoute<string>(srcData2, masterNodeList, routePrefixDictionary);
@@ -23,15 +23,19 @@ namespace DataSequenceGraphCLI
             chunkRoute3.computeFullRoute();
         }
 
-        static void twoFiveRoutes(MasterNodeList<string> masterNodeList, Dictionary<Node<string>, List<Route<string>>> routePrefixDictionary)
+        static void threeSixRoutes(MasterNodeList<string> masterNodeList, Dictionary<Node<string>, List<Route<string>>> routePrefixDictionary)
         {
-            List<string> srcData4 = new List<string>() { "A", "B", "C", "D", "E" };
+            List<string> srcData4 = new List<string>() { "A", "B", "C", "D", "E", "F" };
             DataChunkRoute<string> chunkRoute4 =  new DataChunkRoute<string>(srcData4, masterNodeList, routePrefixDictionary);
             chunkRoute4.computeFullRoute();
 
-            List<string> srcData5 = new List<string>() { "C", "D", "B", "A", "E" };
+            List<string> srcData5 = new List<string>() { "G", "B", "C", "D", "J", "K" };
             DataChunkRoute<string> chunkRoute5 = new DataChunkRoute<string>(srcData5, masterNodeList, routePrefixDictionary);
             chunkRoute5.computeFullRoute();
+
+            List<string> srcData6 = new List<string>() { "G", "B", "D", "M", "N", "O" };
+            DataChunkRoute<string> chunkRoute6 = new DataChunkRoute<string>(srcData6, masterNodeList, routePrefixDictionary);
+            chunkRoute6.computeFullRoute();
         }
 
         static void Main(string[] args)
@@ -39,9 +43,9 @@ namespace DataSequenceGraphCLI
             MasterNodeList<string> masterNodeList = new MasterNodeList<string>();
             Dictionary<Node<string>,List<Route<string>>> routePrefixDictionary = new Dictionary<Node<string>, List<Route<string>>>();
 
-            threeThreeRoutes(masterNodeList, routePrefixDictionary);
+//            threeThreeRoutes(masterNodeList, routePrefixDictionary);
 
-//            twoFiveRoutes(masterNodeList, routePrefixDictionary);
+            threeSixRoutes(masterNodeList, routePrefixDictionary);
 
             foreach (var node in masterNodeList.AllNodes)
             {
