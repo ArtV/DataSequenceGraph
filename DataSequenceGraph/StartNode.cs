@@ -7,6 +7,8 @@ namespace DataSequenceGraph
 {
     public class StartNode<T> : Node<T>
     {
+        public DataChunk<T> sourceDataChunk { get; private set; }
+
         public override bool isStartNode
         {
             get
@@ -15,8 +17,9 @@ namespace DataSequenceGraph
             }
         }
 
-        public StartNode(int SequenceNumber) : base(SequenceNumber)
+        public StartNode(int SequenceNumber,DataChunk<T> sourceDataChunk) : base(SequenceNumber)
         {
+            this.sourceDataChunk = sourceDataChunk;
         }
     }
 }

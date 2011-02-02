@@ -34,16 +34,16 @@ namespace DataSequenceGraph
             return nodeList.ElementAt<Node<T>>(index);
         }
 
-        public StartNode<T> newStartNode()
+        public StartNode<T> newStartNode(DataChunk<T> sourceDataChunk)
         {
-            StartNode<T> newNode = new StartNode<T>(nodeList.Count);
+            StartNode<T> newNode = new StartNode<T>(nodeList.Count,sourceDataChunk);
             nodeList.Add(newNode);
             return newNode;
         }
 
-        public EndNode<T> newEndNode()
+        public EndNode<T> newEndNode(DataChunk<T> sourceDataChunk)
         {
-            EndNode<T> newNode = new EndNode<T>(nodeList.Count);
+            EndNode<T> newNode = new EndNode<T>(nodeList.Count, sourceDataChunk);
             nodeList.Add(newNode);
             return newNode;
         }

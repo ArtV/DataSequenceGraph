@@ -7,7 +7,13 @@ namespace DataSequenceGraph
 {
     public class DataChunkRoute<T>
     {
-        public IEnumerable<T> SourceData { get; private set; }
+        public IEnumerable<T> SourceData 
+        { 
+            get
+            {
+                return this.sourceDataChunk.sourceData;
+            }
+        }
         public StartNode<T> InitialNode
         {
             get
@@ -29,17 +35,18 @@ namespace DataSequenceGraph
 
         private int sourceDataIndex;
         private List<DirectedPair<T>> addedLinks { get; set; }
+        private DataChunk<T> sourceDataChunk { get; set; }
 
-        public DataChunkRoute(IEnumerable<T> sourceData,MasterNodeList<T> nodeList,
+        public DataChunkRoute(DataChunk<T> sourceDataChunk,MasterNodeList<T> nodeList,
             Dictionary<Node<T>, List<Route<T>>> nodeRoutesDictionary)
         {
             this.Done = false;
-            this.SourceData = sourceData;
+            this.sourceDataChunk = sourceDataChunk;
             this.sourceDataIndex = 0;
             this.nodeList = nodeList;
             this.connectedNodes = new List<Node<T>>()
             {
-                nodeList.newStartNode()
+                nodeList.newStartNode(sourceDataChunk)
             };
             this.nodeRoutesDictionary = nodeRoutesDictionary;
             this.addedLinks = new List<DirectedPair<T>>();
@@ -75,7 +82,7 @@ namespace DataSequenceGraph
             sourceDataIndex++;
             if (sourceDataIndex >= SourceData.Count())
             {
-                EndNode<T> endNode = nodeList.newEndNode();
+                EndNode<T> endNode = nodeList.newEndNode(sourceDataChunk);
                 appendEdgeTo(endNode);
                 this.Done = true;
             }

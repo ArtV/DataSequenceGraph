@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using DataSequenceGraph;
+using DataSequenceGraph.DataChunk;
 
 namespace DataSequenceGraphCLI
 {
@@ -10,9 +11,12 @@ namespace DataSequenceGraphCLI
     {
         static void threeThreeRoutes(MasterNodeList<string> masterNodeList, Dictionary<Node<string>, List<Route<string>>> routePrefixDictionary)
         {
-            List<string> srcData = new List<string>() { "A", "B", "C" };
-            List<string> srcData2 = new List<string>() { "A", "A", "D" };
-            List<string> srcData3 = new List<string>() { "A", "A", "E" };
+            List<string> srcDataList = new List<string>() { "A", "B", "C" };
+            StringDataChunk srcData = new StringDataChunk(srcDataList);
+            List<string> srcData2List = new List<string>() { "A", "A", "D" };
+            StringDataChunk srcData2 = new StringDataChunk(srcData2List);
+            List<string> srcData3List = new List<string>() { "A", "A", "E" };
+            StringDataChunk srcData3 = new StringDataChunk(srcData3List);
 
             DataChunkRoute<string> chunkRoute = new DataChunkRoute<string>(srcData, masterNodeList, routePrefixDictionary);
             DataChunkRoute<string> chunkRoute2 = new DataChunkRoute<string>(srcData2, masterNodeList, routePrefixDictionary);
@@ -25,15 +29,18 @@ namespace DataSequenceGraphCLI
 
         static void threeSixRoutes(MasterNodeList<string> masterNodeList, Dictionary<Node<string>, List<Route<string>>> routePrefixDictionary)
         {
-            List<string> srcData4 = new List<string>() { "A", "B", "C", "D", "E", "F" };
+            List<string> srcData4List = new List<string>() { "A", "B", "C", "D", "E", "F" };
+            StringDataChunk srcData4 = new StringDataChunk(srcData4List);
             DataChunkRoute<string> chunkRoute4 =  new DataChunkRoute<string>(srcData4, masterNodeList, routePrefixDictionary);
             chunkRoute4.computeFullRoute();
 
-            List<string> srcData5 = new List<string>() { "G", "B", "C", "D", "J", "K" };
+            List<string> srcData5List = new List<string>() { "G", "B", "C", "D", "J", "K" };
+            StringDataChunk srcData5 = new StringDataChunk(srcData5List);
             DataChunkRoute<string> chunkRoute5 = new DataChunkRoute<string>(srcData5, masterNodeList, routePrefixDictionary);
             chunkRoute5.computeFullRoute();
 
-            List<string> srcData6 = new List<string>() { "G", "B", "D", "M", "N", "O" };
+            List<string> srcData6List = new List<string>() { "G", "B", "D", "M", "N", "O" };
+            StringDataChunk srcData6 = new StringDataChunk(srcData6List);
             DataChunkRoute<string> chunkRoute6 = new DataChunkRoute<string>(srcData6, masterNodeList, routePrefixDictionary);
             chunkRoute6.computeFullRoute();
         }

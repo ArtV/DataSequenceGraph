@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataChunk.cs" />
     <Compile Include="DirectedPair.cs" />
     <Compile Include="NullNode.cs" />
     <Compile Include="Route.cs" />
@@ -53,6 +54,7 @@
     <Compile Include="RouteCriterion.cs" />
     <Compile Include="RouteFactory.cs" />
     <Compile Include="StartNode.cs" />
+    <Compile Include="StringDataChunk.cs" />
     <Compile Include="ValueNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

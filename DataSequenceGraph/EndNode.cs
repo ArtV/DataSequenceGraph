@@ -7,8 +7,11 @@ namespace DataSequenceGraph
 {
     public class EndNode<T> : Node<T>
     {
-        public EndNode(int SequenceNumber) : base(SequenceNumber)
+        public DataChunk<T> sourceDataChunk { get; private set; }
+
+        public EndNode(int SequenceNumber,DataChunk<T> srcDataChunk) : base(SequenceNumber)
         {
+            this.sourceDataChunk = srcDataChunk;
         }
     }
 }

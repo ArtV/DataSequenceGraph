@@ -3,30 +3,37 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
+using DataSequenceGraph.DataChunk;
 
 namespace DataSequenceGraph
 {
     [TestFixture]
     class DataChunkRouteTest
     {
-        List<string> srcData = new List<string>() { "A", "B", "C" };
+        List<string> srcDataList = new List<string>() { "A", "B", "C" };
+        StringDataChunk srcData; 
         private MasterNodeList<string> list;
         private DataChunkRoute<string> chunkRoute;
         private Dictionary<Node<string>, List<Route<string>>> routePrefixDictionary;
 
-        List<string> srcData2 = new List<string>() { "A", "A", "D" };
+        List<string> srcData2List = new List<string>() { "A", "A", "D" };
+        StringDataChunk srcData2;
         private DataChunkRoute<string> chunkRoute2;
 
-        List<string> srcData3 = new List<string>() { "A", "A", "E" };
+        List<string> srcData3List = new List<string>() { "A", "A", "E" };
+        StringDataChunk srcData3;
         private DataChunkRoute<string> chunkRoute3;
 
-        List<string> srcData4 = new List<string>() { "A", "B", "C", "D", "E", "F" };
+        List<string> srcData4List = new List<string>() { "A", "B", "C", "D", "E", "F" };
+        StringDataChunk srcData4;
         private DataChunkRoute<string> chunkRoute4;
 
-        List<string> srcData5 = new List<string>() { "G", "B", "C", "D", "J", "K" };
+        List<string> srcData5List = new List<string>() { "G", "B", "C", "D", "J", "K" };
+        StringDataChunk srcData5;
         private DataChunkRoute<string> chunkRoute5;
 
-        List<string> srcData6 = new List<string>() { "G", "B", "D", "M", "N", "O" };
+        List<string> srcData6List = new List<string>() { "G", "B", "D", "M", "N", "O" };
+        StringDataChunk srcData6;
         private DataChunkRoute<string> chunkRoute6;
 
         [SetUp]
@@ -34,23 +41,23 @@ namespace DataSequenceGraph
         {
             list = new MasterNodeList<string>();
             routePrefixDictionary = new Dictionary<Node<string>, List<Route<string>>>();
+            srcData = new StringDataChunk(srcDataList);
             chunkRoute = new DataChunkRoute<string>(srcData, list,routePrefixDictionary);
-
+            srcData2 = new StringDataChunk(srcData2List);
             chunkRoute2 = new DataChunkRoute<string>(srcData2, list, routePrefixDictionary);
-
+            srcData3 = new StringDataChunk(srcData3List);
             chunkRoute3 = new DataChunkRoute<string>(srcData3, list, routePrefixDictionary);
-
+            srcData4 = new StringDataChunk(srcData4List);
             chunkRoute4 = new DataChunkRoute<string>(srcData4, list, routePrefixDictionary);
-
+            srcData5 = new StringDataChunk(srcData5List);
             chunkRoute5 = new DataChunkRoute<string>(srcData5, list, routePrefixDictionary);
-
+            srcData6 = new StringDataChunk(srcData6List);
             chunkRoute6 = new DataChunkRoute<string>(srcData6, list, routePrefixDictionary);
         }
 
         [Test]
         public void chunkRouteInit()
         {
-            Assert.AreSame(srcData, chunkRoute.SourceData);
             StartNode<string> firstNode = chunkRoute.InitialNode;
             Assert.IsNotNull(firstNode);
         }
