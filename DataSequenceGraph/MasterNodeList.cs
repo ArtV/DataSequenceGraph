@@ -9,6 +9,14 @@ namespace DataSequenceGraph
     {
         private List<Node<T>> nodeList = new List<Node<T>>();
 
+        public IEnumerable<Node<T>> AllNodes
+        {
+            get
+            {
+                return nodeList;
+            }
+        }
+
         public IEnumerable<ValueNode<T>> getValueNodesByValue(T desiredValue)
         {
             return nodeList.OfType<ValueNode<T>>().Where(node => node.Value.Equals(desiredValue));
