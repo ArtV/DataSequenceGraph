@@ -49,6 +49,7 @@ namespace DataSequenceGraph
             Assert.AreEqual("A", Anode.Value);
             Route<string> startToA = chunkRoute.InitialNode.OutgoingRoutes.ElementAt(0);
             Assert.AreSame(Anode, startToA.connectedNodes.Last());
+            Assert.AreEqual(1, chunkRoute.InitialNode.OutgoingRoutes.Count());
         }
 
         [Test]
@@ -58,6 +59,8 @@ namespace DataSequenceGraph
             Assert.IsTrue(chunkRoute.Done);
             Assert.AreEqual(5, chunkRoute.connectedNodes.Count());
             Assert.IsInstanceOf<EndNode<string>>(chunkRoute.finishNode);
+            Route<string> routeToEnd = chunkRoute.connectedNodes.ElementAt(3).OutgoingRoutes.ElementAt(0);
+            Assert.AreSame(chunkRoute.finishNode, routeToEnd.connectedNodes.Last());
 
             Assert.IsFalse(chunkRoute2.Done);
             chunkRoute2.computeFullRoute();

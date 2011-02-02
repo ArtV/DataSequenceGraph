@@ -66,21 +66,34 @@ namespace DataSequenceGraph
                 ValueNode<T> topCandidateNode = findTopCandidateNode(nextValueSequence);
                 if (topCandidateNode == null)
                 {
-                    makeNewNode(nextValueSequence.ElementAt(0));
+                    topCandidateNode = nodeList.newValueNodeFromValue(nextValueSequence.ElementAt(0));
                 }
-                else
-                {
-                    appendEdgeTo(topCandidateNode);
-                }
+                    
+                proceedToNode(topCandidateNode);
             }
 
             sourceDataIndex++;
             if (sourceDataIndex >= SourceData.Count())
             {
                 EndNode<T> endNode = nodeList.newEndNode();
-                connectedNodes.Add(endNode);
+                appendEdgeTo(endNode);
                 this.Done = true;
             }
+        }
+
+        private void proceedToNode(ValueNode<T> node)
+        {
+            if (!suitableEdgeExists(node))
+            {
+                appendEdgeTo(node);
+            }
+        }
+
+        private bool suitableEdgeExists(ValueNode<T> node)
+        {
+            Node<T> previousLastNode = connectedNodes[connectedNodes.Count - 1];
+            return (previousLastNode.OutgoingRoutes.Any(route =>
+                route.connectedNodes.ElementAt(1) == node));
         }
 
         private ValueNode<T> findTopCandidateNode(IEnumerable<T> desiredSequence)
@@ -229,12 +242,6 @@ namespace DataSequenceGraph
             }
         }
 
-        private void makeNewNode(T newValue)
-        {
-            ValueNode<T> newValueNode = nodeList.newValueNodeFromValue(newValue);
-            appendEdgeTo(newValueNode);
-        }
-
         private void appendEdgeTo(Node<T> nextNode)
         {
             Node<T> previousLastNode = connectedNodes[connectedNodes.Count - 1];
@@ -262,7 +269,6 @@ namespace DataSequenceGraph
             }
             addedEdges.Add(newEdge);
             Route<T> newRoute = new RouteFactory<T>().newRouteFromEdge(newEdge);
-            previousLastNode.AddOutgoingRoute(newRoute);
             connectedNodes.Add(nextNode);
         }
     }
