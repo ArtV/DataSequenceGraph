@@ -9,7 +9,7 @@ namespace DataSequenceGraph
     {
         public abstract Node<T> startNode { get; }
         public abstract IEnumerable<Node<T>> connectedNodes { get; }
-        public abstract IEnumerable<Edge<T>> requisiteEdges { get; }
+        public abstract IEnumerable<DirectedPair<T>> requisiteLinks { get; }
         public abstract Route<T> startRoute { get; }
 
         public bool IsNotStartOfAny(IEnumerable<Route<T>> otherRoutes)
@@ -20,14 +20,14 @@ namespace DataSequenceGraph
         public bool startsWith(Route<T> startingRoute)
         {            
             IEnumerable<Node<T>> firstTwoNodes = startingRoute.connectedNodes.Take(2);
-            Edge<T> firstRequisiteEdge = startingRoute.requisiteEdges.First<Edge<T>>();
+            DirectedPair<T> firstRequisiteLink = startingRoute.requisiteLinks.First<DirectedPair<T>>();
 
             IEnumerable<Node<T>> myFirstTwoNodes = startRoute.connectedNodes.Take(2);
-            Edge<T> myFirstRequisiteEdge = startRoute.requisiteEdges.First<Edge<T>>();
+            DirectedPair<T> myFirstRequisiteLink = startRoute.requisiteLinks.First<DirectedPair<T>>();
             return (myFirstTwoNodes.ElementAt(0) == firstTwoNodes.ElementAt(0) &&
                 myFirstTwoNodes.ElementAt(1) == firstTwoNodes.ElementAt(1) &&
-                myFirstRequisiteEdge.requisiteEdgeFrom == firstRequisiteEdge.requisiteEdgeFrom &&
-                myFirstRequisiteEdge.requisiteEdgeTo == firstRequisiteEdge.requisiteEdgeTo);
+                myFirstRequisiteLink.from == firstRequisiteLink.from &&
+                myFirstRequisiteLink.to == firstRequisiteLink.to);
         }
 
         public bool prefixMatches(RouteCriterion<T> criterion)

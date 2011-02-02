@@ -7,17 +7,15 @@ namespace DataSequenceGraph
 {
     public class Edge<T>
     {
-        public Node<T> from { get; set; }
-        public Node<T> to { get; set; }
+        public DirectedPair<T> link { get; set; }
 
-        public Node<T> requisiteEdgeFrom { get; set; }
-        public Node<T> requisiteEdgeTo { get; set; }
+        public DirectedPair<T> requisiteLink { get; set; }
 
-        public static IEnumerable<Edge<T>> nodeSequenceToEdges(IEnumerable<Node<T>> nodeSequence)
+        public Edge()
         {
-            // solution from http://stackoverflow.com/questions/577590/pair-wise-iteration-in-c-or-sliding-window-enumerator
-            return nodeSequence.Zip(nodeSequence.Skip(1),
-                (fromNode, toNode) => new Edge<T>() { from = fromNode, to = toNode } );
-        }
+            this.requisiteLink = new DirectedPair<T>() { 
+                from = new NullNode<T>(), to = new NullNode<T>() 
+            };
+        }        
     }
 }

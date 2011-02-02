@@ -87,6 +87,10 @@ namespace DataSequenceGraph
             {
                 appendEdgeTo(node);
             }
+            else
+            {
+                connectedNodes.Add(node);
+            }
         }
 
         private bool suitableEdgeExists(ValueNode<T> node)
@@ -251,8 +255,11 @@ namespace DataSequenceGraph
                 newEdge =
                     new Edge<T>()
                     {
-                        from = previousLastNode,
-                        to = nextNode
+                        link = new DirectedPair<T>() 
+                        { 
+                            from = previousLastNode, 
+                            to = nextNode 
+                        }
                     };
             }
             else
@@ -261,10 +268,16 @@ namespace DataSequenceGraph
                 newEdge =
                     new Edge<T>()
                     {
-                        from = previousLastNode,
-                        to = nextNode,
-                        requisiteEdgeFrom = lastAddedEdge.from,
-                        requisiteEdgeTo = lastAddedEdge.to
+                        link = new DirectedPair<T>()
+                        {
+                            from = previousLastNode,
+                            to = nextNode
+                        },
+                        requisiteLink = new DirectedPair<T>()
+                        {
+                            from = lastAddedEdge.link.from,
+                            to = lastAddedEdge.link.to
+                        }
                     };
             }
             addedEdges.Add(newEdge);

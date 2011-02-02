@@ -20,6 +20,12 @@ namespace DataSequenceGraph
         List<string> srcData3 = new List<string>() { "A", "D", "E" };
         private DataChunkRoute<string> chunkRoute3;
 
+        List<string> srcData4 = new List<string>() { "A", "B", "C", "D", "E" };
+        private DataChunkRoute<string> chunkRoute4;
+
+        List<string> srcData5 = new List<string>() { "C", "D", "B", "E" };
+        private DataChunkRoute<string> chunkRoute5;
+
         [SetUp]
         public void SetUp()
         {
@@ -30,6 +36,10 @@ namespace DataSequenceGraph
             chunkRoute2 = new DataChunkRoute<string>(srcData2, list, routePrefixDictionary);
 
             chunkRoute3 = new DataChunkRoute<string>(srcData3, list, routePrefixDictionary);
+
+            chunkRoute4 = new DataChunkRoute<string>(srcData4, list, routePrefixDictionary);
+
+            chunkRoute5 = new DataChunkRoute<string>(srcData5, list, routePrefixDictionary);
         }
 
         [Test]
@@ -109,6 +119,23 @@ namespace DataSequenceGraph
 
             Assert.AreNotSame(AnodeOne, route3ANode);
             Assert.AreSame(AnodeTwo, route3ANode);
+        }
+
+        [Test]
+        public void usesEarlierRequisiteOnNewEdge()
+        {
+            chunkRoute4.computeFullRoute();
+            chunkRoute5.computeFullRoute();
+
+            ValueNode<string> Dnode = chunkRoute5.connectedNodes.ElementAt(2) as ValueNode<string>;
+            Route<string> DBroute = Dnode.OutgoingRoutes.First(route =>
+                ((ValueNode<string>)route.connectedNodes.ElementAt(1)).Value.Equals("B"));
+            Route<string> DEroute = Dnode.OutgoingRoutes.First(route =>
+                ((ValueNode<string>)route.connectedNodes.ElementAt(1)).Value.Equals("E"));
+            int DBrouteRequisitePosition = chunkRoute5.connectedNodes.FindIndex(node => node == DBroute.requisiteLinks.First().from);
+            int DErouteRequisitePosition = chunkRoute5.connectedNodes.FindIndex(node => node == DEroute.requisiteLinks.First().to);
+
+            Assert.Less(DBrouteRequisitePosition, DErouteRequisitePosition);
         }
     }
 }

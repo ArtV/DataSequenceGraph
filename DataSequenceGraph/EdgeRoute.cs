@@ -29,18 +29,15 @@ namespace DataSequenceGraph
             {
                 return new List<Node<T>>() 
                 {
-                    edge.from, edge.to
+                    edge.link.from, edge.link.to
                 };
             }
         }
-        public override IEnumerable<Edge<T>> requisiteEdges
+        public override IEnumerable<DirectedPair<T>> requisiteLinks
         {
             get
             {
-                return new List<Edge<T>>()
-                {
-                    new Edge<T>() { from = edge.requisiteEdgeFrom, to = edge.requisiteEdgeTo }
-                };
+                yield return edge.requisiteLink;
             }
         }
 

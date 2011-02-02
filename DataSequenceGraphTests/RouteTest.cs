@@ -34,8 +34,32 @@ namespace DataSequenceGraph
 
             routeFactory = new RouteFactory<string>();
 
-            edgeAB = new Edge<string>() { from = nodeA, to = nodeB, requisiteEdgeFrom = nodeC, requisiteEdgeTo = nodeD };
-            edgeCD = new Edge<string>() { from = nodeC, to = nodeD, requisiteEdgeFrom = nodeA, requisiteEdgeTo = nodeB };
+            edgeAB = new Edge<string>()
+            {
+                link = new DirectedPair<string>()
+                {
+                    from = nodeA,
+                    to = nodeB
+                },
+                requisiteLink = new DirectedPair<string>()
+                {
+                    from = nodeC,
+                    to = nodeD
+                }
+            };
+            edgeCD = new Edge<string>() 
+            { 
+                link = new DirectedPair<string>()
+                {
+                    from = nodeC,
+                    to = nodeD
+                },
+                requisiteLink = new DirectedPair<string>()
+                {
+                    from = nodeA,
+                    to = nodeB
+                }
+            };
             routeAB = routeFactory.newRouteFromEdge(edgeAB);
             routeCD = routeFactory.newRouteFromEdge(edgeCD);
         }
@@ -43,7 +67,19 @@ namespace DataSequenceGraph
         [Test]
         public void newRouteFromEdges()
         {
-            Edge<string> newEdge = new Edge<string>() { from = nodeA, to = nodeB, requisiteEdgeFrom = nodeC, requisiteEdgeTo = nodeD };
+            Edge<string> newEdge = new Edge<string>() 
+            {
+                link = new DirectedPair<string>()
+                {
+                    from = nodeA,
+                    to = nodeB
+                },
+                requisiteLink = new DirectedPair<string>()
+                {
+                    from = nodeC,
+                    to = nodeD
+                }
+            };
             Route<string> route = routeFactory.newRouteFromEdge(newEdge);
             Assert.AreSame(nodeA, route.startNode);
             Assert.AreSame(nodeB, route.connectedNodes.ElementAt(1));

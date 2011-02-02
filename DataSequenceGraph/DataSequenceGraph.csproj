@@ -40,6 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DirectedPair.cs" />
+    <Compile Include="NullNode.cs" />
     <Compile Include="Route.cs" />
     <Compile Include="CompositeRoute.cs" />
     <Compile Include="DataChunkRoute.cs" />

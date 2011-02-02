@@ -44,15 +44,15 @@ namespace DataSequenceGraph
             }
         }
 
-        public override IEnumerable<Edge<T>> requisiteEdges
+        public override IEnumerable<DirectedPair<T>> requisiteLinks
         {
             get
             {
                 foreach (Route<T> componentRoute in componentRoutes)
                 {
-                    foreach (Edge<T> routeEdge in componentRoute.requisiteEdges)
+                    foreach (DirectedPair<T> requisiteLink in componentRoute.requisiteLinks)
                     {
-                        yield return routeEdge;
+                        yield return requisiteLink;
                     }
                 }
             }
