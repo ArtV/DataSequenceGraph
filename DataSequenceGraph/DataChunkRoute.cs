@@ -96,8 +96,21 @@ namespace DataSequenceGraph
         private bool suitableEdgeExists(ValueNode<T> node)
         {
             Node<T> previousLastNode = connectedNodes[connectedNodes.Count - 1];
-            return (previousLastNode.OutgoingRoutes.Any(route =>
-                route.connectedNodes.ElementAt(1) == node));
+            if (previousLastNode is StartNode<T>)
+            {
+                return false;
+            }
+            else
+            {
+                ValueNode<T> previousLastValueNode = previousLastNode as ValueNode<T>;
+                RouteCriterion<T> criterion = new RouteCriterion<T>()
+                {
+                    desiredSequence = new List<T>() { previousLastValueNode.Value, node.Value },
+                    previousNodeSequence = this.connectedNodes
+                };
+                return (previousLastValueNode.OutgoingRoutes.Any(route =>
+                    route.prefixMatches(criterion)));
+            }
         }
 
         private ValueNode<T> findTopCandidateNode(IEnumerable<T> desiredSequence)
@@ -148,7 +161,7 @@ namespace DataSequenceGraph
             {
                 if (previousRemainingRoutes.Count() == 0)
                 {
-                    return null;
+                    return candidateNodes.ElementAt(0);
                 }
                 else
                 {

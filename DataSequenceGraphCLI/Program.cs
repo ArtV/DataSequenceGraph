@@ -39,9 +39,9 @@ namespace DataSequenceGraphCLI
             MasterNodeList<string> masterNodeList = new MasterNodeList<string>();
             Dictionary<Node<string>,List<Route<string>>> routePrefixDictionary = new Dictionary<Node<string>, List<Route<string>>>();
 
-//            threeThreeRoutes(masterNodeList, routePrefixDictionary);
+            threeThreeRoutes(masterNodeList, routePrefixDictionary);
 
-            twoFiveRoutes(masterNodeList, routePrefixDictionary);
+//            twoFiveRoutes(masterNodeList, routePrefixDictionary);
 
             foreach (var node in masterNodeList.AllNodes)
             {

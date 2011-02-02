@@ -68,7 +68,7 @@ namespace DataSequenceGraph
         public void findMatchingRoutes()
         {
             IEnumerable<string> stringSeq = new List<string>() { "A","B" };
-            IEnumerable<Node<string>> previousNodes = new List<Node<string>>();
+            IEnumerable<Node<string>> previousNodes = new List<Node<string>>() { vn3, vn };
             RouteCriterion<string> criterion = new RouteCriterion<string>() { 
                 desiredSequence = stringSeq, previousNodeSequence = previousNodes };
             IEnumerable<Route<string>> matchingRoutes = vn.findMatchingRoutes(criterion);

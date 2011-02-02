@@ -41,7 +41,34 @@ namespace DataSequenceGraph
             else
             {
                 IEnumerable<T> routeValues = routeValueNodes.Take(desiredCount).Select(node => node.Value);
-                return routeValues.SequenceEqual(criterion.desiredSequence);
+                if (!routeValues.SequenceEqual(criterion.desiredSequence))
+                {
+                    return false;
+                }
+                else
+                {
+                    var seq = criterion.previousNodeSequence.GetEnumerator();
+                    int numRequisitesMatched = 0;
+                    for(int sequenceIndex = 0; sequenceIndex <= criterion.previousNodeSequence.Count() - 1;
+                        sequenceIndex++)
+                    {
+                        if (!seq.MoveNext())
+                        {
+                            break;
+                        }
+                        IEnumerable<DirectedPair<T>> requisiteLinksFrom = requisiteLinks.Where(link =>
+                            link.from == seq.Current);
+                        foreach (DirectedPair<T> link in requisiteLinksFrom)
+                        {
+                            if (criterion.previousNodeSequence.ElementAt(sequenceIndex + 1) ==
+                                link.to)
+                            {
+                                numRequisitesMatched++;
+                            }
+                        }
+                    }
+                    return (numRequisitesMatched == requisiteLinks.Count());
+                }
             }
         }
 
