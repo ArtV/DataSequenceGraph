@@ -8,33 +8,40 @@ using DataSequenceGraph.DataChunk;
 namespace DataSequenceGraph
 {
     [TestFixture]
-    class DataChunkRouteTest
+    class DataChunkRouteBlazerTest
     {
         List<string> srcDataList = new List<string>() { "A", "B", "C" };
         StringDataChunk srcData; 
         private MasterNodeList<string> list;
-        private DataChunkRoute<string> chunkRoute;
+        private DataChunkRouteBlazer<string> chunkRoute;
         private Dictionary<Node<string>, List<Route<string>>> routePrefixDictionary;
 
         List<string> srcData2List = new List<string>() { "A", "A", "D" };
         StringDataChunk srcData2;
-        private DataChunkRoute<string> chunkRoute2;
+        private DataChunkRouteBlazer<string> chunkRoute2;
 
         List<string> srcData3List = new List<string>() { "A", "A", "E" };
         StringDataChunk srcData3;
-        private DataChunkRoute<string> chunkRoute3;
+        private DataChunkRouteBlazer<string> chunkRoute3;
 
         List<string> srcData4List = new List<string>() { "A", "B", "C", "D", "E", "F" };
         StringDataChunk srcData4;
-        private DataChunkRoute<string> chunkRoute4;
+        private DataChunkRouteBlazer<string> chunkRoute4;
 
         List<string> srcData5List = new List<string>() { "G", "B", "C", "D", "J", "K" };
         StringDataChunk srcData5;
-        private DataChunkRoute<string> chunkRoute5;
+        private DataChunkRouteBlazer<string> chunkRoute5;
 
         List<string> srcData6List = new List<string>() { "G", "B", "D", "M", "N", "O" };
         StringDataChunk srcData6;
-        private DataChunkRoute<string> chunkRoute6;
+        private DataChunkRouteBlazer<string> chunkRoute6;
+
+        public static void threeSixChunks (MasterNodeList<string> inList)
+        {
+            DataChunkRouteBlazerTest test = new DataChunkRouteBlazerTest();
+            test.SetUp();
+            test.chunkRouteAppendThriceOther();
+        }
 
         [SetUp]
         public void SetUp()
@@ -42,23 +49,23 @@ namespace DataSequenceGraph
             list = new MasterNodeList<string>();
             routePrefixDictionary = new Dictionary<Node<string>, List<Route<string>>>();
             srcData = new StringDataChunk(srcDataList);
-            chunkRoute = new DataChunkRoute<string>(srcData, list,routePrefixDictionary);
+            chunkRoute = new DataChunkRouteBlazer<string>(srcData, list,routePrefixDictionary);
             srcData2 = new StringDataChunk(srcData2List);
-            chunkRoute2 = new DataChunkRoute<string>(srcData2, list, routePrefixDictionary);
+            chunkRoute2 = new DataChunkRouteBlazer<string>(srcData2, list, routePrefixDictionary);
             srcData3 = new StringDataChunk(srcData3List);
-            chunkRoute3 = new DataChunkRoute<string>(srcData3, list, routePrefixDictionary);
+            chunkRoute3 = new DataChunkRouteBlazer<string>(srcData3, list, routePrefixDictionary);
             srcData4 = new StringDataChunk(srcData4List);
-            chunkRoute4 = new DataChunkRoute<string>(srcData4, list, routePrefixDictionary);
+            chunkRoute4 = new DataChunkRouteBlazer<string>(srcData4, list, routePrefixDictionary);
             srcData5 = new StringDataChunk(srcData5List);
-            chunkRoute5 = new DataChunkRoute<string>(srcData5, list, routePrefixDictionary);
+            chunkRoute5 = new DataChunkRouteBlazer<string>(srcData5, list, routePrefixDictionary);
             srcData6 = new StringDataChunk(srcData6List);
-            chunkRoute6 = new DataChunkRoute<string>(srcData6, list, routePrefixDictionary);
+            chunkRoute6 = new DataChunkRouteBlazer<string>(srcData6, list, routePrefixDictionary);
         }
 
         [Test]
         public void chunkRouteInit()
         {
-            StartNode<string> firstNode = chunkRoute.InitialNode;
+            StartNode<string> firstNode = chunkRoute.chunkRoute.getFirstNode();
             Assert.IsNotNull(firstNode);
         }
 
@@ -66,12 +73,12 @@ namespace DataSequenceGraph
         public void createMissingValueNode()
         {
             chunkRoute.appendToRoute();
-            Assert.AreEqual(2, chunkRoute.connectedNodes.Count());
-            ValueNode<string> Anode = ((ValueNode<string>)chunkRoute.connectedNodes.ElementAt(1));
-            Assert.AreEqual("A", Anode.Value);
-            Route<string> startToA = chunkRoute.InitialNode.OutgoingRoutes.ElementAt(0);
-            Assert.AreSame(Anode, startToA.connectedNodes.Last());
-            Assert.AreEqual(1, chunkRoute.InitialNode.OutgoingRoutes.Count());
+            Assert.AreEqual(1, chunkRoute.chunkRoute.dataChunk.Count());
+            string Anode = chunkRoute.chunkRoute.dataChunk.ElementAt(0);
+            Assert.AreEqual("A", Anode);
+            Route<string> startToA = chunkRoute.chunkRoute.getFirstNode().OutgoingRoutes.ElementAt(0);
+            Assert.AreEqual(Anode, ((ValueNode<string>) startToA.connectedNodes.Last()).Value);
+            Assert.AreEqual(1, chunkRoute.chunkRoute.getFirstNode().OutgoingRoutes.Count());
         }
 
         [Test]
@@ -79,26 +86,24 @@ namespace DataSequenceGraph
         {
             chunkRouteAppendThrice();
             Assert.IsTrue(chunkRoute.Done);
-            Assert.AreEqual(5, chunkRoute.connectedNodes.Count());
-            Assert.IsInstanceOf<EndNode<string>>(chunkRoute.finishNode);
-            Route<string> routeToEnd = chunkRoute.connectedNodes.ElementAt(3).OutgoingRoutes.ElementAt(0);
-            Assert.AreSame(chunkRoute.finishNode, routeToEnd.connectedNodes.Last());
+            Assert.AreEqual(3, chunkRoute.chunkRoute.dataChunk.Count());
+            Assert.IsInstanceOf<EndNode<string>>(chunkRoute.chunkRoute.getLastNode());
 
             Assert.IsFalse(chunkRoute2.Done);
             chunkRoute2.computeFullRoute();
             Assert.IsTrue(chunkRoute2.Done);
-            Assert.AreEqual(5, chunkRoute2.connectedNodes.Count());
-            Assert.IsInstanceOf<EndNode<string>>(chunkRoute2.finishNode);
+            Assert.AreEqual(3, chunkRoute2.chunkRoute.dataChunk.Count());
+            Assert.IsInstanceOf<EndNode<string>>(chunkRoute2.chunkRoute.getLastNode());
         }
 
         [Test]
         public void sameChunkNotReusesValueNode()
         {
+            int beforeCount = list.getValueNodesByValue("A").Count();
             chunkRoute2.appendToRoute();
+            int afterCount = list.getValueNodesByValue("A").Count();
             chunkRoute2.appendToRoute();
-            ValueNode<string> AnodeFirst = ((ValueNode<string>)chunkRoute2.connectedNodes.ElementAt(1));
-            ValueNode<string> AnodeSecond = ((ValueNode<string>)chunkRoute2.connectedNodes.ElementAt(2));
-            Assert.AreNotSame(AnodeSecond, AnodeFirst);
+            Assert.AreNotEqual(beforeCount, afterCount);
         }
 
         private void chunkRouteAppendThrice()
@@ -108,14 +113,21 @@ namespace DataSequenceGraph
             chunkRoute.appendToRoute();
         }
 
+        private void chunkRouteAppendThriceOther()
+        {
+            chunkRoute4.computeFullRoute();
+            chunkRoute5.computeFullRoute();
+            chunkRoute6.computeFullRoute();
+        }
+
         [Test]
         public void differentChunkReusesValueNode()
         {
             chunkRouteAppendThrice();
+            int beforeCount = list.getValueNodesByValue("A").Count();
             chunkRoute2.appendToRoute();
-            ValueNode<string> Anode = ((ValueNode<string>)chunkRoute.connectedNodes.ElementAt(1));
-            ValueNode<string> otherChunkNode = ((ValueNode<string>)chunkRoute2.connectedNodes.ElementAt(1));
-            Assert.AreSame(Anode, otherChunkNode);
+            int afterCount = list.getValueNodesByValue("A").Count();
+            Assert.AreEqual(beforeCount, afterCount);
         }
 
         [Test]
@@ -123,12 +135,10 @@ namespace DataSequenceGraph
         {
             chunkRoute.computeFullRoute();
             chunkRoute2.computeFullRoute();
+            int beforeCount = list.getValueNodesByValue("A").Count();
             chunkRoute3.computeFullRoute();
-
-            ValueNode<string> AnodeTwo = ((ValueNode<string>)chunkRoute2.connectedNodes.ElementAt(1));
-            ValueNode<string> route3ANode = ((ValueNode<string>)chunkRoute3.connectedNodes.ElementAt(1));
-
-            Assert.AreSame(AnodeTwo, route3ANode);
+            int afterCount = list.getValueNodesByValue("A").Count();
+            Assert.AreEqual(beforeCount, afterCount);
         }
 
         [Test]
@@ -138,14 +148,15 @@ namespace DataSequenceGraph
             chunkRoute5.computeFullRoute();
             chunkRoute6.computeFullRoute();
 
-            ValueNode<string> Dnode = chunkRoute5.connectedNodes.ElementAt(4) as ValueNode<string>;
-            Assert.AreEqual("D", Dnode.Value);
+            ValueNode<string> Dnode = list.getValueNodesByValue("D").First();
             Route<string> DJroute = Dnode.OutgoingRoutes.First(route =>
                 ((ValueNode<string>)route.connectedNodes.ElementAt(1)).Value.Equals("J"));
             Route<string> DMroute = Dnode.OutgoingRoutes.Last(route =>
                 ((ValueNode<string>)route.connectedNodes.ElementAt(1)).Value.Equals("M"));
-            int DJrouteIndex = chunkRoute6.connectedNodes.FindIndex(node => node == DJroute.requisiteLinks.First().from);
-            int DMrouteIndex = chunkRoute6.connectedNodes.FindIndex(node => node == DMroute.requisiteLinks.First().from);
+            int DJrouteIndex = chunkRoute6.chunkRoute.positionOfContainedNode(DJroute.requisiteLinks.First().from);
+//            int DJrouteIndex = chunkRoute6.chunkRoute.connectedNodes.FindIndex(node => node == DJroute.requisiteLinks.First().from);
+            int DMrouteIndex = chunkRoute6.chunkRoute.positionOfContainedNode(DMroute.requisiteLinks.First().from);
+//            int DMrouteIndex = chunkRoute6.chunkRoute.connectedNodes.FindIndex(node => node == DMroute.requisiteLinks.First().from);
             Assert.Less(DMrouteIndex, DJrouteIndex);
         }
     }

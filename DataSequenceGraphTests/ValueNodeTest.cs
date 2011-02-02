@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
+using DataSequenceGraph.DataChunk;
 
 namespace DataSequenceGraph
 {
@@ -68,9 +69,11 @@ namespace DataSequenceGraph
         public void findMatchingRoutes()
         {
             IEnumerable<string> stringSeq = new List<string>() { "A","B" };
-            IEnumerable<Node<string>> previousNodes = new List<Node<string>>() { vn3, vn };
-            RouteCriterion<string> criterion = new RouteCriterion<string>() { 
-                desiredSequence = stringSeq, previousNodeSequence = previousNodes };
+//            IEnumerable<Node<string>> previousNodes = new List<Node<string>>() { vn3, vn };
+            DataChunkRoute<string> prevRoute = new DataChunkRoute<string>(
+                new List<Node<string>>() { nodeList.newStartNode(new StringDataChunk(null)), vn3, vn });
+            RouteCriterion<string> criterion = new RouteCriterion<string>() {
+                desiredSequence = stringSeq, routeSoFar = prevRoute };
             IEnumerable<Route<string>> matchingRoutes = vn.findMatchingRoutes(criterion);
             Assert.AreEqual(1, matchingRoutes.Count());
 

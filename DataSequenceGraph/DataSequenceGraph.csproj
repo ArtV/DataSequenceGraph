@@ -41,11 +41,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataChunk.cs" />
+    <Compile Include="DataChunkRoute.cs" />
     <Compile Include="DirectedPair.cs" />
     <Compile Include="NullNode.cs" />
     <Compile Include="Route.cs" />
     <Compile Include="CompositeRoute.cs" />
-    <Compile Include="DataChunkRoute.cs" />
+    <Compile Include="DataChunkRouteBlazer.cs" />
     <Compile Include="Edge.cs" />
     <Compile Include="EndNode.cs" />
     <Compile Include="MasterNodeList.cs" />

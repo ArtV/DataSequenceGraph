@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
+using DataSequenceGraph.DataChunk;
 
 namespace DataSequenceGraph
 {
@@ -88,10 +89,12 @@ namespace DataSequenceGraph
         [Test]
         public void routePrefixMatches()
         {
+            DataChunkRoute<string> prevRoute = new DataChunkRoute<string>(
+                new List<Node<string>>() { list.newStartNode(new StringDataChunk(null)), nodeC, nodeD });
             RouteCriterion<string> criterion = new RouteCriterion<string>()
             {
                 desiredSequence = new List<string>() { "A", "B" },
-                previousNodeSequence = new List<Node<string>>() { nodeC, nodeD }
+                routeSoFar = prevRoute 
             };
             Assert.IsTrue(routeAB.prefixMatches(criterion));
         }

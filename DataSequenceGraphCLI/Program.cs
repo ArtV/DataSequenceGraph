@@ -18,9 +18,9 @@ namespace DataSequenceGraphCLI
             List<string> srcData3List = new List<string>() { "A", "A", "E" };
             StringDataChunk srcData3 = new StringDataChunk(srcData3List);
 
-            DataChunkRoute<string> chunkRoute = new DataChunkRoute<string>(srcData, masterNodeList, routePrefixDictionary);
-            DataChunkRoute<string> chunkRoute2 = new DataChunkRoute<string>(srcData2, masterNodeList, routePrefixDictionary);
-            DataChunkRoute<string> chunkRoute3 = new DataChunkRoute<string>(srcData3, masterNodeList, routePrefixDictionary);
+            DataChunkRouteBlazer<string> chunkRoute = new DataChunkRouteBlazer<string>(srcData, masterNodeList, routePrefixDictionary);
+            DataChunkRouteBlazer<string> chunkRoute2 = new DataChunkRouteBlazer<string>(srcData2, masterNodeList, routePrefixDictionary);
+            DataChunkRouteBlazer<string> chunkRoute3 = new DataChunkRouteBlazer<string>(srcData3, masterNodeList, routePrefixDictionary);
 
             chunkRoute.computeFullRoute();
             chunkRoute2.computeFullRoute();
@@ -31,17 +31,17 @@ namespace DataSequenceGraphCLI
         {
             List<string> srcData4List = new List<string>() { "A", "B", "C", "D", "E", "F" };
             StringDataChunk srcData4 = new StringDataChunk(srcData4List);
-            DataChunkRoute<string> chunkRoute4 =  new DataChunkRoute<string>(srcData4, masterNodeList, routePrefixDictionary);
+            DataChunkRouteBlazer<string> chunkRoute4 =  new DataChunkRouteBlazer<string>(srcData4, masterNodeList, routePrefixDictionary);
             chunkRoute4.computeFullRoute();
 
             List<string> srcData5List = new List<string>() { "G", "B", "C", "D", "J", "K" };
             StringDataChunk srcData5 = new StringDataChunk(srcData5List);
-            DataChunkRoute<string> chunkRoute5 = new DataChunkRoute<string>(srcData5, masterNodeList, routePrefixDictionary);
+            DataChunkRouteBlazer<string> chunkRoute5 = new DataChunkRouteBlazer<string>(srcData5, masterNodeList, routePrefixDictionary);
             chunkRoute5.computeFullRoute();
 
             List<string> srcData6List = new List<string>() { "G", "B", "D", "M", "N", "O" };
             StringDataChunk srcData6 = new StringDataChunk(srcData6List);
-            DataChunkRoute<string> chunkRoute6 = new DataChunkRoute<string>(srcData6, masterNodeList, routePrefixDictionary);
+            DataChunkRouteBlazer<string> chunkRoute6 = new DataChunkRouteBlazer<string>(srcData6, masterNodeList, routePrefixDictionary);
             chunkRoute6.computeFullRoute();
         }
 

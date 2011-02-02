@@ -47,5 +47,13 @@ namespace DataSequenceGraph
             nodeList.Add(newNode);
             return newNode;
         }
+        /*
+        public IEnumerable<IEnumerable<string>> produceDataChunks()
+        {
+            foreach (StartNode<T> node in nodeList.OfType<StartNode<T>>())
+            {
+                node.
+            }
+        } */
     }
 }

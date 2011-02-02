@@ -8,6 +8,6 @@ namespace DataSequenceGraph
     public class RouteCriterion<T>
     {
         public IEnumerable<T> desiredSequence { get; set; }
-        public IEnumerable<Node<T>> previousNodeSequence { get; set; }
+        public DataChunkRoute<T> routeSoFar { get; set; }
     }
 }

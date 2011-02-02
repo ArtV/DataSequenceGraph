@@ -33,5 +33,14 @@ namespace DataSequenceGraph
             Assert.AreEqual(1, matchedNodes.Count());
             Assert.AreEqual("A", matchedNodes.ElementAt(0).Value);
         }
+        /*
+        [Test]
+        public void produceDataChunksFromList()
+        {
+            MasterNodeList<string> nodeList = new MasterNodeList<string>();
+            DataChunkRouteBlazerTest.threeSixChunks(nodeList);
+
+            IEnumerable<IEnumerable<string>> chunks = nodeList.produceDataChunks();
+        } */
     }
 }
