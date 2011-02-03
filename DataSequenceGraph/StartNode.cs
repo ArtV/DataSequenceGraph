@@ -9,17 +9,17 @@ namespace DataSequenceGraph
     {
         public DataChunk<T> sourceDataChunk { get; private set; }
 
-        public override bool isStartNode
-        {
-            get
-            {
-                return true;
-            }
-        }
-
         public StartNode(int SequenceNumber,DataChunk<T> sourceDataChunk) : base(SequenceNumber)
         {
             this.sourceDataChunk = sourceDataChunk;
+        }
+
+        public override NodeKind kind
+        {
+            get 
+            {
+                return NodeKind.StartNode;
+            }
         }
     }
 }

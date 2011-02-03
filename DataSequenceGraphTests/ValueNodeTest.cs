@@ -29,11 +29,6 @@ namespace DataSequenceGraph
                 {
                     from = vn,
                     to = vn2
-                },
-                requisiteLink = new DirectedPair<string>()
-                {
-                    from = vn3,
-                    to = vn
                 }
             };
             edge2 = new Edge<string>()
@@ -69,7 +64,8 @@ namespace DataSequenceGraph
         public void findMatchingRoutes()
         {
             IEnumerable<string> stringSeq = new List<string>() { "A","B" };
-            DataChunkRoute<string> prevRoute = new DataChunkRoute<string>(nodeList.newStartNode(new StringDataChunk(null)));
+            DataChunkRoute<string> prevRoute = new DataChunkRoute<string>(
+                nodeList.newStartNode( new StringDataChunk(null) ));
             RouteCriterion<string> criterion = new RouteCriterion<string>() {
                 desiredSequence = stringSeq, routeSoFar = prevRoute };
             IEnumerable<Route<string>> matchingRoutes = vn.findMatchingRoutes(criterion);

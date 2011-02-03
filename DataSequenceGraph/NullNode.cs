@@ -10,5 +10,13 @@ namespace DataSequenceGraph
         public NullNode():base(0)
         {
         }
+
+        public override NodeKind kind
+        {
+            get 
+            {
+                return NodeKind.NullNode;
+            }
+        }
     }
 }

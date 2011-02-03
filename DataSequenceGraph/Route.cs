@@ -61,7 +61,7 @@ namespace DataSequenceGraph
         public bool meetsRequisites(IEnumerable<DirectedPair<T>> requisiteLinks)
         {
             IEnumerable<DirectedPair<T>> requisiteLinksNoNulls = requisiteLinks.Where(
-                link => link.from.SequenceNumber != 0 && link.to.SequenceNumber != 0);
+                link => link.from.kind != NodeKind.NullNode && link.to.kind != NodeKind.NullNode);
             var seq = this.connectedNodes.GetEnumerator();
             int numRequisitesMatched = 0;
             for (int sequenceIndex = 0; sequenceIndex <= this.connectedNodes.Count() - 1;
@@ -106,13 +106,12 @@ namespace DataSequenceGraph
             int earliestRequisiteIndex = -1;
             foreach (EdgeRoute<T> route in node.OutgoingRoutes)
             {
-                if (route.edge.requisiteLink.from.SequenceNumber == 0) continue;
                 int indexOfRequisiteMatch = positionOfContainedNode(route.edge.requisiteLink.from);
                 if (earliestRequisiteIndex == -1)
                 {
                     earliestRequisiteIndex = indexOfRequisiteMatch;
                 }
-                else
+                else if (indexOfRequisiteMatch != -1)
                 {
                     earliestRequisiteIndex = Math.Min(earliestRequisiteIndex, indexOfRequisiteMatch);
                 }

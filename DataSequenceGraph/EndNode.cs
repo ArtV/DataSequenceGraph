@@ -13,5 +13,13 @@ namespace DataSequenceGraph
         {
             this.sourceDataChunk = srcDataChunk;
         }
+
+        public override NodeKind kind
+        {
+            get 
+            {
+                return NodeKind.EndNode;
+            }
+        }
     }
 }

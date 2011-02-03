@@ -5,17 +5,14 @@ using System.Text;
 
 namespace DataSequenceGraph
 {
+    public enum NodeKind { StartNode, ValueNode, EndNode, NullNode }
+
     public abstract class Node<T>
     {
         public IEnumerable<EdgeRoute<T>> OutgoingRoutes { get; private set; }
         public int SequenceNumber { get; private set; }
-        public virtual bool isStartNode
-        {
-            get
-            {
-                return false;
-            }
-        }
+
+        public abstract NodeKind kind { get; }
 
         public Node(int SequenceNumber)
         {

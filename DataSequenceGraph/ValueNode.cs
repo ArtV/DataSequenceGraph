@@ -18,5 +18,13 @@ namespace DataSequenceGraph
         {
             return OutgoingRoutes.Where(route => route.prefixMatches(criterion));
         }
+
+        public override NodeKind kind
+        {
+            get 
+            {
+                return NodeKind.ValueNode;
+            }
+        }
     }
 }
