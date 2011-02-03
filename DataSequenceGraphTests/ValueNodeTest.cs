@@ -69,9 +69,7 @@ namespace DataSequenceGraph
         public void findMatchingRoutes()
         {
             IEnumerable<string> stringSeq = new List<string>() { "A","B" };
-//            IEnumerable<Node<string>> previousNodes = new List<Node<string>>() { vn3, vn };
-            DataChunkRoute<string> prevRoute = new DataChunkRoute<string>(
-                new List<Node<string>>() { nodeList.newStartNode(new StringDataChunk(null)), vn3, vn });
+            DataChunkRoute<string> prevRoute = new DataChunkRoute<string>(nodeList.newStartNode(new StringDataChunk(null)));
             RouteCriterion<string> criterion = new RouteCriterion<string>() {
                 desiredSequence = stringSeq, routeSoFar = prevRoute };
             IEnumerable<Route<string>> matchingRoutes = vn.findMatchingRoutes(criterion);

@@ -5,73 +5,94 @@ using System.Text;
 
 namespace DataSequenceGraph
 {
-    public class DataChunkRoute<T>
+    public class DataChunkRoute<T> : Route<T>
     {
         public IEnumerable<T> dataChunk
         {
             get
             {
-                foreach (ValueNode<T> node in connectedNodes.OfType<ValueNode<T>>())
+                foreach (ValueNode<T> node in chunkRoute.connectedNodes.OfType<ValueNode<T>>().Distinct())
                 {
                     yield return node.Value;
                 }
             }
         }
 
-        private List<Node<T>> connectedNodes { get; set; }
+        private Route<T> chunkRoute { get; set; }
 
-        public DataChunkRoute(IEnumerable<Node<T>> startingNodes)
+        public override Node<T> startNode
         {
-            this.connectedNodes = startingNodes.ToList();
+            get 
+            {
+                return chunkRoute.startNode;
+            }
         }
 
-        public void addNode(Node<T> node)
+        public override IEnumerable<Node<T>> connectedNodes
         {
-            this.connectedNodes.Add(node);
+            get 
+            {
+                return chunkRoute.connectedNodes;
+            }
+        }
+
+        public override IEnumerable<DirectedPair<T>> requisiteLinks
+        {
+            get 
+            {
+                return chunkRoute.requisiteLinks;
+            }
+        }
+
+        public override Route<T> startRoute
+        {
+            get 
+            {
+                return chunkRoute.startRoute;
+            }
+        }
+
+        public DataChunkRoute(StartNode<T> startNode)
+        {
+            this.chunkRoute = new RouteFactory<T>().newRouteFromNode(startNode);
+        }
+
+        public void appendEdge(EdgeRoute<T> edge)
+        {
+            this.chunkRoute = new RouteFactory<T>().newRouteFromConnectedRoutes(this.chunkRoute, edge);
         }
 
         public StartNode<T> getFirstNode()
         {
-            return connectedNodes.First() as StartNode<T>;
+            return this.chunkRoute.connectedNodes.First() as StartNode<T>;
         }
 
         public Node<T> getLastNode()
         {
-            return connectedNodes.Last();
+            return this.chunkRoute.connectedNodes.Last();
         }
 
-        public bool meetsRequisites(IEnumerable<DirectedPair<T>> requisiteLinks)
-        {
-            var seq = connectedNodes.GetEnumerator();
-            int numRequisitesMatched = 0;
-            for (int sequenceIndex = 0; sequenceIndex <= connectedNodes.Count() - 1;
-                sequenceIndex++)
-            {
-                if (!seq.MoveNext())
-                {
-                    break;
-                }
-                IEnumerable<DirectedPair<T>> requisiteLinksFrom = requisiteLinks.Where(link =>
-                    link.from == seq.Current);
-                foreach (DirectedPair<T> link in requisiteLinksFrom)
-                {
-                    if (connectedNodes.ElementAt(sequenceIndex + 1) == link.to)
-                    {
-                        numRequisitesMatched++;
-                    }
-                }
-            }
-            return (numRequisitesMatched == requisiteLinks.Count());
-        }
+
 
         public IEnumerable<ValueNode<T>> removeContainedNodes(IEnumerable<ValueNode<T>> otherNodes)
         {
-            return otherNodes.Except<ValueNode<T>>(connectedNodes.OfType<ValueNode<T>>());
+            return otherNodes.Except<ValueNode<T>>(this.chunkRoute.connectedNodes.OfType<ValueNode<T>>());
         }
 
         public int positionOfContainedNode(Node<T> otherNode)
         {
-            return connectedNodes.FindIndex(connectedNode => connectedNode == otherNode);
+            int counter = 0;
+            foreach (Node<T> node in chunkRoute.connectedNodes)
+            {
+                if (node == otherNode)
+                {
+                    return counter;
+                }
+                counter++;
+            }
+            return -1;
         }
+
+
     }
 }

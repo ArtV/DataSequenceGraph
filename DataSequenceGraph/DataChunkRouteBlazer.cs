@@ -30,10 +30,7 @@ namespace DataSequenceGraph
             this.sourceDataChunk = sourceDataChunk;
             this.sourceDataIndex = 0;
             this.nodeList = nodeList;
-            this.chunkRoute = new DataChunkRoute<T>(new List<Node<T>>()
-                {
-                    nodeList.newStartNode(sourceDataChunk)
-                });
+            this.chunkRoute = new DataChunkRoute<T>(nodeList.newStartNode(sourceDataChunk));
             this.nodeRoutesDictionary = nodeRoutesDictionary;
             this.addedLinks = new List<DirectedPair<T>>();
         }
@@ -76,22 +73,23 @@ namespace DataSequenceGraph
 
         private void proceedToNode(ValueNode<T> node)
         {
-            if (!suitableEdgeExists(node))
+            EdgeRoute<T> suitableEdge = findSuitableEdge(node);
+            if (suitableEdge == null)
             {
                 appendEdgeTo(node);
             }
             else
             {
-                this.chunkRoute.addNode(node);
+                this.chunkRoute.appendEdge(suitableEdge);
             }
         }
 
-        private bool suitableEdgeExists(ValueNode<T> node)
+        private EdgeRoute<T> findSuitableEdge(ValueNode<T> node)
         {
             Node<T> previousLastNode = this.chunkRoute.getLastNode();
             if (previousLastNode is StartNode<T>)
             {
-                return false;
+                return null;
             }
             else
             {
@@ -101,7 +99,7 @@ namespace DataSequenceGraph
                     desiredSequence = new List<T>() { previousLastValueNode.Value, node.Value },
                     routeSoFar = this.chunkRoute
                 };
-                return (previousLastValueNode.OutgoingRoutes.Any(route =>
+                return (previousLastValueNode.OutgoingRoutes.FirstOrDefault(route =>
                     route.prefixMatches(criterion)));
             }
         }
@@ -280,8 +278,8 @@ namespace DataSequenceGraph
                     };
             }
             addNewLinkIfDifferent(newLink);            
-            Route<T> newRoute = new RouteFactory<T>().newRouteFromEdge(newEdge);
-            this.chunkRoute.addNode(nextNode);
+            EdgeRoute<T> newRoute = new RouteFactory<T>().newRouteFromEdge(newEdge);
+            this.chunkRoute.appendEdge(newRoute);
         }
 
         private DirectedPair<T> latestLinkBeforeOtherRouteReqs(Node<T> node)

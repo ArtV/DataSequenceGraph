@@ -53,5 +53,31 @@ namespace DataSequenceGraph
             }
         }
 
+        public bool meetsRequisites(IEnumerable<DirectedPair<T>> requisiteLinks)
+        {
+            IEnumerable<DirectedPair<T>> requisiteLinksNoNulls = requisiteLinks.Where(
+                link => link.from.SequenceNumber != 0 && link.to.SequenceNumber != 0);
+            var seq = this.connectedNodes.GetEnumerator();
+            int numRequisitesMatched = 0;
+            for (int sequenceIndex = 0; sequenceIndex <= this.connectedNodes.Count() - 1;
+                sequenceIndex++)
+            {
+                if (!seq.MoveNext())
+                {
+                    break;
+                }
+                IEnumerable<DirectedPair<T>> requisiteLinksFrom = requisiteLinksNoNulls.Where(link =>
+                    link.from == seq.Current);
+                foreach (DirectedPair<T> link in requisiteLinksFrom)
+                {
+                    if (this.connectedNodes.ElementAt(sequenceIndex + 1) == link.to)
+                    {
+                        numRequisitesMatched++;
+                    }
+                }
+            }
+            return (numRequisitesMatched == requisiteLinksNoNulls.Count());
+        }
+
     }
 }

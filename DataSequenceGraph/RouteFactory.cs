@@ -7,7 +7,7 @@ namespace DataSequenceGraph
 {
     public class RouteFactory<T>
     {
-        public Route<T> newRouteFromEdge(Edge<T> baseNodes)
+        public EdgeRoute<T> newRouteFromEdge(Edge<T> baseNodes)
         {
             EdgeRoute<T> newRoute = new EdgeRoute<T>(baseNodes);
             baseNodes.link.from.AddOutgoingRoute(newRoute);
@@ -18,6 +18,11 @@ namespace DataSequenceGraph
         {
             Route<T> newRoute = new CompositeRoute<T>(new List<Route<T>>() { firstRoute, secondRoute });
             return newRoute;
+        }
+
+        public Route<T> newRouteFromNode(Node<T> node)
+        {
+            return new OneNodeRoute<T>(node);
         }
     }
 }

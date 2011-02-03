@@ -21,8 +21,14 @@ namespace DataSequenceGraph
 
         private Route<string> routeAB;
         private Edge<string> edgeAB;
+        private Route<string> routeBC;
+        private Edge<string> edgeBC;
         private Route<string> routeCD;
         private Edge<string> edgeCD;
+
+        private Route<string> routeABC;        
+
+        private Route<string> routeABCD;
 
         [SetUp]
         public void SetUp()
@@ -41,11 +47,19 @@ namespace DataSequenceGraph
                 {
                     from = nodeA,
                     to = nodeB
-                },
+                }/*,
                 requisiteLink = new DirectedPair<string>()
                 {
                     from = nodeC,
                     to = nodeD
+                } */
+            };
+            edgeBC = new Edge<string>()
+            {
+                link = new DirectedPair<string>()
+                {
+                    from = nodeB,
+                    to = nodeC
                 }
             };
             edgeCD = new Edge<string>() 
@@ -62,7 +76,12 @@ namespace DataSequenceGraph
                 }
             };
             routeAB = routeFactory.newRouteFromEdge(edgeAB);
+            routeBC = routeFactory.newRouteFromEdge(edgeBC);
             routeCD = routeFactory.newRouteFromEdge(edgeCD);
+
+            routeABC = routeFactory.newRouteFromConnectedRoutes(routeAB, routeBC);
+
+            routeABCD = routeFactory.newRouteFromConnectedRoutes(routeABC, routeCD);
         }
 
         [Test]
@@ -89,14 +108,23 @@ namespace DataSequenceGraph
         [Test]
         public void routePrefixMatches()
         {
-            DataChunkRoute<string> prevRoute = new DataChunkRoute<string>(
-                new List<Node<string>>() { list.newStartNode(new StringDataChunk(null)), nodeC, nodeD });
+            DataChunkRoute<string> prevRoute = new DataChunkRoute<string>(list.newStartNode(new StringDataChunk(null)));
             RouteCriterion<string> criterion = new RouteCriterion<string>()
             {
                 desiredSequence = new List<string>() { "A", "B" },
                 routeSoFar = prevRoute 
             };
             Assert.IsTrue(routeAB.prefixMatches(criterion));
+
+            prevRoute = new DataChunkRoute<string>(list.newStartNode(new StringDataChunk(null)));
+            criterion = new RouteCriterion<string>()
+            {
+                desiredSequence = new List<string>() { "A", "B", "C" },
+                routeSoFar = prevRoute
+            };
+            Assert.IsTrue(routeABC.prefixMatches(criterion));
+            Assert.IsTrue(routeABCD.prefixMatches(criterion));
         }
+
     }
 }
