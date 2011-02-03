@@ -79,5 +79,19 @@ namespace DataSequenceGraph
             return (numRequisitesMatched == requisiteLinksNoNulls.Count());
         }
 
+        public int positionOfContainedNode(Node<T> otherNode)
+        {
+            int counter = 0;
+            foreach (Node<T> node in connectedNodes)
+            {
+                if (node == otherNode)
+                {
+                    return counter;
+                }
+                counter++;
+            }
+            return -1;
+        }
+
     }
 }

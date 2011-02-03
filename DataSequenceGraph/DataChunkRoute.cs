@@ -72,27 +72,10 @@ namespace DataSequenceGraph
             return this.chunkRoute.connectedNodes.Last();
         }
 
-
-
         public IEnumerable<ValueNode<T>> removeContainedNodes(IEnumerable<ValueNode<T>> otherNodes)
         {
             return otherNodes.Except<ValueNode<T>>(this.chunkRoute.connectedNodes.OfType<ValueNode<T>>());
         }
-
-        public int positionOfContainedNode(Node<T> otherNode)
-        {
-            int counter = 0;
-            foreach (Node<T> node in chunkRoute.connectedNodes)
-            {
-                if (node == otherNode)
-                {
-                    return counter;
-                }
-                counter++;
-            }
-            return -1;
-        }
-
 
     }
 }
