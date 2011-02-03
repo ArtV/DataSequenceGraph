@@ -8,11 +8,11 @@ using DataSequenceGraph.DataChunk;
 namespace DataSequenceGraph
 {
     [TestFixture]
-    class DataChunkRouteBlazerTest
+    public class DataChunkRouteBlazerTest
     {
         List<string> srcDataList = new List<string>() { "A", "B", "C" };
         StringDataChunk srcData; 
-        private MasterNodeList<string> list;
+        public MasterNodeList<string> list;
         private DataChunkRouteBlazer<string> chunkRoute;
         private Dictionary<Node<string>, List<Route<string>>> routePrefixDictionary;
 
@@ -36,10 +36,13 @@ namespace DataSequenceGraph
         StringDataChunk srcData6;
         private DataChunkRouteBlazer<string> chunkRoute6;
 
-        public static void threeSixChunks (MasterNodeList<string> inList)
+        public static void threeSixChunks (MasterNodeList<string> inList, 
+            Dictionary<Node<string>, List<Route<string>>> inRoutePrefixDictionary)
         {
             DataChunkRouteBlazerTest test = new DataChunkRouteBlazerTest();
-            test.SetUp();
+            test.list = inList;
+            test.routePrefixDictionary = inRoutePrefixDictionary;
+            test.dataSetup46();
             test.chunkRouteAppendThriceOther();
         }
 
@@ -48,12 +51,22 @@ namespace DataSequenceGraph
         {
             list = new MasterNodeList<string>();
             routePrefixDictionary = new Dictionary<Node<string>, List<Route<string>>>();
+            dataSetUp();
+        }
+
+        public void dataSetUp()
+        {
             srcData = new StringDataChunk(srcDataList);
-            chunkRoute = new DataChunkRouteBlazer<string>(srcData, list,routePrefixDictionary);
+            chunkRoute = new DataChunkRouteBlazer<string>(srcData, list, routePrefixDictionary);
             srcData2 = new StringDataChunk(srcData2List);
             chunkRoute2 = new DataChunkRouteBlazer<string>(srcData2, list, routePrefixDictionary);
             srcData3 = new StringDataChunk(srcData3List);
             chunkRoute3 = new DataChunkRouteBlazer<string>(srcData3, list, routePrefixDictionary);
+            dataSetup46();
+        }
+
+        public void dataSetup46()
+        {
             srcData4 = new StringDataChunk(srcData4List);
             chunkRoute4 = new DataChunkRouteBlazer<string>(srcData4, list, routePrefixDictionary);
             srcData5 = new StringDataChunk(srcData5List);
@@ -144,9 +157,7 @@ namespace DataSequenceGraph
         [Test]
         public void usesEarlierRequisiteOnNewEdge()
         {
-            chunkRoute4.computeFullRoute();
-            chunkRoute5.computeFullRoute();
-            chunkRoute6.computeFullRoute();
+            chunkRouteAppendThriceOther();
 
             ValueNode<string> Dnode = list.getValueNodesByValue("D").First();
             Route<string> DJroute = Dnode.OutgoingRoutes.First(route =>
@@ -154,9 +165,7 @@ namespace DataSequenceGraph
             Route<string> DMroute = Dnode.OutgoingRoutes.Last(route =>
                 ((ValueNode<string>)route.connectedNodes.ElementAt(1)).Value.Equals("M"));
             int DJrouteIndex = chunkRoute6.chunkRoute.positionOfContainedNode(DJroute.requisiteLinks.First().from);
-//            int DJrouteIndex = chunkRoute6.chunkRoute.connectedNodes.FindIndex(node => node == DJroute.requisiteLinks.First().from);
             int DMrouteIndex = chunkRoute6.chunkRoute.positionOfContainedNode(DMroute.requisiteLinks.First().from);
-//            int DMrouteIndex = chunkRoute6.chunkRoute.connectedNodes.FindIndex(node => node == DMroute.requisiteLinks.First().from);
             Assert.Less(DMrouteIndex, DJrouteIndex);
         }
     }

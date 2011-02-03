@@ -12,6 +12,11 @@ namespace DataSequenceGraph
         public abstract IEnumerable<DirectedPair<T>> requisiteLinks { get; }
         public abstract Route<T> startRoute { get; }
 
+        public Node<T> getLastNode()
+        {
+            return connectedNodes.Last();
+        }
+
         public bool IsNotStartOfAny(IEnumerable<Route<T>> otherRoutes)
         {
             return !otherRoutes.Any(otherRoute => otherRoute.startsWith(startRoute));
@@ -79,6 +84,42 @@ namespace DataSequenceGraph
             return (numRequisitesMatched == requisiteLinksNoNulls.Count());
         }
 
+        public EdgeRoute<T> findEdgeAfterLast()
+        {
+            Node<T> lastNode = getLastNode();
+            int earliestRequisiteIndex = findEarliestRequisiteMatchIndex(lastNode);
+            EdgeRoute<T> selectedRoute;
+            if (earliestRequisiteIndex == -1)
+            {
+                selectedRoute = lastNode.OutgoingRoutes.First();
+            }
+            else
+            {
+                selectedRoute = lastNode.OutgoingRoutes.First(route =>
+                    route.edge.requisiteLink.from == connectedNodes.ElementAt(earliestRequisiteIndex));
+            }
+            return selectedRoute;
+        }
+
+        public int findEarliestRequisiteMatchIndex(Node<T> node)
+        {
+            int earliestRequisiteIndex = -1;
+            foreach (EdgeRoute<T> route in node.OutgoingRoutes)
+            {
+                if (route.edge.requisiteLink.from.SequenceNumber == 0) continue;
+                int indexOfRequisiteMatch = positionOfContainedNode(route.edge.requisiteLink.from);
+                if (earliestRequisiteIndex == -1)
+                {
+                    earliestRequisiteIndex = indexOfRequisiteMatch;
+                }
+                else
+                {
+                    earliestRequisiteIndex = Math.Min(earliestRequisiteIndex, indexOfRequisiteMatch);
+                }
+            }
+            return earliestRequisiteIndex;
+        }
+        
         public int positionOfContainedNode(Node<T> otherNode)
         {
             int counter = 0;

@@ -51,9 +51,9 @@ namespace DataSequenceGraphCLI
             Dictionary<Node<string>,List<Route<string>>> routePrefixDictionary = new Dictionary<Node<string>, List<Route<string>>>();
 
 //            threeThreeRoutes(masterNodeList, routePrefixDictionary);
-
             threeSixRoutes(masterNodeList, routePrefixDictionary);
-
+//            DataChunkRouteBlazerTest.threeSixChunks(masterNodeList,routePrefixDictionary);
+            
             foreach (var node in masterNodeList.AllNodes)
             {
                 string outStr = node.SequenceNumber + " " + node.GetType() + " ";
@@ -69,6 +69,15 @@ namespace DataSequenceGraphCLI
                         " if already " + route.requisiteLinks.ElementAt(0).from.SequenceNumber + "," +
                         route.requisiteLinks.ElementAt(0).to.SequenceNumber;
                     Console.Out.WriteLine(outStr);
+                }
+            }
+            
+            IEnumerable<IEnumerable<string>> outChunks = masterNodeList.produceDataChunks();
+            foreach (IEnumerable<string> chunk in outChunks)
+            {
+                foreach (string val in chunk)
+                {
+                    Console.Out.WriteLine(val);
                 }
             }
         }

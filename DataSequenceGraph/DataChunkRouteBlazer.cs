@@ -12,7 +12,7 @@ namespace DataSequenceGraph
         { 
             get
             {
-                return this.sourceDataChunk.sourceData;
+                return this.sourceDataChunk;
             }
         }
         public MasterNodeList<T> nodeList { get; set; }
@@ -284,7 +284,7 @@ namespace DataSequenceGraph
 
         private DirectedPair<T> latestLinkBeforeOtherRouteReqs(Node<T> node)
         {
-            int earliestRequisiteIndex = findEarliestRequisiteMatchIndex(node);
+            int earliestRequisiteIndex = this.chunkRoute.findEarliestRequisiteMatchIndex(node);
             if (earliestRequisiteIndex == -1)
             {
                 return addedLinks[addedLinks.Count - 1];
@@ -302,24 +302,6 @@ namespace DataSequenceGraph
                 }
                 return addedLinks[0];
             }
-        }
-
-        private int findEarliestRequisiteMatchIndex(Node<T> node)
-        {
-            int earliestRequisiteIndex = -1;
-            foreach (EdgeRoute<T> route in node.OutgoingRoutes)
-            {
-                int indexOfRequisiteMatch = this.chunkRoute.positionOfContainedNode(route.edge.requisiteLink.from);
-                if (earliestRequisiteIndex == -1)
-                {
-                    earliestRequisiteIndex = indexOfRequisiteMatch;
-                }
-                else
-                {
-                    earliestRequisiteIndex = Math.Min(earliestRequisiteIndex, indexOfRequisiteMatch);
-                }
-            }
-            return earliestRequisiteIndex;
         }
 
         private void addNewLinkIfDifferent(DirectedPair<T> newLink)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Collections;
 
 namespace DataSequenceGraph.DataChunk
 {
@@ -14,9 +15,14 @@ namespace DataSequenceGraph.DataChunk
             this._sourceData = sourceData;
         }
 
-        public IEnumerable<string> sourceData
+        public IEnumerator<string> GetEnumerator()
         {
-            get { return this._sourceData; }
+            return _sourceData.GetEnumerator();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return _sourceData.GetEnumerator();
         }
     }
 }

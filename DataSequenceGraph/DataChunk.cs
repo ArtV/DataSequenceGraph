@@ -5,8 +5,7 @@ using System.Text;
 
 namespace DataSequenceGraph
 {
-    public interface DataChunk<T>
+    public interface DataChunk<T> : IEnumerable<T>
     {
-        IEnumerable<T> sourceData { get; }
     }
 }

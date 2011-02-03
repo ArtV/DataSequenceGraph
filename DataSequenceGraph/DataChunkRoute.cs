@@ -67,14 +67,19 @@ namespace DataSequenceGraph
             return this.chunkRoute.connectedNodes.First() as StartNode<T>;
         }
 
-        public Node<T> getLastNode()
-        {
-            return this.chunkRoute.connectedNodes.Last();
-        }
-
         public IEnumerable<ValueNode<T>> removeContainedNodes(IEnumerable<ValueNode<T>> otherNodes)
         {
             return otherNodes.Except<ValueNode<T>>(this.chunkRoute.connectedNodes.OfType<ValueNode<T>>());
+        }
+
+        public void followToEnd()
+        {
+            EdgeRoute<T> nextRoute;
+            while (!(getLastNode() is EndNode<T>))
+            {
+                nextRoute = findEdgeAfterLast();
+                appendEdge(nextRoute);
+            }
         }
 
     }

@@ -13,7 +13,10 @@ namespace DataSequenceGraph
         {
             get
             {
-                return nodeList;
+                foreach (Node<T> node in nodeList)
+                {
+                    yield return node;
+                }
             }
         }
 
@@ -47,13 +50,16 @@ namespace DataSequenceGraph
             nodeList.Add(newNode);
             return newNode;
         }
-        /*
-        public IEnumerable<IEnumerable<string>> produceDataChunks()
+        
+        public IEnumerable<IEnumerable<T>> produceDataChunks()
         {
+            DataChunkRoute<T> chunkRoute;
             foreach (StartNode<T> node in nodeList.OfType<StartNode<T>>())
             {
-                node.
+                chunkRoute = new DataChunkRoute<T>(node);
+                chunkRoute.followToEnd();
+                yield return chunkRoute.dataChunk;
             }
-        } */
+        } 
     }
 }
