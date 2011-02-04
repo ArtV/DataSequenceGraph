@@ -25,6 +25,37 @@ namespace DataSequenceGraph
             }
         }
 
+        public IEnumerable<EdgeRouteSpec> AllEdgeSpecs
+        {
+            get
+            {
+                return nodeList.SelectMany(node => nodeToRoutesSpecs(node));
+            }
+        }
+
+        public List<Dictionary<NodeSpec<T>, List<EdgeRouteSpec>>> AllNodeAndRouteSpecs
+        {
+            get
+            {
+                List<Dictionary<NodeSpec<T>, List<EdgeRouteSpec>>> retList = new List<Dictionary<NodeSpec<T>, List<EdgeRouteSpec>>>();
+                foreach (Node<T> node in nodeList)
+                {
+                    Dictionary<NodeSpec<T>, List<EdgeRouteSpec>> retElem = new Dictionary<NodeSpec<T>, List<EdgeRouteSpec>>()
+                    {
+                        { node.ToNodeSpec(), 
+                          nodeToRoutesSpecs(node).ToList() }
+                    };
+                    retList.Add(retElem);
+                }
+                return retList;
+            }
+        }        
+
+        private IEnumerable<EdgeRouteSpec> nodeToRoutesSpecs(Node<T> node)
+        {
+            return node.OutgoingRoutes.Select(route => route.ToEdgeRouteSpec());
+        }
+
         public IEnumerable<ValueNode<T>> getValueNodesByValue(T desiredValue)
         {
             return nodeList.OfType<ValueNode<T>>().Where(node => node.Value.Equals(desiredValue));
@@ -86,6 +117,14 @@ namespace DataSequenceGraph
                         break;
                 }
             }
+        }
+
+        public void reloadNodesThenRoutesFromSpecs(IEnumerable<NodeSpec<T>> nodes, IEnumerable<EdgeRouteSpec> routes)
+        {
+            reloadNodesFromSpecs(nodes);
+            RouteFactory<T> factory = new RouteFactory<T>();
+            factory.masterNodeList = this;
+            factory.newRoutesFromSpecs(routes);
         }
     }
 }
