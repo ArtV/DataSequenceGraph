@@ -17,11 +17,11 @@ namespace DataSequenceGraph
             }
         }
 
-        public IEnumerable<NodeSpec<T>> AllNodeSpecs
+        public List<NodeSpec<T>> AllNodeSpecs
         {
             get
             {
-                return nodeList.Select(node => node.ToNodeSpec());
+                return nodeList.Select(node => node.ToNodeSpec()).ToList();
             }
         }
 
@@ -33,18 +33,15 @@ namespace DataSequenceGraph
             }
         }
 
-        public List<Dictionary<NodeSpec<T>, List<EdgeRouteSpec>>> AllNodeAndRouteSpecs
+        public List<Tuple<NodeSpec<T>, IEnumerable<EdgeRouteSpec>>> AllNodeAndRouteSpecs
         {
             get
             {
-                List<Dictionary<NodeSpec<T>, List<EdgeRouteSpec>>> retList = new List<Dictionary<NodeSpec<T>, List<EdgeRouteSpec>>>();
+                List<Tuple<NodeSpec<T>, IEnumerable<EdgeRouteSpec>>> retList = new List<Tuple<NodeSpec<T>, IEnumerable<EdgeRouteSpec>>>();
                 foreach (Node<T> node in nodeList)
                 {
-                    Dictionary<NodeSpec<T>, List<EdgeRouteSpec>> retElem = new Dictionary<NodeSpec<T>, List<EdgeRouteSpec>>()
-                    {
-                        { node.ToNodeSpec(), 
-                          nodeToRoutesSpecs(node).ToList() }
-                    };
+                    Tuple<NodeSpec<T>, IEnumerable<EdgeRouteSpec>> retElem = 
+                        new Tuple<NodeSpec<T>, IEnumerable<EdgeRouteSpec>>(node.ToNodeSpec(), nodeToRoutesSpecs(node));                    
                     retList.Add(retElem);
                 }
                 return retList;
