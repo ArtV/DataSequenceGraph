@@ -46,5 +46,16 @@ namespace DataSequenceGraph
             this.edge = baseNodes;
         }
 
+        public EdgeRouteSpec ToEdgeRouteSpec()
+        {
+            EdgeRouteSpec retSpec = new EdgeRouteSpec()
+            {
+                FromNumber = edge.link.from.SequenceNumber,
+                ToNumber = edge.link.to.SequenceNumber,
+                RequisiteFromNumber = edge.requisiteLink.from.SequenceNumber,
+                RequisiteToNumber = edge.requisiteLink.to.SequenceNumber
+            };
+            return retSpec;
+        }
     }
 }

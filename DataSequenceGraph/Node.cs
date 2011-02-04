@@ -24,5 +24,10 @@ namespace DataSequenceGraph
         {
             OutgoingRoutes = OutgoingRoutes.Concat(new List<EdgeRoute<T>>() { route });
         }
+
+        public virtual NodeSpec<T> ToNodeSpec()
+        {
+            return new NodeSpec<T>() { kind = kind };
+        }
     }
 }

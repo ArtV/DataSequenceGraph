@@ -26,5 +26,12 @@ namespace DataSequenceGraph
                 return NodeKind.ValueNode;
             }
         }
+
+        public override NodeSpec<T> ToNodeSpec()
+        {
+            NodeSpec<T> retSpec = base.ToNodeSpec();
+            retSpec.Value = Value;
+            return retSpec;
+        }
     }
 }

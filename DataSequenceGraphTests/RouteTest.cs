@@ -47,12 +47,7 @@ namespace DataSequenceGraph
                 {
                     from = nodeA,
                     to = nodeB
-                }/*,
-                requisiteLink = new DirectedPair<string>()
-                {
-                    from = nodeC,
-                    to = nodeD
-                } */
+                }
             };
             edgeBC = new Edge<string>()
             {
@@ -126,5 +121,22 @@ namespace DataSequenceGraph
             Assert.IsTrue(routeABCD.prefixMatches(criterion));
         }
 
+        [Test]
+        public void routeFromSpec()
+        {
+            EdgeRouteSpec specAD = new EdgeRouteSpec() { FromNumber = 0, ToNumber = 3 };
+            RouteFactory<string> factory = new RouteFactory<string>();
+            Assert.Throws<InvalidOperationException>(delegate { factory.newRouteFromSpec(specAD); });
+            factory.masterNodeList = list;
+            EdgeRoute<string> routeAD = factory.newRouteFromSpec(specAD);
+            Assert.AreSame(list.getValueNodesByValue("A").First(), routeAD.startNode);
+            Assert.AreSame(list.getValueNodesByValue("D").First(), routeAD.connectedNodes.Last());
+
+            EdgeRouteSpec specCD = (routeCD as EdgeRoute<string>).ToEdgeRouteSpec();
+            Assert.AreEqual(2, specCD.FromNumber);
+            Assert.AreEqual(3, specCD.ToNumber);
+            Assert.AreEqual(0, specCD.RequisiteFromNumber);
+            Assert.AreEqual(1, specCD.RequisiteToNumber);
+        }
     }
 }

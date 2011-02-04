@@ -13,10 +13,15 @@ namespace DataSequenceGraph
         {
             get
             {
-                foreach (Node<T> node in nodeList)
-                {
-                    yield return node;
-                }
+                return nodeList;
+            }
+        }
+
+        public IEnumerable<NodeSpec<T>> AllNodeSpecs
+        {
+            get
+            {
+                return nodeList.Select(node => node.ToNodeSpec());
             }
         }
 
@@ -61,5 +66,26 @@ namespace DataSequenceGraph
                 yield return chunkRoute.dataChunk;
             }
         } 
+
+        public void reloadNodesFromSpecs(IEnumerable<NodeSpec<T>> specs)
+        {
+            foreach (NodeSpec<T> spec in specs)
+            {
+                switch (spec.kind)
+                {
+                    case NodeKind.StartNode:
+                        newStartNode(null);
+                        break;
+                    case NodeKind.EndNode:
+                        newEndNode(null);
+                        break;
+                    case NodeKind.NullNode:
+                        break;
+                    case NodeKind.ValueNode:
+                        newValueNodeFromValue(spec.Value);
+                        break;
+                }
+            }
+        }
     }
 }
