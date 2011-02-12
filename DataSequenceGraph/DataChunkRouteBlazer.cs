@@ -87,8 +87,8 @@ namespace DataSequenceGraph
 
         private EdgeRoute findBestEdgeTo(ValueNode<T> node)
         {
-            Node previousLastNode = this.chunkRoute.getLastNode();
-            if (previousLastNode is StartNode)
+            Node previousLastNode = this.chunkRoute.lastNode;
+            if (previousLastNode.kind == NodeKind.StartNode)
             {
                 return null;
             }
@@ -257,7 +257,7 @@ namespace DataSequenceGraph
 
         private void appendEdgeTo(Node nextNode)
         {
-            Node previousLastNode = chunkRoute.getLastNode();
+            Node previousLastNode = chunkRoute.lastNode;
             Edge newEdge;
             DirectedPair newLink = new DirectedPair()
             {
@@ -289,7 +289,7 @@ namespace DataSequenceGraph
 
         private DirectedPair latestAddedLinkBeforeOutgoingReqs(Node node)
         {
-            int earliestRequisiteIndex = this.chunkRoute.findEarliestIndexOfRequisiteMatches(node);
+            int earliestRequisiteIndex = this.chunkRoute.findEarliestMatchOfRequisites(node);
             if (earliestRequisiteIndex == -1)
             {
                 return addedLinks[addedLinks.Count - 1];
@@ -299,7 +299,7 @@ namespace DataSequenceGraph
                 int linkPositionInNodes;
                 for (int linkIndex = addedLinks.Count - 1; linkIndex >= 0; linkIndex--)
                 {
-                    linkPositionInNodes = this.chunkRoute.positionOfContainedNode(addedLinks[linkIndex].from);
+                    linkPositionInNodes = this.chunkRoute.findNode(addedLinks[linkIndex].from);
                     if (linkPositionInNodes < earliestRequisiteIndex)
                     {
                         return addedLinks[linkIndex];

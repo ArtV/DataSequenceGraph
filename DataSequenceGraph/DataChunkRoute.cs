@@ -21,14 +21,6 @@ namespace DataSequenceGraph
         private Route chunkRoute { get; set; }
         private RouteFactory<T> routeFactory { get; set; }
 
-        public override Node startNode
-        {
-            get 
-            {
-                return chunkRoute.startNode;
-            }
-        }
-
         public override IEnumerable<Node> connectedNodes
         {
             get 
@@ -45,15 +37,7 @@ namespace DataSequenceGraph
             }
         }
 
-        public override Route startRoute
-        {
-            get 
-            {
-                return chunkRoute.startRoute;
-            }
-        }
-
-        internal DataChunkRoute(RouteFactory<T> routeFactory, StartNode startNode) : base(routeFactory.getMatcher())
+        internal DataChunkRoute(RouteFactory<T> routeFactory, StartNode startNode) : base(routeFactory.newMatcher())
         {
             this.routeFactory = routeFactory;
             this.chunkRoute = routeFactory.newRouteFromNode(startNode);
@@ -64,11 +48,6 @@ namespace DataSequenceGraph
             this.chunkRoute = routeFactory.newRouteFromConnectedRoutes(this.chunkRoute, edge);
         }
 
-        public StartNode getFirstNode()
-        {
-            return this.chunkRoute.connectedNodes.First() as StartNode;
-        }
-
         public IEnumerable<ValueNode<T>> excludeMyNodesFrom(IEnumerable<ValueNode<T>> otherNodes)
         {
             return otherNodes.Except<ValueNode<T>>(this.chunkRoute.connectedNodes.OfType<ValueNode<T>>());
@@ -77,7 +56,7 @@ namespace DataSequenceGraph
         public void followToEnd()
         {
             EdgeRoute nextRoute;
-            while (!(getLastNode() is EndNode))
+            while (!(lastNode.kind == NodeKind.EndNode))
             {
                 nextRoute = findNextEdgeToFollow();
                 appendEdge(nextRoute);

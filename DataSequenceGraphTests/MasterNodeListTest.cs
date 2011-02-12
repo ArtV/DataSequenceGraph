@@ -52,7 +52,7 @@ namespace DataSequenceGraph
                 Assert.GreaterOrEqual(node.OutgoingRoutes.Count(), 0);
             }
 
-            IEnumerable<IEnumerable<string>> chunks = nodeList.produceDataChunks();
+            IEnumerable<IEnumerable<string>> chunks = nodeList.enumerateDataChunks();
             Assert.AreEqual("A", chunks.ElementAt(0).ElementAt(0));
             Assert.AreEqual("M", chunks.ElementAt(2).ElementAt(3));
         }

@@ -65,7 +65,7 @@ namespace DataSequenceGraph
         [Test]
         public void chunkRouteInit()
         {
-            StartNode firstNode = chunkRoute.chunkRoute.getFirstNode();
+            StartNode firstNode = chunkRoute.chunkRoute.startNode as StartNode;
             Assert.IsNotNull(firstNode);
         }
 
@@ -76,9 +76,9 @@ namespace DataSequenceGraph
             Assert.AreEqual(1, chunkRoute.chunkRoute.dataChunk.Count());
             string Anode = chunkRoute.chunkRoute.dataChunk.ElementAt(0);
             Assert.AreEqual("A", Anode);
-            Route startToA = chunkRoute.chunkRoute.getFirstNode().OutgoingRoutes.ElementAt(0);
+            Route startToA = chunkRoute.chunkRoute.startNode.OutgoingRoutes.ElementAt(0);
             Assert.AreEqual(Anode, ((ValueNode<string>) startToA.connectedNodes.Last()).Value);
-            Assert.AreEqual(1, chunkRoute.chunkRoute.getFirstNode().OutgoingRoutes.Count());
+            Assert.AreEqual(1, chunkRoute.chunkRoute.startNode.OutgoingRoutes.Count());
         }
 
         [Test]
@@ -87,13 +87,13 @@ namespace DataSequenceGraph
             chunkRouteAppendThrice();
             Assert.IsTrue(chunkRoute.Done);
             Assert.AreEqual(3, chunkRoute.chunkRoute.dataChunk.Count());
-            Assert.IsInstanceOf<EndNode>(chunkRoute.chunkRoute.getLastNode());
+            Assert.IsInstanceOf<EndNode>(chunkRoute.chunkRoute.lastNode);
 
             Assert.IsFalse(chunkRoute2.Done);
             chunkRoute2.computeFullRoute();
             Assert.IsTrue(chunkRoute2.Done);
             Assert.AreEqual(3, chunkRoute2.chunkRoute.dataChunk.Count());
-            Assert.IsInstanceOf<EndNode>(chunkRoute2.chunkRoute.getLastNode());
+            Assert.IsInstanceOf<EndNode>(chunkRoute2.chunkRoute.lastNode);
         }
 
         [Test]
@@ -151,8 +151,8 @@ namespace DataSequenceGraph
                 ((ValueNode<string>)route.connectedNodes.ElementAt(1)).Value.Equals("J"));
             Route DMroute = Dnode.OutgoingRoutes.Last(route =>
                 ((ValueNode<string>)route.connectedNodes.ElementAt(1)).Value.Equals("M"));
-            int DJrouteIndex = chunkRoute6.chunkRoute.positionOfContainedNode(DJroute.requisiteLinks.First().from);
-            int DMrouteIndex = chunkRoute6.chunkRoute.positionOfContainedNode(DMroute.requisiteLinks.First().from);
+            int DJrouteIndex = chunkRoute6.chunkRoute.findNode(DJroute.requisiteLinks.First().from);
+            int DMrouteIndex = chunkRoute6.chunkRoute.findNode(DMroute.requisiteLinks.First().from);
             Assert.Less(DMrouteIndex, DJrouteIndex);
         }
     }

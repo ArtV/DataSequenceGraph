@@ -9,5 +9,10 @@ namespace DataSequenceGraph
     {
         public Node from { get; set; }
         public Node to { get; set; }
+
+        public bool isBetweenValidNodes()
+        {
+            return (from.kind != NodeKind.NullNode && to.kind != NodeKind.NullNode);
+        }
     }
 }

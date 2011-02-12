@@ -45,7 +45,6 @@
     <Compile Include="EdgeRouteSpec.cs" />
     <Compile Include="NodeSpec.cs" />
     <Compile Include="NullNode.cs" />
-    <Compile Include="OneNodeRoute.cs" />
     <Compile Include="Route.cs" />
     <Compile Include="CompositeRoute.cs" />
     <Compile Include="DataChunkRouteBlazer.cs" />

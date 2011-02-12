@@ -7,7 +7,7 @@ namespace DataSequenceGraph
 {
     public class NullNode : Node
     {
-        public NullNode():base(0)
+        public NullNode():base(-1)
         {
         }
 

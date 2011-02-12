@@ -84,7 +84,7 @@ namespace DataSequenceGraph
             return newNode;
         }
         
-        public IEnumerable<IEnumerable<T>> produceDataChunks()
+        public IEnumerable<IEnumerable<T>> enumerateDataChunks()
         {
             DataChunkRoute<T> chunkRoute;
             RouteFactory<T> routeFactory = new RouteFactory<T>();

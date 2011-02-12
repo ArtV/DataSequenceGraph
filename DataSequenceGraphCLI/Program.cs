@@ -50,7 +50,7 @@ namespace DataSequenceGraphCLI
             foreach (var node in masterNodeList.AllNodes)
             {
                 string outStr = node.SequenceNumber + " " + node.GetType() + " ";
-                if (node is ValueNode<string>)
+                if (node.kind == NodeKind.ValueNode)
                 {
                     outStr += (node as ValueNode<string>).Value;
                 }
@@ -65,7 +65,7 @@ namespace DataSequenceGraphCLI
                 }
             }
             
-            IEnumerable<IEnumerable<string>> outChunks = masterNodeList.produceDataChunks();
+            IEnumerable<IEnumerable<string>> outChunks = masterNodeList.enumerateDataChunks();
             foreach (IEnumerable<string> chunk in outChunks)
             {
                 foreach (string val in chunk)

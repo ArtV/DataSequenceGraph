@@ -12,7 +12,10 @@ namespace DataSequenceGraph
         public EdgeRoute newRouteFromEdge(Edge baseNodes)
         {
             EdgeRoute newRoute = new EdgeRoute(new RouteMatcherImpl<T>(),baseNodes);
-            baseNodes.link.from.AddOutgoingRoute(newRoute);
+            if (baseNodes.link.isBetweenValidNodes())
+            {
+                baseNodes.link.from.AddOutgoingRoute(newRoute);
+            }
             return newRoute;
         }
 
@@ -24,11 +27,17 @@ namespace DataSequenceGraph
 
         public Route newRouteFromNode(Node node)
         {
-            Route newRoute = new OneNodeRoute(new RouteMatcherImpl<T>(), node);
-            newRoute.matcher = new RouteMatcherImpl<T>();
-            return newRoute;
+            Edge newEdge = new Edge()
+            {
+                link = new DirectedPair()
+                {
+                    from = node,
+                    to = new NullNode()
+                }
+            };
+            return newRouteFromEdge(newEdge);
         }
-
+        
         public IEnumerable<EdgeRoute> newRoutesFromSpecs(IEnumerable<EdgeRouteSpec> specs)
         {
             return specs.Select(spec => newRouteFromSpec(spec));
@@ -59,7 +68,7 @@ namespace DataSequenceGraph
             return newRouteFromEdge(specEdge);
         }
 
-        public RouteMatcher getMatcher()
+        public RouteMatcher newMatcher()
         {
             return new RouteMatcherImpl<T>();
         }

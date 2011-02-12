@@ -9,28 +9,18 @@ namespace DataSequenceGraph
     {
         public Edge edge { get; private set; }
 
-        public override Node startNode 
-        {
-            get
-            {
-                return connectedNodes.ElementAt(0);
-            }
-        }
-        public override Route startRoute
-        {
-            get
-            {
-                return this;
-            }
-        }
         public override IEnumerable<Node> connectedNodes
         {
             get
             {
-                return new List<Node>() 
+                if (edge.link.from.kind != NodeKind.NullNode)
                 {
-                    edge.link.from, edge.link.to
-                };
+                    yield return edge.link.from;
+                }
+                if (edge.link.to.kind != NodeKind.NullNode)
+                {
+                    yield return edge.link.to;
+                }
             }
         }
         public override IEnumerable<DirectedPair> requisiteLinks

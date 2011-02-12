@@ -26,22 +26,6 @@ namespace DataSequenceGraph
             }
         }
 
-        public override Node startNode
-        {
-            get
-            {
-                return _startRoute.startNode;
-            }
-        }
-
-        public override Route startRoute
-        {
-            get 
-            {
-                return _startRoute;
-            }
-        }
-
         public override IEnumerable<Node> connectedNodes
         {
             get
