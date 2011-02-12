@@ -7,9 +7,9 @@ namespace DataSequenceGraph
 {
     public class MasterNodeList<T>
     {
-        private List<Node<T>> nodeList = new List<Node<T>>();
+        private List<Node> nodeList = new List<Node>();
 
-        public IEnumerable<Node<T>> AllNodes
+        public IEnumerable<Node> AllNodes
         {
             get
             {
@@ -17,7 +17,7 @@ namespace DataSequenceGraph
             }
         }
 
-        public List<NodeSpec<T>> AllNodeSpecs
+        public List<NodeSpec> AllNodeSpecs
         {
             get
             {
@@ -33,22 +33,22 @@ namespace DataSequenceGraph
             }
         }
 
-        public List<Tuple<NodeSpec<T>, IEnumerable<EdgeRouteSpec>>> AllNodeAndRouteSpecs
+        public List<Tuple<NodeSpec, IEnumerable<EdgeRouteSpec>>> AllNodeAndRouteSpecs
         {
             get
             {
-                List<Tuple<NodeSpec<T>, IEnumerable<EdgeRouteSpec>>> retList = new List<Tuple<NodeSpec<T>, IEnumerable<EdgeRouteSpec>>>();
-                foreach (Node<T> node in nodeList)
+                List<Tuple<NodeSpec, IEnumerable<EdgeRouteSpec>>> retList = new List<Tuple<NodeSpec, IEnumerable<EdgeRouteSpec>>>();
+                foreach (Node node in nodeList)
                 {
-                    Tuple<NodeSpec<T>, IEnumerable<EdgeRouteSpec>> retElem = 
-                        new Tuple<NodeSpec<T>, IEnumerable<EdgeRouteSpec>>(node.ToNodeSpec(), nodeToRoutesSpecs(node));                    
+                    Tuple<NodeSpec, IEnumerable<EdgeRouteSpec>> retElem = 
+                        new Tuple<NodeSpec, IEnumerable<EdgeRouteSpec>>(node.ToNodeSpec(), nodeToRoutesSpecs(node));                    
                     retList.Add(retElem);
                 }
                 return retList;
             }
         }        
 
-        private IEnumerable<EdgeRouteSpec> nodeToRoutesSpecs(Node<T> node)
+        private IEnumerable<EdgeRouteSpec> nodeToRoutesSpecs(Node node)
         {
             return node.OutgoingRoutes.Select(route => route.ToEdgeRouteSpec());
         }
@@ -65,21 +65,21 @@ namespace DataSequenceGraph
             return newNode;
         }
 
-        public Node<T> nodeByNumber(int index)
+        public Node nodeByNumber(int index)
         {
-            return nodeList.ElementAt<Node<T>>(index);
+            return nodeList.ElementAt<Node>(index);
         }
 
-        public StartNode<T> newStartNode(DataChunk<T> sourceDataChunk)
+        public StartNode newStartNode()
         {
-            StartNode<T> newNode = new StartNode<T>(nodeList.Count,sourceDataChunk);
+            StartNode newNode = new StartNode(nodeList.Count);
             nodeList.Add(newNode);
             return newNode;
         }
 
-        public EndNode<T> newEndNode(DataChunk<T> sourceDataChunk)
+        public EndNode newEndNode()
         {
-            EndNode<T> newNode = new EndNode<T>(nodeList.Count, sourceDataChunk);
+            EndNode newNode = new EndNode(nodeList.Count);
             nodeList.Add(newNode);
             return newNode;
         }
@@ -87,36 +87,37 @@ namespace DataSequenceGraph
         public IEnumerable<IEnumerable<T>> produceDataChunks()
         {
             DataChunkRoute<T> chunkRoute;
-            foreach (StartNode<T> node in nodeList.OfType<StartNode<T>>())
+            RouteFactory<T> routeFactory = new RouteFactory<T>();
+            foreach (StartNode node in nodeList.OfType<StartNode>())
             {
-                chunkRoute = new DataChunkRoute<T>(node);
+                chunkRoute = routeFactory.newDataChunkRoute(node);
                 chunkRoute.followToEnd();
                 yield return chunkRoute.dataChunk;
             }
         } 
 
-        public void reloadNodesFromSpecs(IEnumerable<NodeSpec<T>> specs)
+        public void reloadNodesFromSpecs(IEnumerable<NodeSpec> specs)
         {
-            foreach (NodeSpec<T> spec in specs)
+            foreach (NodeSpec spec in specs)
             {
                 switch (spec.kind)
                 {
                     case NodeKind.StartNode:
-                        newStartNode(null);
+                        newStartNode();
                         break;
                     case NodeKind.EndNode:
-                        newEndNode(null);
+                        newEndNode();
                         break;
                     case NodeKind.NullNode:
                         break;
                     case NodeKind.ValueNode:
-                        newValueNodeFromValue(spec.Value);
+                        newValueNodeFromValue(((ValueNodeSpec<T>) spec).Value);
                         break;
                 }
             }
         }
 
-        public void reloadNodesThenRoutesFromSpecs(IEnumerable<NodeSpec<T>> nodes, IEnumerable<EdgeRouteSpec> routes)
+        public void reloadNodesThenRoutesFromSpecs(IEnumerable<NodeSpec> nodes, IEnumerable<EdgeRouteSpec> routes)
         {
             reloadNodesFromSpecs(nodes);
             RouteFactory<T> factory = new RouteFactory<T>();

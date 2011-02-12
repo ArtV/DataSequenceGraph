@@ -16,23 +16,24 @@ namespace DataSequenceGraph
             }
         }
         public MasterNodeList<T> nodeList { get; set; }
-        public Dictionary<Node<T>, List<Route<T>>> nodeRoutesDictionary { get; set; }
+        public Dictionary<Node, List<Route>> nodeRoutesDictionary { get; set; }
         public bool Done { get; private set; }
 
         private int sourceDataIndex;
-        private List<DirectedPair<T>> addedLinks { get; set; }
-        private DataChunk<T> sourceDataChunk { get; set; }
+        private List<DirectedPair> addedLinks { get; set; }
+        private IEnumerable<T> sourceDataChunk { get; set; }
 
-        public DataChunkRouteBlazer(DataChunk<T> sourceDataChunk,MasterNodeList<T> nodeList,
-            Dictionary<Node<T>, List<Route<T>>> nodeRoutesDictionary)
+        public DataChunkRouteBlazer(IEnumerable<T> sourceDataChunk,MasterNodeList<T> nodeList,
+            Dictionary<Node, List<Route>> nodeRoutesDictionary)
         {
             this.Done = false;
             this.sourceDataChunk = sourceDataChunk;
             this.sourceDataIndex = 0;
             this.nodeList = nodeList;
-            this.chunkRoute = new DataChunkRoute<T>(nodeList.newStartNode(sourceDataChunk));
+            RouteFactory<T> factory = new RouteFactory<T>();
+            this.chunkRoute = factory.newDataChunkRoute(nodeList.newStartNode());
             this.nodeRoutesDictionary = nodeRoutesDictionary;
-            this.addedLinks = new List<DirectedPair<T>>();
+            this.addedLinks = new List<DirectedPair>();
         }
 
         public void computeFullRoute()
@@ -65,7 +66,7 @@ namespace DataSequenceGraph
             sourceDataIndex++;
             if (sourceDataIndex >= SourceData.Count())
             {
-                EndNode<T> endNode = nodeList.newEndNode(sourceDataChunk);
+                EndNode endNode = nodeList.newEndNode();
                 appendEdgeTo(endNode);
                 this.Done = true;
             }
@@ -73,7 +74,7 @@ namespace DataSequenceGraph
 
         private void proceedToNode(ValueNode<T> node)
         {
-            EdgeRoute<T> suitableEdge = findSuitableEdge(node);
+            EdgeRoute suitableEdge = findSuitableEdge(node);
             if (suitableEdge == null)
             {
                 appendEdgeTo(node);
@@ -84,10 +85,10 @@ namespace DataSequenceGraph
             }
         }
 
-        private EdgeRoute<T> findSuitableEdge(ValueNode<T> node)
+        private EdgeRoute findSuitableEdge(ValueNode<T> node)
         {
-            Node<T> previousLastNode = this.chunkRoute.getLastNode();
-            if (previousLastNode is StartNode<T>)
+            Node previousLastNode = this.chunkRoute.getLastNode();
+            if (previousLastNode is StartNode)
             {
                 return null;
             }
@@ -132,8 +133,8 @@ namespace DataSequenceGraph
                 desiredSequence = desiredSequence.Take(depth),
                 routeSoFar = this.chunkRoute
             };
-            IEnumerable<Route<T>> previousRemainingRoutes;
-            IEnumerable<Route<T>> remainingRoutes = new List<Route<T>>();
+            IEnumerable<Route> previousRemainingRoutes;
+            IEnumerable<Route> remainingRoutes = new List<Route>();
             foreach (ValueNode<T> candidate in candidateNodes)
             {
                 previousRemainingRoutes = getInitialNodeRoutes(candidate, criterion);
@@ -165,45 +166,45 @@ namespace DataSequenceGraph
             }
         }
 
-        private IEnumerable<Route<T>> getInitialNodeRoutes(ValueNode<T> routeStartingNode,RouteCriterion<T> criterion)
+        private IEnumerable<Route> getInitialNodeRoutes(ValueNode<T> routeStartingNode,RouteCriterion<T> criterion)
         {
-            IEnumerable<Route<T>> cachedRoutes = Enumerable.Empty<Route<T>>();
+            IEnumerable<Route> cachedRoutes = Enumerable.Empty<Route>();
             if (nodeRoutesDictionary.ContainsKey(routeStartingNode))
             {
                 cachedRoutes = nodeRoutesDictionary[routeStartingNode];
             }
 
-            IEnumerable<Route<T>> allMatchingEdges = routeStartingNode.findMatchingRoutes(criterion);
-            IEnumerable<Route<T>> allNewMatchingEdges = allMatchingEdges.Where(route =>
+            IEnumerable<Route> allMatchingEdges = routeStartingNode.findMatchingRoutes(criterion);
+            IEnumerable<Route> allNewMatchingEdges = allMatchingEdges.Where(route =>
                 route.IsNotStartOfAny(cachedRoutes));
             foreach (var route in allNewMatchingEdges)
             {
                 if (!nodeRoutesDictionary.ContainsKey(routeStartingNode))
                 {
-                    nodeRoutesDictionary[routeStartingNode] = new List<Route<T>>();
+                    nodeRoutesDictionary[routeStartingNode] = new List<Route>();
                 }
                 nodeRoutesDictionary[routeStartingNode].Add(route);
             }
 
-            return cachedRoutes.Concat<Route<T>>(allNewMatchingEdges);    
+            return cachedRoutes.Concat<Route>(allNewMatchingEdges);    
         }
 
-        private IEnumerable<Route<T>> findMatchingRoutes(IEnumerable<T> desiredSequence, IEnumerable<Route<T>> remainingRoutes)
+        private IEnumerable<Route> findMatchingRoutes(IEnumerable<T> desiredSequence, IEnumerable<Route> remainingRoutes)
         {
             RouteCriterion<T> criterion = new RouteCriterion<T>()
             {
                 desiredSequence = desiredSequence,
                 routeSoFar = this.chunkRoute
             };
-            IEnumerable<Route<T>> routesToCheck;
-            foreach (Route<T> route in remainingRoutes)
+            IEnumerable<Route> routesToCheck;
+            foreach (Route route in remainingRoutes)
             {
-                routesToCheck = new List<Route<T>>() { route };
+                routesToCheck = new List<Route>() { route };
                 if (route.connectedNodes.Count() < desiredSequence.Count())
                 {
                     routesToCheck = computeFartherRoutes(route,desiredSequence.Count());
                 }
-                foreach (Route<T> longEnoughRoute in routesToCheck)
+                foreach (Route longEnoughRoute in routesToCheck)
                 {
                     if (longEnoughRoute.prefixMatches(criterion))
                     {
@@ -213,36 +214,36 @@ namespace DataSequenceGraph
             }
         }
 
-        private IEnumerable<Route<T>> computeFartherRoutes(Route<T> baseRoute,int desiredDepth)
+        private IEnumerable<Route> computeFartherRoutes(Route baseRoute,int desiredDepth)
         {
             int depth = baseRoute.connectedNodes.Count();
             while (depth < desiredDepth)
             {
                 depth++;
-                foreach (Route<T> route in followOutgoingRoutes(baseRoute))
+                foreach (Route route in followOutgoingRoutes(baseRoute))
                 {
                     yield return route;
                 }
             }
         }
 
-        private IEnumerable<Route<T>> followOutgoingRoutes(Route<T> baseRoute)
+        private IEnumerable<Route> followOutgoingRoutes(Route baseRoute)
         {
-            Node<T> firstNode = baseRoute.startNode;
+            Node firstNode = baseRoute.startNode;
             if (nodeRoutesDictionary.ContainsKey(firstNode))
             {
                 nodeRoutesDictionary[firstNode].Remove(baseRoute);
             }
             else
             {
-                nodeRoutesDictionary[firstNode] = new List<Route<T>>();
+                nodeRoutesDictionary[firstNode] = new List<Route>();
             }
 
-            Node<T> lastNode = baseRoute.connectedNodes.Last();
+            Node lastNode = baseRoute.connectedNodes.Last();
             RouteFactory<T> routeFactory = new RouteFactory<T>();
-            Route<T> newLongerRoute;
+            Route newLongerRoute;
 
-            foreach (Route<T> route in lastNode.OutgoingRoutes)
+            foreach (Route route in lastNode.OutgoingRoutes)
             {
                 newLongerRoute = routeFactory.newRouteFromConnectedRoutes(baseRoute, route);
                 nodeRoutesDictionary[firstNode].Add(newLongerRoute);
@@ -250,39 +251,39 @@ namespace DataSequenceGraph
             }
         }
 
-        private void appendEdgeTo(Node<T> nextNode)
+        private void appendEdgeTo(Node nextNode)
         {
-            Node<T> previousLastNode = chunkRoute.getLastNode();
-            Edge<T> newEdge;
-            DirectedPair<T> newLink = new DirectedPair<T>()
+            Node previousLastNode = chunkRoute.getLastNode();
+            Edge newEdge;
+            DirectedPair newLink = new DirectedPair()
             {
                 from = previousLastNode,
                 to = nextNode
             };
-            if (previousLastNode.GetType() == typeof(StartNode<T>))
+            if (previousLastNode.GetType() == typeof(StartNode))
             {
                 newEdge =
-                    new Edge<T>()
+                    new Edge()
                     {
                         link = newLink
                     };
             }
             else
             {
-                DirectedPair<T> lastAddedLink = latestLinkBeforeOtherRouteReqs(previousLastNode);
+                DirectedPair lastAddedLink = latestLinkBeforeOtherRouteReqs(previousLastNode);
                 newEdge =
-                    new Edge<T>()
+                    new Edge()
                     {
                         link = newLink,
                         requisiteLink = lastAddedLink
                     };
             }
             addNewLinkIfDifferent(newLink);            
-            EdgeRoute<T> newRoute = new RouteFactory<T>().newRouteFromEdge(newEdge);
+            EdgeRoute newRoute = new RouteFactory<T>().newRouteFromEdge(newEdge);
             this.chunkRoute.appendEdge(newRoute);
         }
 
-        private DirectedPair<T> latestLinkBeforeOtherRouteReqs(Node<T> node)
+        private DirectedPair latestLinkBeforeOtherRouteReqs(Node node)
         {
             int earliestRequisiteIndex = this.chunkRoute.findEarliestRequisiteMatchIndex(node);
             if (earliestRequisiteIndex == -1)
@@ -304,9 +305,9 @@ namespace DataSequenceGraph
             }
         }
 
-        private void addNewLinkIfDifferent(DirectedPair<T> newLink)
+        private void addNewLinkIfDifferent(DirectedPair newLink)
         {
-            Node<T> fromNode = newLink.from;
+            Node fromNode = newLink.from;
             if (!fromNode.OutgoingRoutes.Any(oldRoute => oldRoute.edge.link.to == newLink.to))
             {
                 addedLinks.Add(newLink);

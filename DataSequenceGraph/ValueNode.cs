@@ -5,7 +5,7 @@ using System.Text;
 
 namespace DataSequenceGraph
 {
-    public class ValueNode<T> : Node<T>
+    public class ValueNode<T> : Node
     {
         public T Value { get; private set; }
 
@@ -14,7 +14,7 @@ namespace DataSequenceGraph
             Value = newValue;
         }
 
-        public IEnumerable<Route<T>> findMatchingRoutes(RouteCriterion<T> criterion)
+        public IEnumerable<Route> findMatchingRoutes(RouteCriterion<T> criterion)
         {
             return OutgoingRoutes.Where(route => route.prefixMatches(criterion));
         }
@@ -27,9 +27,10 @@ namespace DataSequenceGraph
             }
         }
 
-        public override NodeSpec<T> ToNodeSpec()
+        public override NodeSpec ToNodeSpec()
         {
-            NodeSpec<T> retSpec = base.ToNodeSpec();
+            ValueNodeSpec<T> retSpec = new ValueNodeSpec<T>();
+            retSpec.kind = kind;
             retSpec.Value = Value;
             return retSpec;
         }

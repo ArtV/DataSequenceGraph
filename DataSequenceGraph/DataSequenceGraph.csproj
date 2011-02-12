@@ -40,7 +40,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataChunk.cs" />
     <Compile Include="DataChunkRoute.cs" />
     <Compile Include="DirectedPair.cs" />
     <Compile Include="EdgeRouteSpec.cs" />
@@ -57,10 +56,12 @@
     <Compile Include="EdgeRoute.cs" />
     <Compile Include="RouteCriterion.cs" />
     <Compile Include="RouteFactory.cs" />
+    <Compile Include="RouteMatcher.cs" />
+    <Compile Include="RouteMatcherImpl.cs" />
     <Compile Include="StartNode.cs" />
-    <Compile Include="StringDataChunk.cs" />
     <Compile Include="ValueNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ValueNodeSpec.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

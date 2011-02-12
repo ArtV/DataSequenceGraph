@@ -9,38 +9,40 @@ namespace DataSequenceGraph
     {
         public MasterNodeList<T> masterNodeList { get; set; }
 
-        public EdgeRoute<T> newRouteFromEdge(Edge<T> baseNodes)
+        public EdgeRoute newRouteFromEdge(Edge baseNodes)
         {
-            EdgeRoute<T> newRoute = new EdgeRoute<T>(baseNodes);
+            EdgeRoute newRoute = new EdgeRoute(new RouteMatcherImpl<T>(),baseNodes);
             baseNodes.link.from.AddOutgoingRoute(newRoute);
             return newRoute;
         }
 
-        public Route<T> newRouteFromConnectedRoutes(Route<T> firstRoute, Route<T> secondRoute)
+        public Route newRouteFromConnectedRoutes(Route firstRoute, Route secondRoute)
         {
-            Route<T> newRoute = new CompositeRoute<T>(new List<Route<T>>() { firstRoute, secondRoute });
+            Route newRoute = new CompositeRoute(new RouteMatcherImpl<T>(),new List<Route>() { firstRoute, secondRoute });
             return newRoute;
         }
 
-        public Route<T> newRouteFromNode(Node<T> node)
+        public Route newRouteFromNode(Node node)
         {
-            return new OneNodeRoute<T>(node);
+            Route newRoute = new OneNodeRoute(new RouteMatcherImpl<T>(), node);
+            newRoute.matcher = new RouteMatcherImpl<T>();
+            return newRoute;
         }
 
-        public IEnumerable<EdgeRoute<T>> newRoutesFromSpecs(IEnumerable<EdgeRouteSpec> specs)
+        public IEnumerable<EdgeRoute> newRoutesFromSpecs(IEnumerable<EdgeRouteSpec> specs)
         {
             return specs.Select(spec => newRouteFromSpec(spec));
         }
 
-        public EdgeRoute<T> newRouteFromSpec(EdgeRouteSpec spec)
+        public EdgeRoute newRouteFromSpec(EdgeRouteSpec spec)
         {
             if (masterNodeList == null)
             {
                 throw new InvalidOperationException("masterNodeList must be set to create routes from specs");
             }
-            Edge<T> specEdge = new Edge<T>()
+            Edge specEdge = new Edge()
             {
-                link = new DirectedPair<T>
+                link = new DirectedPair
                 {
                     from = masterNodeList.nodeByNumber(spec.FromNumber),
                     to = masterNodeList.nodeByNumber(spec.ToNumber)
@@ -48,13 +50,23 @@ namespace DataSequenceGraph
             };
             if (spec.RequisiteFromNumber >= 0 && spec.RequisiteToNumber >= 0)
             {
-                specEdge.requisiteLink = new DirectedPair<T>()
+                specEdge.requisiteLink = new DirectedPair()
                 {
                     from = masterNodeList.nodeByNumber(spec.RequisiteFromNumber),
                     to = masterNodeList.nodeByNumber(spec.RequisiteToNumber)
                 };
             }
             return newRouteFromEdge(specEdge);
+        }
+
+        public RouteMatcher getMatcher()
+        {
+            return new RouteMatcherImpl<T>();
+        }
+
+        public DataChunkRoute<T> newDataChunkRoute(StartNode startNode)
+        {
+            return new DataChunkRoute<T>(this, startNode);
         }
     }
 }

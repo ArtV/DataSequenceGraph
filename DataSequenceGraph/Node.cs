@@ -7,27 +7,27 @@ namespace DataSequenceGraph
 {
     public enum NodeKind { StartNode, ValueNode, EndNode, NullNode }
 
-    public abstract class Node<T>
+    public abstract class Node
     {
-        public IEnumerable<EdgeRoute<T>> OutgoingRoutes { get; private set; }
+        public IEnumerable<EdgeRoute> OutgoingRoutes { get; private set; }
         public int SequenceNumber { get; private set; }
 
         public abstract NodeKind kind { get; }
 
         public Node(int SequenceNumber)
         {
-            OutgoingRoutes = new List<EdgeRoute<T>>();
+            OutgoingRoutes = new List<EdgeRoute>();
             this.SequenceNumber = SequenceNumber;
         }
 
-        public void AddOutgoingRoute(EdgeRoute<T> route)
+        public void AddOutgoingRoute(EdgeRoute route)
         {
-            OutgoingRoutes = OutgoingRoutes.Concat(new List<EdgeRoute<T>>() { route });
+            OutgoingRoutes = OutgoingRoutes.Concat(new List<EdgeRoute>() { route });
         }
 
-        public virtual NodeSpec<T> ToNodeSpec()
+        public virtual NodeSpec ToNodeSpec()
         {
-            return new NodeSpec<T>() { kind = kind };
+            return new NodeSpec() { kind = kind };
         }
     }
 }

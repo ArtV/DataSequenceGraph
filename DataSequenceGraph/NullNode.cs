@@ -5,7 +5,7 @@ using System.Text;
 
 namespace DataSequenceGraph
 {
-    public class NullNode<T> : Node<T>
+    public class NullNode : Node
     {
         public NullNode():base(0)
         {

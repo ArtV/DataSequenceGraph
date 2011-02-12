@@ -5,7 +5,7 @@ using System.Text;
 
 namespace DataSequenceGraph
 {
-    public class DataChunkRoute<T> : Route<T>
+    public class DataChunkRoute<T> : Route
     {
         public IEnumerable<T> dataChunk
         {
@@ -18,9 +18,10 @@ namespace DataSequenceGraph
             }
         }
 
-        private Route<T> chunkRoute { get; set; }
+        private Route chunkRoute { get; set; }
+        private RouteFactory<T> routeFactory { get; set; }
 
-        public override Node<T> startNode
+        public override Node startNode
         {
             get 
             {
@@ -28,7 +29,7 @@ namespace DataSequenceGraph
             }
         }
 
-        public override IEnumerable<Node<T>> connectedNodes
+        public override IEnumerable<Node> connectedNodes
         {
             get 
             {
@@ -36,7 +37,7 @@ namespace DataSequenceGraph
             }
         }
 
-        public override IEnumerable<DirectedPair<T>> requisiteLinks
+        public override IEnumerable<DirectedPair> requisiteLinks
         {
             get 
             {
@@ -44,7 +45,7 @@ namespace DataSequenceGraph
             }
         }
 
-        public override Route<T> startRoute
+        public override Route startRoute
         {
             get 
             {
@@ -52,19 +53,20 @@ namespace DataSequenceGraph
             }
         }
 
-        public DataChunkRoute(StartNode<T> startNode)
+        internal DataChunkRoute(RouteFactory<T> routeFactory, StartNode startNode) : base(routeFactory.getMatcher())
         {
-            this.chunkRoute = new RouteFactory<T>().newRouteFromNode(startNode);
+            this.routeFactory = routeFactory;
+            this.chunkRoute = routeFactory.newRouteFromNode(startNode);
         }
 
-        public void appendEdge(EdgeRoute<T> edge)
+        public void appendEdge(EdgeRoute edge)
         {
-            this.chunkRoute = new RouteFactory<T>().newRouteFromConnectedRoutes(this.chunkRoute, edge);
+            this.chunkRoute = routeFactory.newRouteFromConnectedRoutes(this.chunkRoute, edge);
         }
 
-        public StartNode<T> getFirstNode()
+        public StartNode getFirstNode()
         {
-            return this.chunkRoute.connectedNodes.First() as StartNode<T>;
+            return this.chunkRoute.connectedNodes.First() as StartNode;
         }
 
         public IEnumerable<ValueNode<T>> removeContainedNodes(IEnumerable<ValueNode<T>> otherNodes)
@@ -74,8 +76,8 @@ namespace DataSequenceGraph
 
         public void followToEnd()
         {
-            EdgeRoute<T> nextRoute;
-            while (!(getLastNode() is EndNode<T>))
+            EdgeRoute nextRoute;
+            while (!(getLastNode() is EndNode))
             {
                 nextRoute = findEdgeAfterLast();
                 appendEdge(nextRoute);

@@ -5,18 +5,18 @@ using System.Text;
 
 namespace DataSequenceGraph
 {
-    public class CompositeRoute<T> : Route<T>
+    public class CompositeRoute : Route
     {
-        private Route<T> _startRoute { get; set; }
-        private IEnumerable<Node<T>> _connectedNodes { get; set; }
-        private IEnumerable<DirectedPair<T>> _requisiteLinks { get; set; }
+        private Route _startRoute { get; set; }
+        private IEnumerable<Node> _connectedNodes { get; set; }
+        private IEnumerable<DirectedPair> _requisiteLinks { get; set; }
 
-        public CompositeRoute(IEnumerable<Route<T>> componentRoutes)
+        internal CompositeRoute(RouteMatcher matcher, IEnumerable<Route> componentRoutes) : base(matcher)
         {
             this._startRoute = componentRoutes.First();
-            this._connectedNodes = Enumerable.Empty<Node<T>>();
-            this._requisiteLinks = Enumerable.Empty<DirectedPair<T>>();
-            foreach(Route<T> route in componentRoutes)
+            this._connectedNodes = Enumerable.Empty<Node>();
+            this._requisiteLinks = Enumerable.Empty<DirectedPair>();
+            foreach(Route route in componentRoutes)
             {
                 this._connectedNodes = this._connectedNodes.Concat(route.connectedNodes).Distinct();
                 if (!meetsRequisites(route.requisiteLinks))
@@ -26,7 +26,7 @@ namespace DataSequenceGraph
             }
         }
 
-        public override Node<T> startNode
+        public override Node startNode
         {
             get
             {
@@ -34,7 +34,7 @@ namespace DataSequenceGraph
             }
         }
 
-        public override Route<T> startRoute
+        public override Route startRoute
         {
             get 
             {
@@ -42,7 +42,7 @@ namespace DataSequenceGraph
             }
         }
 
-        public override IEnumerable<Node<T>> connectedNodes
+        public override IEnumerable<Node> connectedNodes
         {
             get
             {
@@ -50,7 +50,7 @@ namespace DataSequenceGraph
             }
         }
 
-        public override IEnumerable<DirectedPair<T>> requisiteLinks
+        public override IEnumerable<DirectedPair> requisiteLinks
         {
             get
             {

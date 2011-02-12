@@ -5,9 +5,9 @@ using System.Text;
 
 namespace DataSequenceGraph
 {
-    public class DirectedPair<T>
+    public class DirectedPair
     {
-        public Node<T> from { get; set; }
-        public Node<T> to { get; set; }
+        public Node from { get; set; }
+        public Node to { get; set; }
     }
 }

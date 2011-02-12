@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
-using DataSequenceGraph.DataChunk;
 
 namespace DataSequenceGraph
 {
@@ -19,16 +18,16 @@ namespace DataSequenceGraph
         private ValueNode<string> nodeC;
         private ValueNode<string> nodeD;
 
-        private Route<string> routeAB;
-        private Edge<string> edgeAB;
-        private Route<string> routeBC;
-        private Edge<string> edgeBC;
-        private Route<string> routeCD;
-        private Edge<string> edgeCD;
+        private Route routeAB;
+        private Edge edgeAB;
+        private Route routeBC;
+        private Edge edgeBC;
+        private Route routeCD;
+        private Edge edgeCD;
 
-        private Route<string> routeABC;        
+        private Route routeABC;        
 
-        private Route<string> routeABCD;
+        private Route routeABCD;
 
         [SetUp]
         public void SetUp()
@@ -41,30 +40,30 @@ namespace DataSequenceGraph
 
             routeFactory = new RouteFactory<string>();
 
-            edgeAB = new Edge<string>()
+            edgeAB = new Edge()
             {
-                link = new DirectedPair<string>()
+                link = new DirectedPair()
                 {
                     from = nodeA,
                     to = nodeB
                 }
             };
-            edgeBC = new Edge<string>()
+            edgeBC = new Edge()
             {
-                link = new DirectedPair<string>()
+                link = new DirectedPair()
                 {
                     from = nodeB,
                     to = nodeC
                 }
             };
-            edgeCD = new Edge<string>() 
+            edgeCD = new Edge() 
             { 
-                link = new DirectedPair<string>()
+                link = new DirectedPair()
                 {
                     from = nodeC,
                     to = nodeD
                 },
-                requisiteLink = new DirectedPair<string>()
+                requisiteLink = new DirectedPair()
                 {
                     from = nodeA,
                     to = nodeB
@@ -82,20 +81,20 @@ namespace DataSequenceGraph
         [Test]
         public void newRouteFromEdges()
         {
-            Edge<string> newEdge = new Edge<string>() 
+            Edge newEdge = new Edge() 
             {
-                link = new DirectedPair<string>()
+                link = new DirectedPair()
                 {
                     from = nodeA,
                     to = nodeB
                 },
-                requisiteLink = new DirectedPair<string>()
+                requisiteLink = new DirectedPair()
                 {
                     from = nodeC,
                     to = nodeD
                 }
             };
-            Route<string> route = routeFactory.newRouteFromEdge(newEdge);
+            Route route = routeFactory.newRouteFromEdge(newEdge);
             Assert.AreSame(nodeA, route.startNode);
             Assert.AreSame(nodeB, route.connectedNodes.ElementAt(1));
         }
@@ -103,7 +102,7 @@ namespace DataSequenceGraph
         [Test]
         public void routePrefixMatches()
         {
-            DataChunkRoute<string> prevRoute = new DataChunkRoute<string>(list.newStartNode(new StringDataChunk(null)));
+            DataChunkRoute<string> prevRoute = routeFactory.newDataChunkRoute(list.newStartNode());
             RouteCriterion<string> criterion = new RouteCriterion<string>()
             {
                 desiredSequence = new List<string>() { "A", "B" },
@@ -111,7 +110,7 @@ namespace DataSequenceGraph
             };
             Assert.IsTrue(routeAB.prefixMatches(criterion));
 
-            prevRoute = new DataChunkRoute<string>(list.newStartNode(new StringDataChunk(null)));
+            prevRoute = routeFactory.newDataChunkRoute(list.newStartNode());
             criterion = new RouteCriterion<string>()
             {
                 desiredSequence = new List<string>() { "A", "B", "C" },
@@ -128,11 +127,11 @@ namespace DataSequenceGraph
             RouteFactory<string> factory = new RouteFactory<string>();
             Assert.Throws<InvalidOperationException>(delegate { factory.newRouteFromSpec(specAD); });
             factory.masterNodeList = list;
-            EdgeRoute<string> routeAD = factory.newRouteFromSpec(specAD);
+            EdgeRoute routeAD = factory.newRouteFromSpec(specAD);
             Assert.AreSame(list.getValueNodesByValue("A").First(), routeAD.startNode);
             Assert.AreSame(list.getValueNodesByValue("D").First(), routeAD.connectedNodes.Last());
 
-            EdgeRouteSpec specCD = (routeCD as EdgeRoute<string>).ToEdgeRouteSpec();
+            EdgeRouteSpec specCD = (routeCD as EdgeRoute).ToEdgeRouteSpec();
             Assert.AreEqual(2, specCD.FromNumber);
             Assert.AreEqual(3, specCD.ToNumber);
             Assert.AreEqual(0, specCD.RequisiteFromNumber);

@@ -5,9 +5,8 @@ using System.Text;
 
 namespace DataSequenceGraph
 {
-    public class NodeSpec<T>
+    public class NodeSpec
     {
         public NodeKind kind { get; set; }
-        public T Value { get; set; }
     }
 }

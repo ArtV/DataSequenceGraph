@@ -5,35 +5,35 @@ using System.Text;
 
 namespace DataSequenceGraph
 {
-    public class EdgeRoute<T> : Route<T>
+    public class EdgeRoute : Route
     {
-        public Edge<T> edge { get; private set; }
+        public Edge edge { get; private set; }
 
-        public override Node<T> startNode 
+        public override Node startNode 
         {
             get
             {
                 return connectedNodes.ElementAt(0);
             }
         }
-        public override Route<T> startRoute
+        public override Route startRoute
         {
             get
             {
                 return this;
             }
         }
-        public override IEnumerable<Node<T>> connectedNodes
+        public override IEnumerable<Node> connectedNodes
         {
             get
             {
-                return new List<Node<T>>() 
+                return new List<Node>() 
                 {
                     edge.link.from, edge.link.to
                 };
             }
         }
-        public override IEnumerable<DirectedPair<T>> requisiteLinks
+        public override IEnumerable<DirectedPair> requisiteLinks
         {
             get
             {
@@ -41,7 +41,7 @@ namespace DataSequenceGraph
             }
         }
 
-        public EdgeRoute(Edge<T> baseNodes)
+        internal EdgeRoute(RouteMatcher matcher, Edge baseNodes) : base(matcher)
         {
             this.edge = baseNodes;
         }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
-using DataSequenceGraph.DataChunk;
 
 namespace DataSequenceGraph
 {
@@ -11,11 +10,12 @@ namespace DataSequenceGraph
     public class ValueNodeTest
     {
         private MasterNodeList<string> nodeList;
+        private RouteFactory<string> routeFactory;
         private ValueNode<string> vn;
         private ValueNode<string> vn2;
         private ValueNode<string> vn3;
-        private Edge<string> edge;
-        private Edge<string> edge2;
+        private Edge edge;
+        private Edge edge2;
 
         [SetUp]
         public void SetUp()
@@ -24,22 +24,22 @@ namespace DataSequenceGraph
             vn = nodeList.newValueNodeFromValue("A");
             vn2 = nodeList.newValueNodeFromValue("B");
             vn3 = nodeList.newValueNodeFromValue("C");
-            edge = new Edge<string>() { 
-                link = new DirectedPair<string>()
+            edge = new Edge() { 
+                link = new DirectedPair()
                 {
                     from = vn,
                     to = vn2
                 }
             };
-            edge2 = new Edge<string>()
+            edge2 = new Edge()
             {
-                link = new DirectedPair<string>()
+                link = new DirectedPair()
                 {
                     from = vn3,
                     to = vn
                 }
             };
-            RouteFactory<string> routeFactory = new RouteFactory<string>();
+            routeFactory = new RouteFactory<string>();
             routeFactory.newRouteFromEdge(edge);
         }
 
@@ -64,11 +64,11 @@ namespace DataSequenceGraph
         public void findMatchingRoutes()
         {
             IEnumerable<string> stringSeq = new List<string>() { "A","B" };
-            DataChunkRoute<string> prevRoute = new DataChunkRoute<string>(
-                nodeList.newStartNode( new StringDataChunk(null) ));
+            DataChunkRoute<string> prevRoute = routeFactory.newDataChunkRoute(
+                nodeList.newStartNode());
             RouteCriterion<string> criterion = new RouteCriterion<string>() {
                 desiredSequence = stringSeq, routeSoFar = prevRoute };
-            IEnumerable<Route<string>> matchingRoutes = vn.findMatchingRoutes(criterion);
+            IEnumerable<Route> matchingRoutes = vn.findMatchingRoutes(criterion);
             Assert.AreEqual(1, matchingRoutes.Count());
 
             criterion.desiredSequence = new List<string>() { "A", "C" };

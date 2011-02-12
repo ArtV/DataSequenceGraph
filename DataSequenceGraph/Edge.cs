@@ -5,16 +5,16 @@ using System.Text;
 
 namespace DataSequenceGraph
 {
-    public class Edge<T>
+    public class Edge
     {
-        public DirectedPair<T> link { get; set; }
+        public DirectedPair link { get; set; }
 
-        public DirectedPair<T> requisiteLink { get; set; }
+        public DirectedPair requisiteLink { get; set; }
 
         public Edge()
         {
-            this.requisiteLink = new DirectedPair<T>() { 
-                from = new NullNode<T>(), to = new NullNode<T>() 
+            this.requisiteLink = new DirectedPair() { 
+                from = new NullNode(), to = new NullNode() 
             };
         }        
     }

@@ -5,14 +5,9 @@ using System.Text;
 
 namespace DataSequenceGraph
 {
-    public class EndNode<T> : Node<T>
+    public class EndNode : Node
     {
-        public DataChunk<T> sourceDataChunk { get; private set; }
-
-        public EndNode(int SequenceNumber,DataChunk<T> srcDataChunk) : base(SequenceNumber)
-        {
-            this.sourceDataChunk = srcDataChunk;
-        }
+        public EndNode(int sequenceNumber) : base(sequenceNumber) { }
 
         public override NodeKind kind
         {

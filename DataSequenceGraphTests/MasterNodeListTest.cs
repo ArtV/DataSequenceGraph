@@ -38,7 +38,7 @@ namespace DataSequenceGraph
         {
             MasterNodeList<string> nodeList = new MasterNodeList<string>();
             DataChunkRouteBlazerTest.threeSixChunks(nodeList,
-                new Dictionary<Node<string>, List<Route<string>>>());
+                new Dictionary<Node, List<Route>>());
             return nodeList;
         }
 
@@ -64,8 +64,8 @@ namespace DataSequenceGraph
             MasterNodeList<string> nodeListImporter = new MasterNodeList<string>();
             nodeListImporter.reloadNodesFromSpecs(nodeListExporter.AllNodeSpecs);
             Assert.AreEqual(nodeListExporter.AllNodes.Count(), nodeListImporter.AllNodes.Count());
-            Assert.AreEqual(nodeListExporter.AllNodes.OfType<StartNode<string>>().Count(),
-                nodeListImporter.AllNodes.OfType<StartNode<string>>().Count());
+            Assert.AreEqual(nodeListExporter.AllNodes.OfType<StartNode>().Count(),
+                nodeListImporter.AllNodes.OfType<StartNode>().Count());
             Assert.AreEqual(nodeListExporter.AllNodes.OfType<ValueNode<string>>().ElementAt(5).Value,
                 nodeListImporter.AllNodes.OfType<ValueNode<string>>().ElementAt(5).Value);
         }

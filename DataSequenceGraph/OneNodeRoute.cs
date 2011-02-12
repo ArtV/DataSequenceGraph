@@ -5,11 +5,11 @@ using System.Text;
 
 namespace DataSequenceGraph
 {
-    public class OneNodeRoute<T> : Route<T>
+    public class OneNodeRoute : Route
     {
-        private Node<T> node { get; set; }
+        private Node node { get; set; }
 
-        public override Node<T> startNode
+        public override Node startNode
         {
             get 
             {
@@ -17,7 +17,7 @@ namespace DataSequenceGraph
             }
         }
 
-        public override IEnumerable<Node<T>> connectedNodes
+        public override IEnumerable<Node> connectedNodes
         {
             get 
             {
@@ -25,19 +25,19 @@ namespace DataSequenceGraph
             }
         }
 
-        public override IEnumerable<DirectedPair<T>> requisiteLinks
+        public override IEnumerable<DirectedPair> requisiteLinks
         {
             get 
             {
-                yield return new DirectedPair<T>()
+                yield return new DirectedPair()
                 {
-                    from = new NullNode<T>(),
-                    to = new NullNode<T>()
+                    from = new NullNode(),
+                    to = new NullNode()
                 };
             }
         }
 
-        public override Route<T> startRoute
+        public override Route startRoute
         {
             get 
             {
@@ -45,7 +45,7 @@ namespace DataSequenceGraph
             }
         }
 
-        public OneNodeRoute(Node<T> node)
+        internal OneNodeRoute(RouteMatcher matcher, Node node) : base(matcher)
         {
             this.node = node;
         }
