@@ -51,10 +51,10 @@ namespace DataSequenceGraph
             return matcher.meetsRequisites(this, requisiteLinks);
         }
 
-        public EdgeRoute findEdgeAfterLast()
+        public EdgeRoute findNextEdgeToFollow()
         {
             Node lastNode = getLastNode();
-            int earliestRequisiteIndex = findEarliestRequisiteMatchIndex(lastNode);
+            int earliestRequisiteIndex = findEarliestIndexOfRequisiteMatches(lastNode);
             EdgeRoute selectedRoute;
             if (earliestRequisiteIndex == -1)
             {
@@ -68,7 +68,7 @@ namespace DataSequenceGraph
             return selectedRoute;
         }
 
-        public int findEarliestRequisiteMatchIndex(Node node)
+        public int findEarliestIndexOfRequisiteMatches(Node node)
         {
             int earliestRequisiteIndex = -1;
             foreach (EdgeRoute route in node.OutgoingRoutes)

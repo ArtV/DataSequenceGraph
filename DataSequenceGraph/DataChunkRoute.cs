@@ -69,7 +69,7 @@ namespace DataSequenceGraph
             return this.chunkRoute.connectedNodes.First() as StartNode;
         }
 
-        public IEnumerable<ValueNode<T>> removeContainedNodes(IEnumerable<ValueNode<T>> otherNodes)
+        public IEnumerable<ValueNode<T>> excludeMyNodesFrom(IEnumerable<ValueNode<T>> otherNodes)
         {
             return otherNodes.Except<ValueNode<T>>(this.chunkRoute.connectedNodes.OfType<ValueNode<T>>());
         }
@@ -79,7 +79,7 @@ namespace DataSequenceGraph
             EdgeRoute nextRoute;
             while (!(getLastNode() is EndNode))
             {
-                nextRoute = findEdgeAfterLast();
+                nextRoute = findNextEdgeToFollow();
                 appendEdge(nextRoute);
             }
         }

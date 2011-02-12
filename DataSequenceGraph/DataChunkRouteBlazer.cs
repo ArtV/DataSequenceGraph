@@ -74,18 +74,18 @@ namespace DataSequenceGraph
 
         private void proceedToNode(ValueNode<T> node)
         {
-            EdgeRoute suitableEdge = findSuitableEdge(node);
-            if (suitableEdge == null)
+            EdgeRoute bestEdge = findBestEdgeTo(node);
+            if (bestEdge == null)
             {
                 appendEdgeTo(node);
             }
             else
             {
-                this.chunkRoute.appendEdge(suitableEdge);
+                this.chunkRoute.appendEdge(bestEdge);
             }
         }
 
-        private EdgeRoute findSuitableEdge(ValueNode<T> node)
+        private EdgeRoute findBestEdgeTo(ValueNode<T> node)
         {
             Node previousLastNode = this.chunkRoute.getLastNode();
             if (previousLastNode is StartNode)
@@ -109,7 +109,7 @@ namespace DataSequenceGraph
         {
             T nextValue = desiredSequence.ElementAt(0);
             IEnumerable<ValueNode<T>> matchingNodes = nodeList.getValueNodesByValue(nextValue);
-            IEnumerable<ValueNode<T>> matchingUnusedNodes = this.chunkRoute.removeContainedNodes(matchingNodes);
+            IEnumerable<ValueNode<T>> matchingUnusedNodes = this.chunkRoute.excludeMyNodesFrom(matchingNodes);
             if (matchingUnusedNodes.Count() == 0)
             {
                 return null;
@@ -168,25 +168,29 @@ namespace DataSequenceGraph
 
         private IEnumerable<Route> getInitialNodeRoutes(ValueNode<T> routeStartingNode,RouteCriterion<T> criterion)
         {
+            updateRoutesListForNode(routeStartingNode);
+
+            return nodeRoutesDictionary[routeStartingNode].Where(route => route.prefixMatches(criterion));
+        }
+
+        private void updateRoutesListForNode(ValueNode<T> routeStartingNode)
+        {
             IEnumerable<Route> cachedRoutes = Enumerable.Empty<Route>();
             if (nodeRoutesDictionary.ContainsKey(routeStartingNode))
             {
                 cachedRoutes = nodeRoutesDictionary[routeStartingNode];
             }
-
-            IEnumerable<Route> allMatchingEdges = routeStartingNode.findMatchingRoutes(criterion);
-            IEnumerable<Route> allNewMatchingEdges = allMatchingEdges.Where(route =>
-                route.IsNotStartOfAny(cachedRoutes));
-            foreach (var route in allNewMatchingEdges)
+            else
             {
-                if (!nodeRoutesDictionary.ContainsKey(routeStartingNode))
-                {
-                    nodeRoutesDictionary[routeStartingNode] = new List<Route>();
-                }
-                nodeRoutesDictionary[routeStartingNode].Add(route);
+                nodeRoutesDictionary[routeStartingNode] = new List<Route>();
             }
 
-            return cachedRoutes.Concat<Route>(allNewMatchingEdges);    
+            IEnumerable<Route> allNewOutgoingEdges = routeStartingNode.OutgoingRoutes.Where(route =>
+                route.IsNotStartOfAny(cachedRoutes));
+            foreach (var route in allNewOutgoingEdges)
+            {
+                nodeRoutesDictionary[routeStartingNode].Add(route);
+            }
         }
 
         private IEnumerable<Route> findMatchingRoutes(IEnumerable<T> desiredSequence, IEnumerable<Route> remainingRoutes)
@@ -270,7 +274,7 @@ namespace DataSequenceGraph
             }
             else
             {
-                DirectedPair lastAddedLink = latestLinkBeforeOtherRouteReqs(previousLastNode);
+                DirectedPair lastAddedLink = latestAddedLinkBeforeOutgoingReqs(previousLastNode);
                 newEdge =
                     new Edge()
                     {
@@ -283,9 +287,9 @@ namespace DataSequenceGraph
             this.chunkRoute.appendEdge(newRoute);
         }
 
-        private DirectedPair latestLinkBeforeOtherRouteReqs(Node node)
+        private DirectedPair latestAddedLinkBeforeOutgoingReqs(Node node)
         {
-            int earliestRequisiteIndex = this.chunkRoute.findEarliestRequisiteMatchIndex(node);
+            int earliestRequisiteIndex = this.chunkRoute.findEarliestIndexOfRequisiteMatches(node);
             if (earliestRequisiteIndex == -1)
             {
                 return addedLinks[addedLinks.Count - 1];
