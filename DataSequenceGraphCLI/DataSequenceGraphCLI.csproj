@@ -51,6 +51,10 @@
       <Project>{55CB11B6-B07B-4308-93E3-F95F74B069E2}</Project>
       <Name>DataSequenceGraph</Name>
     </ProjectReference>
+    <ProjectReference Include="..\XMLGraphFormat\XMLGraphFormat.csproj">
+      <Project>{E9C47BF8-4F91-4B0E-ACA3-AB521C466190}</Project>
+      <Name>XMLGraphFormat</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using DataSequenceGraph;
+using DataSequenceGraph.Format;
+using System.Xml;
 
 namespace DataSequenceGraphCLI
 {
@@ -44,16 +46,15 @@ namespace DataSequenceGraphCLI
             {
                 defaultTestOutput();
             }
+            else if (args[0] == "X")
+            {
+                XMLOut();
+            }
         }
 
         static void defaultTestOutput()
         {
-            MasterNodeList<string> masterNodeList = new MasterNodeList<string>();
-            Dictionary<Node, List<Route>> routePrefixDictionary = new Dictionary<Node, List<Route>>();
-
-            //            threeThreeRoutes(masterNodeList, routePrefixDictionary);
-            threeSixRoutes(masterNodeList, routePrefixDictionary);
-            //            DataChunkRouteBlazerTest.threeSixChunks(masterNodeList,routePrefixDictionary);
+            MasterNodeList<string> masterNodeList = setupNodeList();
 
             foreach (var node in masterNodeList.AllNodes)
             {
@@ -82,6 +83,24 @@ namespace DataSequenceGraphCLI
                 }
                 Console.Out.WriteLine();
             }
+        }
+
+        static MasterNodeList<string> setupNodeList()
+        {
+            MasterNodeList<string> masterNodeList = new MasterNodeList<string>();
+            Dictionary<Node, List<Route>> routePrefixDictionary = new Dictionary<Node, List<Route>>();
+
+            threeSixRoutes(masterNodeList, routePrefixDictionary);
+            return masterNodeList;
+        }
+
+        static void XMLOut()
+        {
+            MasterNodeList<string> masterNodeList = setupNodeList();
+
+            XmlDocument doc = new XMLGraphFormat<string>().ToXML(masterNodeList);
+
+            doc.WriteContentTo(new XmlTextWriter(Console.Out));
         }
     }
 }
