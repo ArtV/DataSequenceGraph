@@ -11,5 +11,8 @@
     <Node UniqueName="[0-1009]DataSequenceGraph.MasterNodeListTest" Expanded="true" />
     <Node UniqueName="[0-1001]DataSequenceGraph.RouteTest" Expanded="true" />
     <Node UniqueName="[0-1005]DataSequenceGraph.ValueNodeTest" Expanded="true" />
+    <Node UniqueName="[0-1026]C:\Users\Administrator\DataSequenceGraph\DataSequenceGraphTests\..\SentenceChunkLoaderTests\bin\Release\SentenceChunkLoaderTests.dll" Expanded="true" />
+    <Node UniqueName="[0-1027]SentenceChunkLoaderTests" Expanded="true" />
+    <Node UniqueName="[0-1024]SentenceChunkLoaderTests.SentenceChunkLoaderTest" Expanded="true" />
   </Nodes>
 </VisualState>

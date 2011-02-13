@@ -40,13 +40,21 @@ namespace DataSequenceGraphCLI
 
         static void Main(string[] args)
         {
-            MasterNodeList<string> masterNodeList = new MasterNodeList<string>();
-            Dictionary<Node,List<Route>> routePrefixDictionary = new Dictionary<Node, List<Route>>();
+            if (args.Length == 0)
+            {
+                defaultTestOutput();
+            }
+        }
 
-//            threeThreeRoutes(masterNodeList, routePrefixDictionary);
+        static void defaultTestOutput()
+        {
+            MasterNodeList<string> masterNodeList = new MasterNodeList<string>();
+            Dictionary<Node, List<Route>> routePrefixDictionary = new Dictionary<Node, List<Route>>();
+
+            //            threeThreeRoutes(masterNodeList, routePrefixDictionary);
             threeSixRoutes(masterNodeList, routePrefixDictionary);
-//            DataChunkRouteBlazerTest.threeSixChunks(masterNodeList,routePrefixDictionary);
-            
+            //            DataChunkRouteBlazerTest.threeSixChunks(masterNodeList,routePrefixDictionary);
+
             foreach (var node in masterNodeList.AllNodes)
             {
                 string outStr = node.SequenceNumber + " " + node.GetType() + " ";
@@ -55,23 +63,24 @@ namespace DataSequenceGraphCLI
                     outStr += (node as ValueNode<string>).Value;
                 }
                 Console.Out.WriteLine(outStr);
-                foreach(Route route in node.OutgoingRoutes)
+                foreach (Route route in node.OutgoingRoutes)
                 {
                     outStr = route.connectedNodes.ElementAt(0).SequenceNumber + "," +
-                        route.connectedNodes.ElementAt(1).SequenceNumber + 
+                        route.connectedNodes.ElementAt(1).SequenceNumber +
                         " if already " + route.requisiteLinks.ElementAt(0).from.SequenceNumber + "," +
                         route.requisiteLinks.ElementAt(0).to.SequenceNumber;
                     Console.Out.WriteLine(outStr);
                 }
             }
-            
+
             IEnumerable<IEnumerable<string>> outChunks = masterNodeList.enumerateDataChunks();
             foreach (IEnumerable<string> chunk in outChunks)
             {
                 foreach (string val in chunk)
                 {
-                    Console.Out.WriteLine(val);
+                    Console.Out.Write(val);
                 }
+                Console.Out.WriteLine();
             }
         }
     }

@@ -34,7 +34,7 @@ namespace DataSequenceGraph
         public bool meetsRequisites(Route candidateRoute, IEnumerable<DirectedPair> requisiteLinks)
         {
             IEnumerable<DirectedPair> requisiteLinksNoNulls = requisiteLinks.Where(
-                link => link.from.kind != NodeKind.NullNode && link.to.kind != NodeKind.NullNode);
+                link => link.isBetweenValidNodes());
             var seq = candidateRoute.connectedNodes.GetEnumerator();
             int numRequisitesMatched = 0;
             for (int sequenceIndex = 0; sequenceIndex <= candidateRoute.connectedNodes.Count() - 1;

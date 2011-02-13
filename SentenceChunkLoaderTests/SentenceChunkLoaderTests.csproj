@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{7C4FA147-1D23-46CB-B9F2-B48EC68B5B67}</ProjectGuid>
+    <ProjectGuid>{5B263317-30B6-471B-8CE5-F958511BE1F0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DataSequenceGraph</RootNamespace>
-    <AssemblyName>DataSequenceGraphTests</AssemblyName>
+    <RootNamespace>SentenceChunkLoaderTests</RootNamespace>
+    <AssemblyName>SentenceChunkLoaderTests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -44,16 +44,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataChunkRouteBlazerTest.cs" />
-    <Compile Include="RouteTest.cs" />
-    <Compile Include="MasterNodeListTest.cs" />
-    <Compile Include="ValueNodeTest.cs" />
+    <Compile Include="SentenceChunkLoaderTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DataSequenceGraph\DataSequenceGraph.csproj">
-      <Project>{55CB11B6-B07B-4308-93E3-F95F74B069E2}</Project>
-      <Name>DataSequenceGraph</Name>
+    <ProjectReference Include="..\SentenceChunkLoader\SentenceChunkLoader.csproj">
+      <Project>{FD4B2F07-6C20-43AE-A0E1-E5874CD46EE6}</Project>
+      <Name>SentenceChunkLoader</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
