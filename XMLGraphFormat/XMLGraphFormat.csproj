@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{7C4FA147-1D23-46CB-B9F2-B48EC68B5B67}</ProjectGuid>
+    <ProjectGuid>{E9C47BF8-4F91-4B0E-ACA3-AB521C466190}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DataSequenceGraph</RootNamespace>
-    <AssemblyName>DataSequenceGraphTests</AssemblyName>
+    <RootNamespace>XMLGraphFormat</RootNamespace>
+    <AssemblyName>XMLGraphFormat</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -31,10 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework, Version=2.5.9.10348, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Program Files\NUnit 2.5.9\bin\net-2.0\framework\nunit.framework.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -44,10 +40,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataChunkRouteBlazerTest.cs" />
-    <Compile Include="RouteTest.cs" />
-    <Compile Include="MasterNodeListTest.cs" />
-    <Compile Include="ValueNodeTest.cs" />
+    <Compile Include="NodeValueConverter.cs" />
+    <Compile Include="ToStringNodeValueConverter.cs" />
+    <Compile Include="XMLGraphFormat.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -57,10 +52,6 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

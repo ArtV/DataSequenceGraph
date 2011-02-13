@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{7C4FA147-1D23-46CB-B9F2-B48EC68B5B67}</ProjectGuid>
+    <ProjectGuid>{0AF2AA5A-9069-4C95-B15C-CDEB1CAF63F9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DataSequenceGraph</RootNamespace>
-    <AssemblyName>DataSequenceGraphTests</AssemblyName>
+    <RootNamespace>XMLGraphFormatTests</RootNamespace>
+    <AssemblyName>XMLGraphFormatTests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -44,23 +44,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataChunkRouteBlazerTest.cs" />
-    <Compile Include="RouteTest.cs" />
-    <Compile Include="MasterNodeListTest.cs" />
-    <Compile Include="ValueNodeTest.cs" />
+    <Compile Include="XMLGraphFormatTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DataSequenceGraphTests\DataSequenceGraphTests.csproj">
+      <Project>{7C4FA147-1D23-46CB-B9F2-B48EC68B5B67}</Project>
+      <Name>DataSequenceGraphTests</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DataSequenceGraph\DataSequenceGraph.csproj">
       <Project>{55CB11B6-B07B-4308-93E3-F95F74B069E2}</Project>
       <Name>DataSequenceGraph</Name>
     </ProjectReference>
+    <ProjectReference Include="..\XMLGraphFormat\XMLGraphFormat.csproj">
+      <Project>{E9C47BF8-4F91-4B0E-ACA3-AB521C466190}</Project>
+      <Name>XMLGraphFormat</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
