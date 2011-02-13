@@ -3,22 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.Xml.XPath;
 using DataSequenceGraph;
 
 namespace DataSequenceGraph.Format
 {
     public class XMLGraphFormat<NodeValType>
     {
-        public NodeValueConverter<NodeValType> nodeValueConverter { get; set; }
+        public NodeValueExporter<NodeValType> nodeValueExporter { get; set; }
+        public NodeValueParser<NodeValType> nodeValueParser { get; set; }
 
         public XMLGraphFormat()
         {
-            this.nodeValueConverter = new ToStringNodeValueConverter<NodeValType>();
+            this.nodeValueExporter = new ToStringNodeValueExporter<NodeValType>();
         }
 
-        public XMLGraphFormat(NodeValueConverter<NodeValType> nodeValueConverter)
+        public XMLGraphFormat(NodeValueExporter<NodeValType> nodeValueConverter)
         {
-            this.nodeValueConverter = nodeValueConverter;
+            this.nodeValueExporter = nodeValueConverter;
         }
 
         public XmlDocument ToXML(MasterNodeList<NodeValType> nodeList)
@@ -59,7 +61,7 @@ namespace DataSequenceGraph.Format
                 if (currentNodeSpec.kind == NodeKind.ValueNode)
                 {
                     valSpec = currentNodeSpec as ValueNodeSpec<NodeValType>;
-                    valueText = doc.CreateTextNode(nodeValueConverter.ToNodeValueString(valSpec.Value));
+                    valueText = doc.CreateTextNode(nodeValueExporter.ToNodeValueString(valSpec.Value));
                     nodeElement.AppendChild(valueText);
                 }
             }
@@ -96,6 +98,69 @@ namespace DataSequenceGraph.Format
                 reqToAttr.Value = spec.RequisiteToNumber.ToString();
                 edgeElement.Attributes.Append(reqToAttr);
             }
+        }
+
+        public MasterNodeList<NodeValType> ToNodeList(XmlReader reader)
+        {
+            if (nodeValueParser == null)
+            {
+                throw new InvalidOperationException("nodeValueParser must be set to recreate a graph from XML");
+            }
+            XPathDocument doc = new XPathDocument(reader);
+            XPathNavigator rootNav = doc.CreateNavigator().SelectSingleNode("DataSequenceGraph");
+            rootNav.MoveToFirstChild();            
+            MasterNodeList<NodeValType> nodeList = new MasterNodeList<NodeValType>();
+            IEnumerable<NodeSpec> nodeSpecs = handleNodes(rootNav);
+            rootNav.MoveToNext();
+            IEnumerable<EdgeRouteSpec> edgeSpecs = handleEdges(rootNav);
+            nodeList.reloadNodesThenRoutesFromSpecs(nodeSpecs, edgeSpecs);
+            return nodeList;
+        }
+
+        public List<NodeSpec> handleNodes(XPathNavigator nodesRootNav)
+        {
+            XPathNodeIterator nodes = nodesRootNav.SelectChildren("Node", "");
+            List<NodeSpec> newNodeSpecs = new List<NodeSpec>();
+            NodeKind curKind;
+            foreach (XPathNavigator nodeNav in nodes)
+            {
+                nodeNav.MoveToAttribute("Kind", "");
+                curKind = (NodeKind)System.Enum.Parse(typeof(NodeKind), nodeNav.Value);
+                if (curKind == NodeKind.ValueNode)
+                {
+                    nodeNav.MoveToParent();
+                    newNodeSpecs.Add(new ValueNodeSpec<NodeValType>()
+                    {
+                        kind = curKind,
+                        Value = nodeValueParser.parseToValue(nodeNav.Value)
+                    });
+                }
+                else
+                {
+                    newNodeSpecs.Add(new NodeSpec()
+                    {
+                        kind = (NodeKind)System.Enum.Parse(typeof(NodeKind), nodeNav.Value)
+                    });
+                }
+            }
+            return newNodeSpecs;
+        }
+
+        public IEnumerable<EdgeRouteSpec> handleEdges(XPathNavigator edgesRootNav)
+        {
+            XPathNodeIterator edges = edgesRootNav.SelectChildren("Edge", "");
+            List<EdgeRouteSpec> newNodeSpecs = new List<EdgeRouteSpec>();
+            foreach (XPathNavigator edgeNav in edges)
+            {
+                newNodeSpecs.Add(new EdgeRouteSpec()
+                {
+                    FromNumber = Convert.ToInt32(edgeNav.Evaluate("number(@from)")),
+                    ToNumber = Convert.ToInt32(edgeNav.Evaluate("number(@to)")),
+                    RequisiteFromNumber = Convert.ToInt32(edgeNav.Evaluate("number(@fromRequisite)")),
+                    RequisiteToNumber = Convert.ToInt32(edgeNav.Evaluate("number(@toRequisite)"))
+                });
+            }
+            return newNodeSpecs;
         }
     }
 }

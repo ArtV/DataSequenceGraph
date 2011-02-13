@@ -5,6 +5,7 @@ using System.Text;
 using DataSequenceGraph;
 using DataSequenceGraph.Format;
 using System.Xml;
+using System.IO;
 
 namespace DataSequenceGraphCLI
 {
@@ -42,9 +43,11 @@ namespace DataSequenceGraphCLI
 
         static void Main(string[] args)
         {
+            MasterNodeList<string> masterNodeList = setupNodeList();
             if (args.Length == 0)
             {
-                defaultTestOutput();
+                defaultTestOutput(masterNodeList);
+                printEnumeratedChunks(masterNodeList);
             }
             else if (args[0] == "X")
             {
@@ -52,10 +55,8 @@ namespace DataSequenceGraphCLI
             }
         }
 
-        static void defaultTestOutput()
+        static void defaultTestOutput(MasterNodeList<string> masterNodeList)
         {
-            MasterNodeList<string> masterNodeList = setupNodeList();
-
             foreach (var node in masterNodeList.AllNodes)
             {
                 string outStr = node.SequenceNumber + " " + node.GetType() + " ";
@@ -74,6 +75,10 @@ namespace DataSequenceGraphCLI
                 }
             }
 
+        }
+
+        static void printEnumeratedChunks(MasterNodeList<string> masterNodeList)
+        {
             IEnumerable<IEnumerable<string>> outChunks = masterNodeList.enumerateDataChunks();
             foreach (IEnumerable<string> chunk in outChunks)
             {
@@ -96,11 +101,18 @@ namespace DataSequenceGraphCLI
 
         static void XMLOut()
         {
+            XMLGraphFormat<string> formatter = new XMLGraphFormat<string>();
+            formatter.nodeValueParser = new StringNodeValueParser();
             MasterNodeList<string> masterNodeList = setupNodeList();
 
-            XmlDocument doc = new XMLGraphFormat<string>().ToXML(masterNodeList);
+            XmlDocument doc = formatter.ToXML(masterNodeList);
 
             doc.WriteContentTo(new XmlTextWriter(Console.Out));
+
+            masterNodeList = formatter.ToNodeList(new XmlTextReader(new StringReader(doc.OuterXml)));
+
+            defaultTestOutput(masterNodeList);
+//            printEnumeratedChunks(masterNodeList);
         }
     }
 }

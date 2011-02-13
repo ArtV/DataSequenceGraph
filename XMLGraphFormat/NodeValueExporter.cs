@@ -5,7 +5,7 @@ using System.Text;
 
 namespace DataSequenceGraph.Format
 {
-    public interface NodeValueConverter<in NodeValType>
+    public interface NodeValueExporter<in NodeValType>
     {
         string ToNodeValueString(NodeValType originalValue);
     }

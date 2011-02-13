@@ -38,9 +38,12 @@ namespace DataSequenceGraph
             return newRouteFromEdge(newEdge);
         }
         
-        public IEnumerable<EdgeRoute> newRoutesFromSpecs(IEnumerable<EdgeRouteSpec> specs)
+        public void newRoutesFromSpecs(IEnumerable<EdgeRouteSpec> specs)
         {
-            return specs.Select(spec => newRouteFromSpec(spec));
+            foreach (EdgeRouteSpec spec in specs)
+            {
+                newRouteFromSpec(spec);
+            }
         }
 
         public EdgeRoute newRouteFromSpec(EdgeRouteSpec spec)
