@@ -37,7 +37,7 @@ namespace DataSequenceGraph
             }
         }
 
-        internal DataChunkRoute(RouteFactory<T> routeFactory, StartNode startNode) : base(routeFactory.newMatcher())
+        internal DataChunkRoute(RouteFactory<T> routeFactory, GateNode startNode) : base(routeFactory.newMatcher())
         {
             this.routeFactory = routeFactory;
             this.chunkRoute = routeFactory.newRouteFromNode(startNode);
@@ -56,10 +56,14 @@ namespace DataSequenceGraph
         public void followToEnd()
         {
             EdgeRoute nextRoute;
-            while (!(lastNode.kind == NodeKind.EndNode))
+            while (true)
             {
                 nextRoute = findNextEdgeToFollow();
                 appendEdge(nextRoute);
+                if (nextRoute.edge.link.to == startNode)
+                {
+                    break;
+                }
             }
         }
 

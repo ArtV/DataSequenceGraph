@@ -5,15 +5,15 @@ using System.Text;
 
 namespace DataSequenceGraph
 {
-    public class EndNode : Node
+    public class GateNode : Node
     {
-        public EndNode(int sequenceNumber) : base(sequenceNumber) { }
+        public GateNode(int sequenceNumber) : base(sequenceNumber) { }
 
         public override NodeKind kind
         {
             get 
             {
-                return NodeKind.EndNode;
+                return NodeKind.GateNode;
             }
         }
     }

@@ -31,7 +31,7 @@ namespace DataSequenceGraph
             this.sourceDataIndex = 0;
             this.nodeList = nodeList;
             RouteFactory<T> factory = new RouteFactory<T>();
-            this.chunkRoute = factory.newDataChunkRoute(nodeList.newStartNode());
+            this.chunkRoute = factory.newDataChunkRoute(nodeList.newGateNode());
             this.nodeRoutesDictionary = nodeRoutesDictionary;
             this.addedLinks = new List<DirectedPair>();
         }
@@ -66,8 +66,7 @@ namespace DataSequenceGraph
             sourceDataIndex++;
             if (sourceDataIndex >= SourceData.Count())
             {
-                EndNode endNode = nodeList.newEndNode();
-                appendEdgeTo(endNode);
+                appendEdgeTo(this.chunkRoute.startNode);
                 this.Done = true;
             }
         }
@@ -88,7 +87,7 @@ namespace DataSequenceGraph
         private EdgeRoute findBestEdgeTo(ValueNode<T> node)
         {
             Node previousLastNode = this.chunkRoute.lastNode;
-            if (previousLastNode.kind == NodeKind.StartNode)
+            if (previousLastNode.kind == NodeKind.GateNode)
             {
                 return null;
             }
@@ -264,7 +263,7 @@ namespace DataSequenceGraph
                 from = previousLastNode,
                 to = nextNode
             };
-            if (previousLastNode.GetType() == typeof(StartNode))
+            if (previousLastNode.kind == NodeKind.GateNode)
             {
                 newEdge =
                     new Edge()

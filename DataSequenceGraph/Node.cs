@@ -5,7 +5,7 @@ using System.Text;
 
 namespace DataSequenceGraph
 {
-    public enum NodeKind { StartNode, ValueNode, EndNode, NullNode }
+    public enum NodeKind { GateNode, ValueNode, NullNode }
 
     public abstract class Node
     {

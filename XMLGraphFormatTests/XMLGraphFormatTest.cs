@@ -34,7 +34,7 @@ namespace XMLGraphFormatTests
             XmlNode firstStartNode = nodeElements[0];
             Assert.AreEqual("Node", firstStartNode.LocalName);
             Assert.AreEqual("0", firstStartNode.Attributes["ID"].Value);
-            Assert.AreEqual(NodeKind.StartNode.ToString(), firstStartNode.Attributes["Kind"].Value);
+            Assert.AreEqual(NodeKind.GateNode.ToString(), firstStartNode.Attributes["Kind"].Value);
 
             XmlNode firstValueNode = nodeElements[3];
             Assert.AreEqual("3", firstValueNode.Attributes["ID"].Value);

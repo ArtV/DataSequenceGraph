@@ -65,7 +65,7 @@ namespace DataSequenceGraph
         [Test]
         public void chunkRouteInit()
         {
-            StartNode firstNode = chunkRoute.chunkRoute.startNode as StartNode;
+            GateNode firstNode = chunkRoute.chunkRoute.startNode as GateNode;
             Assert.IsNotNull(firstNode);
         }
 
@@ -79,21 +79,6 @@ namespace DataSequenceGraph
             Route startToA = chunkRoute.chunkRoute.startNode.OutgoingRoutes.ElementAt(0);
             Assert.AreEqual(Anode, ((ValueNode<string>) startToA.connectedNodes.Last()).Value);
             Assert.AreEqual(1, chunkRoute.chunkRoute.startNode.OutgoingRoutes.Count());
-        }
-
-        [Test]
-        public void createEndNode()
-        {
-            chunkRouteAppendThrice();
-            Assert.IsTrue(chunkRoute.Done);
-            Assert.AreEqual(3, chunkRoute.chunkRoute.dataChunk.Count());
-            Assert.IsInstanceOf<EndNode>(chunkRoute.chunkRoute.lastNode);
-
-            Assert.IsFalse(chunkRoute2.Done);
-            chunkRoute2.computeFullRoute();
-            Assert.IsTrue(chunkRoute2.Done);
-            Assert.AreEqual(3, chunkRoute2.chunkRoute.dataChunk.Count());
-            Assert.IsInstanceOf<EndNode>(chunkRoute2.chunkRoute.lastNode);
         }
 
         [Test]

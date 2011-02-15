@@ -102,7 +102,7 @@ namespace DataSequenceGraph
         [Test]
         public void routePrefixMatches()
         {
-            DataChunkRoute<string> prevRoute = routeFactory.newDataChunkRoute(list.newStartNode());
+            DataChunkRoute<string> prevRoute = routeFactory.newDataChunkRoute(list.newGateNode());
             RouteCriterion<string> criterion = new RouteCriterion<string>()
             {
                 desiredSequence = new List<string>() { "A", "B" },
@@ -110,7 +110,7 @@ namespace DataSequenceGraph
             };
             Assert.IsTrue(routeAB.prefixMatches(criterion));
 
-            prevRoute = routeFactory.newDataChunkRoute(list.newStartNode());
+            prevRoute = routeFactory.newDataChunkRoute(list.newGateNode());
             criterion = new RouteCriterion<string>()
             {
                 desiredSequence = new List<string>() { "A", "B", "C" },

@@ -70,25 +70,18 @@ namespace DataSequenceGraph
             return nodeList.ElementAt<Node>(index);
         }
 
-        public StartNode newStartNode()
+        public GateNode newGateNode()
         {
-            StartNode newNode = new StartNode(nodeList.Count);
+            GateNode newNode = new GateNode(nodeList.Count);
             nodeList.Add(newNode);
             return newNode;
         }
 
-        public EndNode newEndNode()
-        {
-            EndNode newNode = new EndNode(nodeList.Count);
-            nodeList.Add(newNode);
-            return newNode;
-        }
-        
         public IEnumerable<IEnumerable<T>> enumerateDataChunks()
         {
             DataChunkRoute<T> chunkRoute;
             RouteFactory<T> routeFactory = new RouteFactory<T>();
-            foreach (StartNode node in nodeList.OfType<StartNode>())
+            foreach (GateNode node in nodeList.OfType<GateNode>())
             {
                 chunkRoute = routeFactory.newDataChunkRoute(node);
                 chunkRoute.followToEnd();
@@ -102,11 +95,8 @@ namespace DataSequenceGraph
             {
                 switch (spec.kind)
                 {
-                    case NodeKind.StartNode:
-                        newStartNode();
-                        break;
-                    case NodeKind.EndNode:
-                        newEndNode();
+                    case NodeKind.GateNode:
+                        newGateNode();
                         break;
                     case NodeKind.NullNode:
                         break;

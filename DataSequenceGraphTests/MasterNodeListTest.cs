@@ -46,7 +46,6 @@ namespace DataSequenceGraph
         public void produceDataChunksFromList()
         {
             MasterNodeList<string> nodeList = threeSixNodeList();
-            Assert.Greater(nodeList.AllNodes.Count(), 15);
             foreach (var node in nodeList.AllNodes)
             {
                 Assert.GreaterOrEqual(node.OutgoingRoutes.Count(), 0);
@@ -64,8 +63,8 @@ namespace DataSequenceGraph
             MasterNodeList<string> nodeListImporter = new MasterNodeList<string>();
             nodeListImporter.reloadNodesFromSpecs(nodeListExporter.AllNodeSpecs);
             Assert.AreEqual(nodeListExporter.AllNodes.Count(), nodeListImporter.AllNodes.Count());
-            Assert.AreEqual(nodeListExporter.AllNodes.OfType<StartNode>().Count(),
-                nodeListImporter.AllNodes.OfType<StartNode>().Count());
+            Assert.AreEqual(nodeListExporter.AllNodes.OfType<GateNode>().Count(),
+                nodeListImporter.AllNodes.OfType<GateNode>().Count());
             Assert.AreEqual(nodeListExporter.AllNodes.OfType<ValueNode<string>>().ElementAt(5).Value,
                 nodeListImporter.AllNodes.OfType<ValueNode<string>>().ElementAt(5).Value);
         }

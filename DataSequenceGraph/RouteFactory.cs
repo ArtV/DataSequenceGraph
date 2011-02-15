@@ -76,7 +76,7 @@ namespace DataSequenceGraph
             return new RouteMatcherImpl<T>();
         }
 
-        public DataChunkRoute<T> newDataChunkRoute(StartNode startNode)
+        public DataChunkRoute<T> newDataChunkRoute(GateNode startNode)
         {
             return new DataChunkRoute<T>(this, startNode);
         }
