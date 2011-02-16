@@ -10,12 +10,6 @@ namespace DataSequenceGraph
         public abstract IEnumerable<Node> connectedNodes { get; }
         public abstract IEnumerable<DirectedPair> requisiteLinks { get; }
 
-        public RouteMatcher matcher { get; set; }
-        public Route(RouteMatcher matcher)
-        {
-            this.matcher = matcher;
-        }
-
         public Node startNode
         {
             get
@@ -50,14 +44,54 @@ namespace DataSequenceGraph
                 myFirstRequisiteLink.to == firstRequisiteLink.to);
         }
 
-        public bool prefixMatches(object criterion)
+        public bool prefixMatches<NodeValType>(RouteCriterion<NodeValType> criterionArg)
         {
-            return matcher.prefixMatches(this, criterion);
+            RouteCriterion<NodeValType> criterion = criterionArg as RouteCriterion<NodeValType>;
+            IEnumerable<ValueNode<NodeValType>> routeValueNodes = connectedNodes.OfType<ValueNode<NodeValType>>();
+            int desiredCount = criterion.desiredSequence.Count();
+            DataChunkRoute<NodeValType> routeInProgress = criterion.routeSoFar;
+            if (routeValueNodes.Count() < desiredCount)
+            {
+                return false;
+            }
+            else
+            {
+                IEnumerable<NodeValType> routeValues = routeValueNodes.Take(desiredCount).Select(node => node.Value);
+                if (!routeValues.SequenceEqual(criterion.desiredSequence))
+                {
+                    return false;
+                }
+                else
+                {
+                    return criterion.routeSoFar.meetsRequisites(requisiteLinks);
+                }
+            }
         }
 
         public bool meetsRequisites(IEnumerable<DirectedPair> requisiteLinks)
         {
-            return matcher.meetsRequisites(this, requisiteLinks);
+            IEnumerable<DirectedPair> requisiteLinksNoNulls = requisiteLinks.Where(
+                link => link.isBetweenValidNodes());
+            var seq = connectedNodes.GetEnumerator();
+            int numRequisitesMatched = 0;
+            for (int sequenceIndex = 0; sequenceIndex <= connectedNodes.Count() - 1;
+                sequenceIndex++)
+            {
+                if (!seq.MoveNext())
+                {
+                    break;
+                }
+                IEnumerable<DirectedPair> requisiteLinksFrom = requisiteLinksNoNulls.Where(link =>
+                    link.from == seq.Current);
+                foreach (DirectedPair link in requisiteLinksFrom)
+                {
+                    if (connectedNodes.ElementAt(sequenceIndex + 1) == link.to)
+                    {
+                        numRequisitesMatched++;
+                    }
+                }
+            }
+            return (numRequisitesMatched == requisiteLinksNoNulls.Count());
         }
 
         public EdgeRoute findNextEdgeToFollow()

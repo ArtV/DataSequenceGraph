@@ -31,7 +31,7 @@ namespace DataSequenceGraph
             }
         }
 
-        internal EdgeRoute(RouteMatcher matcher, Edge baseNodes) : base(matcher)
+        internal EdgeRoute(Edge baseNodes)
         {
             this.edge = baseNodes;
         }

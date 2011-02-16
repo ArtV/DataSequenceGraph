@@ -11,7 +11,7 @@ namespace DataSequenceGraph
 
         public EdgeRoute newRouteFromEdge(Edge baseNodes)
         {
-            EdgeRoute newRoute = new EdgeRoute(new RouteMatcherImpl<T>(),baseNodes);
+            EdgeRoute newRoute = new EdgeRoute(baseNodes);
             if (baseNodes.link.isBetweenValidNodes())
             {
                 baseNodes.link.from.AddOutgoingRoute(newRoute);
@@ -21,7 +21,7 @@ namespace DataSequenceGraph
 
         public Route newRouteFromConnectedRoutes(Route firstRoute, Route secondRoute)
         {
-            Route newRoute = new CompositeRoute(new RouteMatcherImpl<T>(),new List<Route>() { firstRoute, secondRoute });
+            Route newRoute = new CompositeRoute(new List<Route>() { firstRoute, secondRoute });
             return newRoute;
         }
 
@@ -69,11 +69,6 @@ namespace DataSequenceGraph
                 };
             }
             return newRouteFromEdge(specEdge);
-        }
-
-        public RouteMatcher newMatcher()
-        {
-            return new RouteMatcherImpl<T>();
         }
 
         public DataChunkRoute<T> newDataChunkRoute(GateNode startNode)

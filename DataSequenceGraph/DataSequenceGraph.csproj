@@ -55,8 +55,6 @@
     <Compile Include="EdgeRoute.cs" />
     <Compile Include="RouteCriterion.cs" />
     <Compile Include="RouteFactory.cs" />
-    <Compile Include="RouteMatcher.cs" />
-    <Compile Include="RouteMatcherImpl.cs" />
     <Compile Include="ValueNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ValueNodeSpec.cs" />

@@ -37,7 +37,7 @@ namespace DataSequenceGraph
             }
         }
 
-        internal DataChunkRoute(RouteFactory<T> routeFactory, GateNode startNode) : base(routeFactory.newMatcher())
+        internal DataChunkRoute(RouteFactory<T> routeFactory, GateNode startNode)
         {
             this.routeFactory = routeFactory;
             this.chunkRoute = routeFactory.newRouteFromNode(startNode);

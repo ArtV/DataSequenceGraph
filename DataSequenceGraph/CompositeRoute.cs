@@ -11,7 +11,7 @@ namespace DataSequenceGraph
         private IEnumerable<Node> _connectedNodes { get; set; }
         private IEnumerable<DirectedPair> _requisiteLinks { get; set; }
 
-        internal CompositeRoute(RouteMatcher matcher, IEnumerable<Route> componentRoutes) : base(matcher)
+        internal CompositeRoute(IEnumerable<Route> componentRoutes)
         {
             this._startRoute = componentRoutes.First();
             this._connectedNodes = Enumerable.Empty<Node>();
