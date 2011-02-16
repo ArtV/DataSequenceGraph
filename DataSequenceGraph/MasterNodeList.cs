@@ -8,6 +8,7 @@ namespace DataSequenceGraph
     public class MasterNodeList<T>
     {
         private List<Node> nodeList = new List<Node>();
+        private Dictionary<T,List<int>> valueSearchCache = new Dictionary<T,List<int>>();
 
         public IEnumerable<Node> AllNodes
         {
@@ -55,25 +56,55 @@ namespace DataSequenceGraph
 
         public IEnumerable<ValueNode<T>> getValueNodesByValue(T desiredValue)
         {
-            return nodeList.OfType<ValueNode<T>>().Where(node => node.Value.Equals(desiredValue));
+            if (!valueSearchCache.ContainsKey(desiredValue))
+            {
+                yield break;
+            }
+            else
+            {
+                foreach (int valueIndex in valueSearchCache[desiredValue])
+                {
+                    yield return (ValueNode<T>)nodeList[valueIndex];
+                }
+            }
         }
 
         public ValueNode<T> newValueNodeFromValue(T newValue)
         {
             ValueNode<T> newNode = new ValueNode<T>(newValue, nodeList.Count);
-            nodeList.Add(newNode);
+            AddNode(newNode);
             return newNode;
+        }
+
+        private void AddNode(Node newNode)
+        {
+            nodeList.Add(newNode);
+            if (newNode is ValueNode<T>)
+            {
+                ValueNode<T> newValueNode = newNode as ValueNode<T>;
+                List<int> valueIndexList;
+                if (!valueSearchCache.ContainsKey(newValueNode.Value))
+                {
+                    valueIndexList = new List<int>();
+                    valueSearchCache.Add(newValueNode.Value, valueIndexList);
+                }
+                else
+                {
+                    valueIndexList = valueSearchCache[newValueNode.Value];
+                }
+                valueIndexList.Add(newValueNode.SequenceNumber);
+            }
         }
 
         public Node nodeByNumber(int index)
         {
-            return nodeList.ElementAt<Node>(index);
+            return nodeList[index];
         }
 
         public GateNode newGateNode()
         {
             GateNode newNode = new GateNode(nodeList.Count);
-            nodeList.Add(newNode);
+            AddNode(newNode);
             return newNode;
         }
 
