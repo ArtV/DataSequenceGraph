@@ -18,11 +18,19 @@ namespace DataSequenceGraph
             }
         }
 
+        public IEnumerable<Node> AllNonNullNodes
+        {
+            get
+            {
+                return AllNodes.Where(node => node.kind != NodeKind.NullNode);
+            }
+        }
+
         public List<NodeSpec> AllNodeSpecs
         {
             get
             {
-                return nodeList.Select(node => node.ToNodeSpec()).ToList();
+                return AllNonNullNodes.Select(node => node.ToNodeSpec()).ToList();
             }
         }
 
@@ -30,7 +38,7 @@ namespace DataSequenceGraph
         {
             get
             {
-                return nodeList.SelectMany(node => nodeToRoutesSpecs(node));
+                return AllNonNullNodes.SelectMany(node => nodeToRoutesSpecs(node));
             }
         }
 
@@ -39,7 +47,7 @@ namespace DataSequenceGraph
             get
             {
                 List<Tuple<NodeSpec, IEnumerable<EdgeRouteSpec>>> retList = new List<Tuple<NodeSpec, IEnumerable<EdgeRouteSpec>>>();
-                foreach (Node node in nodeList)
+                foreach (Node node in AllNonNullNodes)
                 {
                     Tuple<NodeSpec, IEnumerable<EdgeRouteSpec>> retElem = 
                         new Tuple<NodeSpec, IEnumerable<EdgeRouteSpec>>(node.ToNodeSpec(), nodeToRoutesSpecs(node));                    
@@ -164,7 +172,7 @@ namespace DataSequenceGraph
             int desiredIndex = spec.SequenceNumber;
             if (desiredIndex <= nodeList.Count - 1)
             {
-                if (nodeList[desiredIndex].kind != NodeKind.NullNode)
+                if (desiredIndex < 0 || nodeList[desiredIndex].kind != NodeKind.NullNode)
                 {
                     return false;
                 }
