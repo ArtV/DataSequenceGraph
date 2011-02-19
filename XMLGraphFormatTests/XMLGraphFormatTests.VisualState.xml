@@ -5,8 +5,8 @@
   <ExcludeCategories>false</ExcludeCategories>
   <Nodes>
     <Node UniqueName="[0-1000]C:\Users\Administrator\DataSequenceGraph\XMLGraphFormatTests\XMLGraphFormatTests.nunit" Expanded="true" />
-    <Node UniqueName="[0-1005]C:\Users\Administrator\DataSequenceGraph\XMLGraphFormatTests\bin\Release\XMLGraphFormatTests.dll" Expanded="true" />
-    <Node UniqueName="[0-1006]XMLGraphFormatTests" Expanded="true" />
+    <Node UniqueName="[0-1006]C:\Users\Administrator\DataSequenceGraph\XMLGraphFormatTests\bin\Release\XMLGraphFormatTests.dll" Expanded="true" />
+    <Node UniqueName="[0-1007]XMLGraphFormatTests" Expanded="true" />
     <Node UniqueName="[0-1001]XMLGraphFormatTests.XMLGraphFormatTest" Expanded="true" />
   </Nodes>
 </VisualState>

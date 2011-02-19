@@ -73,7 +73,7 @@ namespace DataSequenceGraphCLI
                     outStr += (node as ValueNode<string>).Value;
                 }
                 Console.Out.WriteLine(outStr);
-                foreach (Route route in node.OutgoingRoutes)
+                foreach (Route route in node.OutgoingEdges)
                 {
                     outStr = route.connectedNodes.ElementAt(0).SequenceNumber + "," +
                         route.connectedNodes.ElementAt(1).SequenceNumber +

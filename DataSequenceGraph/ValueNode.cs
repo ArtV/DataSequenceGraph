@@ -16,7 +16,7 @@ namespace DataSequenceGraph
 
         public IEnumerable<Route> findMatchingRoutes(RouteCriterion<T> criterion)
         {
-            return OutgoingRoutes.Where(route => route.prefixMatches(criterion));
+            return OutgoingEdges.Where(route => route.prefixMatches(criterion));
         }
 
         public override NodeKind kind

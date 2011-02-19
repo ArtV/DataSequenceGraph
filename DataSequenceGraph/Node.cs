@@ -9,20 +9,20 @@ namespace DataSequenceGraph
 
     public abstract class Node
     {
-        public IEnumerable<EdgeRoute> OutgoingRoutes { get; private set; }
+        public IEnumerable<EdgeRoute> OutgoingEdges { get; private set; }
         public int SequenceNumber { get; private set; }
 
         public abstract NodeKind kind { get; }
 
         public Node(int SequenceNumber)
         {
-            OutgoingRoutes = new List<EdgeRoute>();
+            OutgoingEdges = new List<EdgeRoute>();
             this.SequenceNumber = SequenceNumber;
         }
 
-        public void AddOutgoingRoute(EdgeRoute route)
+        public void AddOutgoingEdge(EdgeRoute route)
         {
-            OutgoingRoutes = OutgoingRoutes.Concat(new List<EdgeRoute>() { route });
+            OutgoingEdges = OutgoingEdges.Concat(new List<EdgeRoute>() { route });
         }
 
         public virtual NodeSpec ToNodeSpec()

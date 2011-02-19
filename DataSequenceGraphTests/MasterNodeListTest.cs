@@ -48,7 +48,7 @@ namespace DataSequenceGraph
             MasterNodeList<string> nodeList = threeSixNodeList();
             foreach (var node in nodeList.AllNodes)
             {
-                Assert.GreaterOrEqual(node.OutgoingRoutes.Count(), 0);
+                Assert.GreaterOrEqual(node.OutgoingEdges.Count(), 0);
             }
 
             IEnumerable<IEnumerable<string>> chunks = nodeList.enumerateDataChunks();

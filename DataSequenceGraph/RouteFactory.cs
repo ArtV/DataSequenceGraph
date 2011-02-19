@@ -14,7 +14,7 @@ namespace DataSequenceGraph
             EdgeRoute newRoute = new EdgeRoute(baseNodes);
             if (baseNodes.link.isBetweenValidNodes())
             {
-                baseNodes.link.from.AddOutgoingRoute(newRoute);
+                baseNodes.link.from.AddOutgoingEdge(newRoute);
             }
             return newRoute;
         }

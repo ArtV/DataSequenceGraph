@@ -100,11 +100,11 @@ namespace DataSequenceGraph
             EdgeRoute selectedRoute;
             if (earliestRequisiteIndex == -1)
             {
-                selectedRoute = lastNode.OutgoingRoutes.First();
+                selectedRoute = lastNode.OutgoingEdges.First();
             }
             else
             {
-                selectedRoute = lastNode.OutgoingRoutes.First(route =>
+                selectedRoute = lastNode.OutgoingEdges.First(route =>
                     route.edge.requisiteLink.from == connectedNodes.ElementAt(earliestRequisiteIndex));
             }
             return selectedRoute;
@@ -113,7 +113,7 @@ namespace DataSequenceGraph
         public int findEarliestMatchOfRequisites(Node node)
         {
             int earliestRequisiteIndex = -1;
-            foreach (EdgeRoute route in node.OutgoingRoutes)
+            foreach (EdgeRoute route in node.OutgoingEdges)
             {
                 int indexOfRequisiteMatch = findNode(route.edge.requisiteLink.from);
                 if (earliestRequisiteIndex == -1)

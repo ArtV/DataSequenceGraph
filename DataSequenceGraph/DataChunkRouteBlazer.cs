@@ -99,7 +99,7 @@ namespace DataSequenceGraph
                     desiredSequence = new List<T>() { previousLastValueNode.Value, node.Value },
                     routeSoFar = this.chunkRoute
                 };
-                return (previousLastValueNode.OutgoingRoutes.FirstOrDefault(route =>
+                return (previousLastValueNode.OutgoingEdges.FirstOrDefault(route =>
                     route.prefixMatches(criterion)));
             }
         }
@@ -184,7 +184,7 @@ namespace DataSequenceGraph
                 nodeRoutesDictionary[routeStartingNode] = new List<Route>();
             }
 
-            IEnumerable<Route> allNewOutgoingEdges = routeStartingNode.OutgoingRoutes.Where(route =>
+            IEnumerable<Route> allNewOutgoingEdges = routeStartingNode.OutgoingEdges.Where(route =>
                 route.IsNotStartOfAny(cachedRoutes));
             foreach (var route in allNewOutgoingEdges)
             {
@@ -246,7 +246,7 @@ namespace DataSequenceGraph
             RouteFactory<T> routeFactory = new RouteFactory<T>();
             Route newLongerRoute;
 
-            foreach (Route route in lastNode.OutgoingRoutes)
+            foreach (Route route in lastNode.OutgoingEdges)
             {
                 newLongerRoute = routeFactory.newRouteFromConnectedRoutes(baseRoute, route);
                 nodeRoutesDictionary[firstNode].Add(newLongerRoute);
@@ -311,7 +311,7 @@ namespace DataSequenceGraph
         private void addNewLinkIfDifferent(DirectedPair newLink)
         {
             Node fromNode = newLink.from;
-            if (!fromNode.OutgoingRoutes.Any(oldRoute => oldRoute.edge.link.to == newLink.to))
+            if (!fromNode.OutgoingEdges.Any(oldRoute => oldRoute.edge.link.to == newLink.to))
             {
                 addedLinks.Add(newLink);
             }

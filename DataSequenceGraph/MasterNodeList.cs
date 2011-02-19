@@ -59,7 +59,7 @@ namespace DataSequenceGraph
 
         private IEnumerable<EdgeRouteSpec> nodeToRoutesSpecs(Node node)
         {
-            return node.OutgoingRoutes.Select(route => route.ToEdgeRouteSpec());
+            return node.OutgoingEdges.Select(route => route.ToEdgeRouteSpec());
         }
 
         public IEnumerable<ValueNode<T>> getValueNodesByValue(T desiredValue)

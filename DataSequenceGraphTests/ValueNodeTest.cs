@@ -56,8 +56,8 @@ namespace DataSequenceGraph
         [Test]
         public void getOutgoingRoutes()
         {
-            Assert.AreEqual(1,vn.OutgoingRoutes.Count());
-            Assert.AreEqual(0, vn2.OutgoingRoutes.Count());
+            Assert.AreEqual(1,vn.OutgoingEdges.Count());
+            Assert.AreEqual(0, vn2.OutgoingEdges.Count());
         }
 
         [Test]

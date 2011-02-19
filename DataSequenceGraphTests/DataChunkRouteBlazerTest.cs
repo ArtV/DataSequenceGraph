@@ -98,9 +98,9 @@ namespace DataSequenceGraph
             Assert.AreEqual(1, chunkRoute.chunkRoute.dataChunk.Count());
             string Anode = chunkRoute.chunkRoute.dataChunk.ElementAt(0);
             Assert.AreEqual("A", Anode);
-            Route startToA = chunkRoute.chunkRoute.startNode.OutgoingRoutes.ElementAt(0);
+            Route startToA = chunkRoute.chunkRoute.startNode.OutgoingEdges.ElementAt(0);
             Assert.AreEqual(Anode, ((ValueNode<string>) startToA.connectedNodes.Last()).Value);
-            Assert.AreEqual(1, chunkRoute.chunkRoute.startNode.OutgoingRoutes.Count());
+            Assert.AreEqual(1, chunkRoute.chunkRoute.startNode.OutgoingEdges.Count());
         }
 
         [Test]
@@ -154,9 +154,9 @@ namespace DataSequenceGraph
             chunkRouteAppendThriceOther();
 
             ValueNode<string> Dnode = list.getValueNodesByValue("D").First();
-            Route DJroute = Dnode.OutgoingRoutes.First(route =>
+            Route DJroute = Dnode.OutgoingEdges.First(route =>
                 ((ValueNode<string>)route.connectedNodes.ElementAt(1)).Value.Equals("J"));
-            Route DMroute = Dnode.OutgoingRoutes.Last(route =>
+            Route DMroute = Dnode.OutgoingEdges.Last(route =>
                 ((ValueNode<string>)route.connectedNodes.ElementAt(1)).Value.Equals("M"));
             int DJrouteIndex = chunkRoute6.chunkRoute.findNode(DJroute.requisiteLinks.First().from);
             int DMrouteIndex = chunkRoute6.chunkRoute.findNode(DMroute.requisiteLinks.First().from);
