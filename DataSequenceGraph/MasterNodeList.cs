@@ -9,6 +9,14 @@ namespace DataSequenceGraph
     {
         private List<Node> nodeList = new List<Node>();
         private Dictionary<T,List<int>> valueSearchCache = new Dictionary<T,List<int>>();
+        private List<GateNode> gateNodeList = new List<GateNode>();
+        private RouteFactory<T> routeFactory;
+
+        public MasterNodeList()
+        {
+            routeFactory = new RouteFactory<T>();
+            routeFactory.masterNodeList = this;
+        }
 
         public IEnumerable<Node> AllNodes
         {
@@ -92,6 +100,10 @@ namespace DataSequenceGraph
                 ValueNode<T> newValueNode = newNode as ValueNode<T>;
                 cacheValueNode(newValueNode);
             }
+            if (newNode is GateNode)
+            {
+                gateNodeList.Add(newNode as GateNode);
+            }
         }
 
         private void cacheValueNode(ValueNode<T> newValueNode)
@@ -123,15 +135,18 @@ namespace DataSequenceGraph
 
         public IEnumerable<IEnumerable<T>> enumerateDataChunks()
         {
-            DataChunkRoute<T> chunkRoute;
-            RouteFactory<T> routeFactory = new RouteFactory<T>();
-            foreach (GateNode node in nodeList.OfType<GateNode>())
+            for (int i = 0; i <= gateNodeList.Count - 1; i++)
             {
-                chunkRoute = routeFactory.newDataChunkRoute(node);
-                chunkRoute.followToEnd();
-                yield return chunkRoute.dataChunk;
+                yield return nthDataChunkRoute(i).dataChunk;
             }
-        } 
+        }
+
+        public DataChunkRoute<T> nthDataChunkRoute(int nth)
+        {
+            DataChunkRoute<T> chunkRoute = routeFactory.newDataChunkRoute(gateNodeList[nth]);
+            chunkRoute.followToEnd();
+            return chunkRoute;
+        }
 
         public void reloadNodesFromSpecs(IEnumerable<NodeSpec> specs)
         {
@@ -162,9 +177,7 @@ namespace DataSequenceGraph
         public void reloadNodesThenRoutesFromSpecs(IEnumerable<NodeSpec> nodes, IEnumerable<EdgeRouteSpec> routes)
         {
             reloadNodesFromSpecs(nodes);
-            RouteFactory<T> factory = new RouteFactory<T>();
-            factory.masterNodeList = this;
-            factory.newRoutesFromSpecs(routes);
+            routeFactory.newRoutesFromSpecs(routes);
         }
 
         public bool trySetNode(NodeSpec spec)
