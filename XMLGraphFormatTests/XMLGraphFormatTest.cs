@@ -74,5 +74,21 @@ namespace XMLGraphFormatTests
             Assert.AreEqual(1, nodeList.getValueNodesByValue("Here").Count());
         }
 
+        [Test]
+        public void reuseNodeValueByRef()
+        {
+            MasterNodeList<string> nodeList = new MasterNodeList<string>();
+            Dictionary<Node, List<Route>> prefixD = new Dictionary<Node, List<Route>>();
+            DataChunkRouteBlazerTest.threeThreeChunks(nodeList, prefixD);
+            XmlDocument threeThreeDoc = new XMLGraphFormat<string>().ToXML(nodeList);
+            XmlNode nodesElement = threeThreeDoc.DocumentElement.ChildNodes[0];
+            XmlNodeList nodeElements = nodesElement.ChildNodes;
+
+            int firstAIndex = nodeList.getValueNodesByValue("A").ElementAt(0).SequenceNumber;
+            int secondAIndex = nodeList.getValueNodesByValue("A").ElementAt(1).SequenceNumber;
+            XmlNode secondAXmlElem = nodeElements[secondAIndex];
+            Assert.AreEqual(firstAIndex.ToString(), secondAXmlElem.Attributes["valueRef"].Value);
+            Assert.AreEqual("", secondAXmlElem.InnerText);
+        }
     }
 }

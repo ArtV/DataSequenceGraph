@@ -29,6 +29,16 @@ namespace DataSequenceGraph
         List<string> srcData6List = new List<string>() { "G", "B", "D", "M", "N", "O" };
         private DataChunkRouteBlazer<string> chunkRoute6;
 
+        public static void threeThreeChunks(MasterNodeList<string> inList,
+            Dictionary<Node, List<Route>> inRoutePrefixDictionary)
+        {
+            DataChunkRouteBlazerTest test = new DataChunkRouteBlazerTest();
+            test.list = inList;
+            test.routePrefixDictionary = inRoutePrefixDictionary;
+            test.dataSetup13();
+            test.setup13append();
+        }
+
         public static void threeSixChunks (MasterNodeList<string> inList, 
             Dictionary<Node, List<Route>> inRoutePrefixDictionary)
         {
@@ -37,7 +47,7 @@ namespace DataSequenceGraph
             test.routePrefixDictionary = inRoutePrefixDictionary;
             test.dataSetup46();
             test.chunkRouteAppendThriceOther();
-        }
+        }        
 
         [SetUp]
         public void SetUp()
@@ -49,10 +59,22 @@ namespace DataSequenceGraph
 
         public void dataSetUp()
         {
+            dataSetup13();
+            dataSetup46();
+        }
+
+        public void dataSetup13()
+        {
             chunkRoute = new DataChunkRouteBlazer<string>(srcDataList, list, routePrefixDictionary);
             chunkRoute2 = new DataChunkRouteBlazer<string>(srcData2List, list, routePrefixDictionary);
             chunkRoute3 = new DataChunkRouteBlazer<string>(srcData3List, list, routePrefixDictionary);
-            dataSetup46();
+        }
+
+        private void setup13append()
+        {
+            chunkRoute.computeFullRoute();
+            chunkRoute2.computeFullRoute();
+            chunkRoute3.computeFullRoute();
         }
 
         public void dataSetup46()

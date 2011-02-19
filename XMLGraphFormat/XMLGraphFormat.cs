@@ -44,6 +44,7 @@ namespace DataSequenceGraph.Format
             NodeSpec currentNodeSpec;
             ValueNodeSpec<NodeValType> valSpec;
             XmlText valueText;
+            XmlAttribute valueRefAttr;
             for (nodeIndex = 0; nodeIndex <= nodeSpecs.Count - 1; nodeIndex++)
             {
                 currentNodeSpec = nodeSpecs[nodeIndex];
@@ -61,8 +62,19 @@ namespace DataSequenceGraph.Format
                 if (currentNodeSpec.kind == NodeKind.ValueNode)
                 {
                     valSpec = currentNodeSpec as ValueNodeSpec<NodeValType>;
-                    valueText = doc.CreateTextNode(nodeValueExporter.ToNodeValueString(valSpec.Value));
-                    nodeElement.AppendChild(valueText);
+                    IEnumerable<ValueNode<NodeValType>> nodesWithValue = nodeList.getValueNodesByValue(valSpec.Value);
+                    int indexOfFirstValue = nodesWithValue.ElementAt(0).SequenceNumber;
+                    if (nodesWithValue.Count() > 1 && currentNodeSpec.SequenceNumber != indexOfFirstValue)
+                    {
+                        valueRefAttr = doc.CreateAttribute("valueRef");
+                        valueRefAttr.Value = indexOfFirstValue.ToString();
+                        nodeElement.Attributes.Append(valueRefAttr);
+                    }
+                    else
+                    {
+                        valueText = doc.CreateTextNode(nodeValueExporter.ToNodeValueString(valSpec.Value));
+                        nodeElement.AppendChild(valueText);
+                    }
                 }
             }
         }       
@@ -123,6 +135,8 @@ namespace DataSequenceGraph.Format
             List<NodeSpec> newNodeSpecs = new List<NodeSpec>();
             NodeKind curKind;
             int sequenceNumber;
+            NodeValType nodeValue;
+            ValueNodeSpec<NodeValType> valueRefNode;
             foreach (XPathNavigator nodeNav in nodes)
             {
                 nodeNav.MoveToAttribute("ID","");
@@ -133,10 +147,20 @@ namespace DataSequenceGraph.Format
                 if (curKind == NodeKind.ValueNode)
                 {
                     nodeNav.MoveToParent();
+                    if (nodeNav.MoveToAttribute("valueRef", ""))
+                    {
+                        valueRefNode = newNodeSpecs.OfType<ValueNodeSpec<NodeValType>>().First(
+                            spec => spec.SequenceNumber == nodeNav.ValueAsInt);
+                        nodeValue = valueRefNode.Value;
+                    }
+                    else
+                    {
+                        nodeValue = nodeValueParser.parseToValue(nodeNav.Value);
+                    }
                     newNodeSpecs.Add(new ValueNodeSpec<NodeValType>()
                     {
                         kind = curKind,
-                        Value = nodeValueParser.parseToValue(nodeNav.Value),
+                        Value = nodeValue,
                         SequenceNumber = sequenceNumber
                     });
                 }
