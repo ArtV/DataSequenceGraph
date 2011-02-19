@@ -27,7 +27,7 @@ namespace DataSequenceGraph
 
         public virtual NodeSpec ToNodeSpec()
         {
-            return new NodeSpec() { kind = kind };
+            return new NodeSpec() { kind = kind, SequenceNumber = SequenceNumber };
         }
     }
 }

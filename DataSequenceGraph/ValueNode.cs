@@ -32,6 +32,7 @@ namespace DataSequenceGraph
             ValueNodeSpec<T> retSpec = new ValueNodeSpec<T>();
             retSpec.kind = kind;
             retSpec.Value = Value;
+            retSpec.SequenceNumber = SequenceNumber;
             return retSpec;
         }
     }

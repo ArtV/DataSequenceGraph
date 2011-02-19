@@ -6,6 +6,7 @@ using DataSequenceGraph;
 using DataSequenceGraph.Format;
 using NUnit.Framework;
 using System.Xml;
+using System.IO;
 
 namespace XMLGraphFormatTests
 {
@@ -51,6 +52,26 @@ namespace XMLGraphFormatTests
             Assert.AreEqual("3", firstEdge.Attributes["to"].Value);
             Assert.AreEqual("-1", firstEdge.Attributes["fromRequisite"].Value);
             Assert.AreEqual("-1", firstEdge.Attributes["toRequisite"].Value);
+        }
+
+        [Test]
+        public void threeSixFromXMLToList()
+        {
+            XMLGraphFormat<string> format = new XMLGraphFormat<string>();
+            format.nodeValueParser = new StringNodeValueParser();
+            XmlDocument sampleDoc = new XmlDocument();
+            string myDoc =
+            @"<DataSequenceGraph><Nodes>
+            <Node ID=""0"" Kind=""GateNode"" />
+            <Node ID=""1"" Kind=""ValueNode"">Here</Node>            
+            </Nodes><Edges>
+            <Edge from=""0"" to=""1"" fromRequisite=""-1"" toRequisite=""-1"" />
+            <Edge from=""1"" to=""0"" fromRequisite=""-1"" toRequisite=""-1"" />
+            </Edges></DataSequenceGraph>";
+            MasterNodeList<string> nodeList = format.ToNodeList(XmlReader.Create(new StringReader(myDoc)));
+            Assert.AreEqual(2, nodeList.AllNodes.Count());
+            Assert.IsInstanceOf<ValueNode<string>>(nodeList.AllNodes.ElementAt(1));
+            Assert.AreEqual(1, nodeList.getValueNodesByValue("Here").Count());
         }
 
     }

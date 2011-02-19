@@ -82,18 +82,23 @@ namespace DataSequenceGraph
             if (newNode is ValueNode<T>)
             {
                 ValueNode<T> newValueNode = newNode as ValueNode<T>;
-                List<int> valueIndexList;
-                if (!valueSearchCache.ContainsKey(newValueNode.Value))
-                {
-                    valueIndexList = new List<int>();
-                    valueSearchCache.Add(newValueNode.Value, valueIndexList);
-                }
-                else
-                {
-                    valueIndexList = valueSearchCache[newValueNode.Value];
-                }
-                valueIndexList.Add(newValueNode.SequenceNumber);
+                cacheValueNode(newValueNode);
             }
+        }
+
+        private void cacheValueNode(ValueNode<T> newValueNode)
+        {
+            List<int> valueIndexList;
+            if (!valueSearchCache.ContainsKey(newValueNode.Value))
+            {
+                valueIndexList = new List<int>();
+                valueSearchCache.Add(newValueNode.Value, valueIndexList);
+            }
+            else
+            {
+                valueIndexList = valueSearchCache[newValueNode.Value];
+            }
+            valueIndexList.Add(newValueNode.SequenceNumber);
         }
 
         public Node nodeByNumber(int index)
@@ -124,18 +129,26 @@ namespace DataSequenceGraph
         {
             foreach (NodeSpec spec in specs)
             {
-                switch (spec.kind)
-                {
-                    case NodeKind.GateNode:
-                        newGateNode();
-                        break;
-                    case NodeKind.NullNode:
-                        break;
-                    case NodeKind.ValueNode:
-                        newValueNodeFromValue(((ValueNodeSpec<T>) spec).Value);
-                        break;
-                }
+                trySetNode(spec);
             }
+        }
+
+        private Node nodeSpecToNode(NodeSpec spec)
+        {
+            Node returnNode;
+            switch (spec.kind)
+            {
+                case NodeKind.GateNode:
+                    returnNode = new GateNode(spec.SequenceNumber);
+                    break;
+                case NodeKind.ValueNode:
+                    returnNode = new ValueNode<T>(((ValueNodeSpec<T>)spec).Value,spec.SequenceNumber);
+                    break;
+                default:
+                    returnNode = NullNode.o;
+                    break;
+            }
+            return returnNode;
         }
 
         public void reloadNodesThenRoutesFromSpecs(IEnumerable<NodeSpec> nodes, IEnumerable<EdgeRouteSpec> routes)
@@ -144,6 +157,38 @@ namespace DataSequenceGraph
             RouteFactory<T> factory = new RouteFactory<T>();
             factory.masterNodeList = this;
             factory.newRoutesFromSpecs(routes);
+        }
+
+        public bool trySetNode(NodeSpec spec)
+        {
+            int desiredIndex = spec.SequenceNumber;
+            if (desiredIndex <= nodeList.Count - 1)
+            {
+                if (nodeList[desiredIndex].kind != NodeKind.NullNode)
+                {
+                    return false;
+                }
+                else
+                {
+                    Node newNode = nodeSpecToNode(spec);
+                    nodeList[desiredIndex] = newNode;
+                    if (newNode is ValueNode<T>)
+                    {
+                        ValueNode<T> newValueNode = newNode as ValueNode<T>;
+                        cacheValueNode(newValueNode);
+                    }
+                    return true;
+                }
+            }
+            else
+            {
+                while (desiredIndex > nodeList.Count)
+                {
+                    nodeList.Add(NullNode.o);
+                }
+                AddNode(nodeSpecToNode(spec));
+                return true;
+            }
         }
     }
 }

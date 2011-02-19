@@ -7,6 +7,7 @@ namespace DataSequenceGraph
 {
     public class NodeSpec
     {
+        public int SequenceNumber { get; set; }
         public NodeKind kind { get; set; }
     }
 }

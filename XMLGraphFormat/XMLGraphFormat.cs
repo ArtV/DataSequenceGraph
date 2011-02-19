@@ -51,7 +51,7 @@ namespace DataSequenceGraph.Format
                 rootNodesElement.AppendChild(nodeElement);
 
                 IDAttr = doc.CreateAttribute("ID");
-                IDAttr.Value = nodeIndex.ToString();
+                IDAttr.Value = currentNodeSpec.SequenceNumber.ToString();
                 nodeElement.Attributes.Append(IDAttr);
 
                 kindAttr = doc.CreateAttribute("Kind");
@@ -117,13 +117,17 @@ namespace DataSequenceGraph.Format
             return nodeList;
         }
 
-        public List<NodeSpec> handleNodes(XPathNavigator nodesRootNav)
+        private List<NodeSpec> handleNodes(XPathNavigator nodesRootNav)
         {
             XPathNodeIterator nodes = nodesRootNav.SelectChildren("Node", "");
             List<NodeSpec> newNodeSpecs = new List<NodeSpec>();
             NodeKind curKind;
+            int sequenceNumber;
             foreach (XPathNavigator nodeNav in nodes)
             {
+                nodeNav.MoveToAttribute("ID","");
+                sequenceNumber = nodeNav.ValueAsInt;
+                nodeNav.MoveToParent();
                 nodeNav.MoveToAttribute("Kind", "");
                 curKind = (NodeKind)System.Enum.Parse(typeof(NodeKind), nodeNav.Value);
                 if (curKind == NodeKind.ValueNode)
@@ -132,21 +136,23 @@ namespace DataSequenceGraph.Format
                     newNodeSpecs.Add(new ValueNodeSpec<NodeValType>()
                     {
                         kind = curKind,
-                        Value = nodeValueParser.parseToValue(nodeNav.Value)
+                        Value = nodeValueParser.parseToValue(nodeNav.Value),
+                        SequenceNumber = sequenceNumber
                     });
                 }
                 else
                 {
                     newNodeSpecs.Add(new NodeSpec()
                     {
-                        kind = (NodeKind)System.Enum.Parse(typeof(NodeKind), nodeNav.Value)
+                        kind = (NodeKind)System.Enum.Parse(typeof(NodeKind), nodeNav.Value),
+                        SequenceNumber = sequenceNumber
                     });
                 }
             }
             return newNodeSpecs;
         }
 
-        public IEnumerable<EdgeRouteSpec> handleEdges(XPathNavigator edgesRootNav)
+        private IEnumerable<EdgeRouteSpec> handleEdges(XPathNavigator edgesRootNav)
         {
             XPathNodeIterator edges = edgesRootNav.SelectChildren("Edge", "");
             List<EdgeRouteSpec> newNodeSpecs = new List<EdgeRouteSpec>();

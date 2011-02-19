@@ -68,5 +68,13 @@ namespace DataSequenceGraph
             Assert.AreEqual(nodeListExporter.AllNodes.OfType<ValueNode<string>>().ElementAt(5).Value,
                 nodeListImporter.AllNodes.OfType<ValueNode<string>>().ElementAt(5).Value);
         }
+
+        [Test]
+        public void trysetNode()
+        {
+            Assert.False(list.trySetNode(new ValueNodeSpec<string>() { kind = NodeKind.ValueNode, Value = "C", SequenceNumber = 0}));
+            Assert.True(list.trySetNode(new ValueNodeSpec<string>() { kind = NodeKind.ValueNode, Value = "C", SequenceNumber = 5 }));
+            Assert.AreEqual("C", ((ValueNode<string>)list.AllNodes.ElementAt(5)).Value);
+        }
     }
 }
