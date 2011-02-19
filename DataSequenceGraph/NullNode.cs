@@ -7,7 +7,9 @@ namespace DataSequenceGraph
 {
     public class NullNode : Node
     {
-        public NullNode():base(-1)
+        public static readonly NullNode o = new NullNode();
+
+        private NullNode():base(-1)
         {
         }
 

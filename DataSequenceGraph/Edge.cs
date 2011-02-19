@@ -14,7 +14,7 @@ namespace DataSequenceGraph
         public Edge()
         {
             this.requisiteLink = new DirectedPair() { 
-                from = new NullNode(), to = new NullNode() 
+                from = NullNode.o, to = NullNode.o
             };
         }        
     }

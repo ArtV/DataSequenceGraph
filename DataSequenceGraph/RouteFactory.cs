@@ -32,7 +32,7 @@ namespace DataSequenceGraph
                 link = new DirectedPair()
                 {
                     from = node,
-                    to = new NullNode()
+                    to = NullNode.o
                 }
             };
             return newRouteFromEdge(newEdge);
