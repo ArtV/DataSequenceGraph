@@ -132,6 +132,20 @@ namespace XMLGraphFormatTests
             Assert.AreEqual(6, Convert.ToInt32(AXmlElem.Attributes[XMLGraphFormat<bool>.SEQNUMATTR].Value));
             Assert.AreEqual("", AXmlElem.InnerText);
             Assert.AreEqual(firstAIndex.ToString(), AXmlElem.Attributes[XMLGraphFormat<long>.VALUEREFATTR].Value);
+
+            DataChunkRouteBlazer<string> blaz = new DataChunkRouteBlazer<string>(new List<string> { "G", "G", "G" }, nodeList, prefixD);
+            blaz.computeFullRoute();
+            DataChunkRoute<string> GGG = nodeList.nthDataChunkRoute(3);
+            secondMissingComponents = GGG.specsForMissingComponents(destinationList);
+            secondMissingNodeSpecs = secondMissingComponents.Item1;
+            Assert.AreEqual(4, secondMissingNodeSpecs.Count);
+            secondMissingDoc = new XMLGraphFormat<string>().ToXML(destinationList, secondMissingNodeSpecs, secondMissingEdgeSpecs);
+            nodesElement = secondMissingDoc.DocumentElement.ChildNodes[0];
+            nodeElements = nodesElement.ChildNodes;
+            XmlNode G2Elem = nodeElements[2];
+            Assert.AreEqual(NodeKind.ValueNode.ToString(), G2Elem.Attributes[XMLGraphFormat<bool>.NODEKINDATTR].Value);
+            Assert.AreEqual("", G2Elem.InnerText);
+            Assert.IsNotNull(G2Elem.Attributes[XMLGraphFormat<bool>.VALUEREFATTR]);
         }
     }
 }

@@ -48,11 +48,7 @@ namespace DataSequenceGraph.Format
 
         public XmlDocument ToXML(MasterNodeList<NodeValType> nodeList)
         {
-            XmlDocument returnDoc = new XmlDocument();
-            returnDoc.LoadXml("<" + ROOTELEM + " />");
-            addNodes(returnDoc,nodeList,nodeList.AllNodeSpecs);
-            addEdges(returnDoc,nodeList.AllEdgeSpecs);
-            return returnDoc;
+            return ToXML(nodeList, nodeList.AllNodeSpecs, nodeList.AllEdgeSpecs.ToList());
         }
 
         private void addNodes(XmlDocument doc,MasterNodeList<NodeValType> nodeList,IList<NodeSpec> nodeSpecs)
@@ -94,8 +90,20 @@ namespace DataSequenceGraph.Format
                     }
                     else
                     {
-                        valueText = doc.CreateTextNode(nodeValueExporter.ToNodeValueString(valSpec.Value));
-                        nodeElement.AppendChild(valueText);
+                        nodeIndexesWithValue = nodeSpecs.OfType<ValueNodeSpec<NodeValType>>().Where(
+                            spec => spec.SequenceNumber < valSpec.SequenceNumber &&
+                                    spec.Value.Equals(valSpec.Value)).Select(spec => spec.SequenceNumber);
+                        if (nodeIndexesWithValue.Count() > 0 && valSpec.SequenceNumber != nodeIndexesWithValue.First())
+                        {
+                            valueRefAttr = doc.CreateAttribute(VALUEREFATTR);
+                            valueRefAttr.Value = nodeIndexesWithValue.First().ToString();
+                            nodeElement.Attributes.Append(valueRefAttr);
+                        }
+                        else
+                        {
+                            valueText = doc.CreateTextNode(nodeValueExporter.ToNodeValueString(valSpec.Value));
+                            nodeElement.AppendChild(valueText);
+                        }
                     }
                 }
             }
