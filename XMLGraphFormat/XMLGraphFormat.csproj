@@ -40,10 +40,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NodeValueExporter.cs" />
-    <Compile Include="NodeValueParser.cs" />
-    <Compile Include="StringNodeValueParser.cs" />
-    <Compile Include="ToStringNodeValueExporter.cs" />
     <Compile Include="XMLGraphFormat.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
