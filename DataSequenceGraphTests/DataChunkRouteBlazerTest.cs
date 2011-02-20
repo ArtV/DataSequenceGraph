@@ -174,7 +174,7 @@ namespace DataSequenceGraph
 //            new DataChunkRouteBlazer<string>(srcDataList, destinationList, destinationDict).computeFullRoute();
 //            new DataChunkRouteBlazer<string>(srcData2List, destinationList, destinationDict).computeFullRoute();
             DataChunkRoute<string> ABC = list.nthDataChunkRoute(0);
-            Tuple<IEnumerable<NodeSpec>, IEnumerable<EdgeRouteSpec>> missingComponents = 
+            Tuple<IList<NodeSpec>, IList<EdgeRouteSpec>> missingComponents = 
                 ABC.specsForMissingComponents(destinationList);
             IEnumerable<NodeSpec> missingNodes = missingComponents.Item1;
             IEnumerable<EdgeRouteSpec> missingEdges = missingComponents.Item2;

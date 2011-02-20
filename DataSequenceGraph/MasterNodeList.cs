@@ -192,7 +192,8 @@ namespace DataSequenceGraph
             int desiredIndex = spec.SequenceNumber;
             if (desiredIndex <= nodeList.Count - 1)
             {
-                if (desiredIndex < 0 || nodeList[desiredIndex].kind != NodeKind.NullNode)
+                if (desiredIndex < 0 || nodeList[desiredIndex].kind != NodeKind.NullNode ||
+                    spec.kind == NodeKind.NullNode)
                 {
                     return false;
                 }

@@ -95,6 +95,43 @@ namespace XMLGraphFormatTests
             XmlNode secondAXmlElem = nodeElements[secondAIndex];
             Assert.AreEqual(firstAIndex.ToString(), secondAXmlElem.Attributes[XMLGraphFormat<ushort>.VALUEREFATTR].Value);
             Assert.AreEqual("", secondAXmlElem.InnerText);
+
+            MasterNodeList<string> destinationList = new MasterNodeList<string>();
+            Dictionary<Node, List<Route>> destinationDict = new Dictionary<Node, List<Route>>();
+            DataChunkRoute<string> firstRoute = nodeList.nthDataChunkRoute(0);
+            var missingComponents = firstRoute.specsForMissingComponents(destinationList);
+            Assert.AreEqual(4, missingComponents.Item1.Count);
+            Assert.AreEqual(3, missingComponents.Item2.Count);
+            destinationList.reloadNodesThenRoutesFromSpecs(missingComponents.Item1, missingComponents.Item2);
+
+            DataChunkRoute<string> secondRoute = nodeList.nthDataChunkRoute(1);
+            Assert.AreEqual(3,secondRoute.componentEdges.Count);
+            Assert.AreEqual(1, secondRoute.componentEdges[0].edge.link.from.SequenceNumber);
+            Assert.AreEqual(3, secondRoute.componentEdges[1].edge.link.from.SequenceNumber);
+            Assert.AreEqual(6, secondRoute.componentEdges[2].edge.link.from.SequenceNumber);
+            Assert.AreEqual(7, secondRoute.componentEdges[2].edge.link.to.SequenceNumber);
+            foreach(EdgeRoute rt in secondRoute.componentEdges)
+            {
+                Assert.AreNotEqual(0, rt.edge.link.from.SequenceNumber);
+                Assert.AreNotEqual(0, rt.edge.link.to.SequenceNumber);
+                Assert.AreNotEqual(0, rt.edge.requisiteLink.from.SequenceNumber);
+                Assert.AreNotEqual(0, rt.edge.requisiteLink.to.SequenceNumber);
+            }
+            var secondMissingComponents = secondRoute.specsForMissingComponents(destinationList);
+            var secondMissingNodeSpecs = secondMissingComponents.Item1;
+            Assert.AreEqual(3, secondMissingNodeSpecs.Count);
+            var secondMissingEdgeSpecs = secondMissingComponents.Item2;
+            XmlDocument secondMissingDoc = new XMLGraphFormat<string>().ToXML(destinationList, secondMissingNodeSpecs, secondMissingEdgeSpecs);
+            Assert.AreEqual(2, secondMissingDoc.DocumentElement.ChildNodes.Count);
+            nodesElement = secondMissingDoc.DocumentElement.ChildNodes[0];
+            nodeElements = nodesElement.ChildNodes;            
+            Assert.AreEqual(3, nodeElements.Count);
+            Assert.AreEqual(NodeKind.GateNode.ToString(), nodeElements[0].Attributes[XMLGraphFormat<bool>.NODEKINDATTR].Value);
+            Assert.AreEqual(NodeKind.ValueNode.ToString(), nodeElements[1].Attributes[XMLGraphFormat<bool>.NODEKINDATTR].Value);
+            XmlNode AXmlElem = nodeElements[1];
+            Assert.AreEqual(6, Convert.ToInt32(AXmlElem.Attributes[XMLGraphFormat<bool>.SEQNUMATTR].Value));
+            Assert.AreEqual("", AXmlElem.InnerText);
+            Assert.AreEqual(firstAIndex.ToString(), AXmlElem.Attributes[XMLGraphFormat<long>.VALUEREFATTR].Value);
         }
     }
 }

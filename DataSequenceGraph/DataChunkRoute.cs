@@ -74,7 +74,7 @@ namespace DataSequenceGraph
             }
         }
 
-        public Tuple<IEnumerable<NodeSpec>, IEnumerable<EdgeRouteSpec>> specsForMissingComponents(
+        public Tuple<IList<NodeSpec>, IList<EdgeRouteSpec>> specsForMissingComponents(
             MasterNodeList<T> destinationList)
         {
             followToEnd();
@@ -99,7 +99,7 @@ namespace DataSequenceGraph
                 }
             }
             sortAndDedupe(nodeSpecs);
-            return new Tuple<IEnumerable<NodeSpec>,IEnumerable<EdgeRouteSpec>>(nodeSpecs,edgeSpecs);
+            return new Tuple<IList<NodeSpec>,IList<EdgeRouteSpec>>(nodeSpecs.AsReadOnly(),edgeSpecs.AsReadOnly());
         }
 
         private bool edgeOnNodeAlready(MasterNodeList<T> destinationList,Node node, EdgeRoute edge)
@@ -111,7 +111,7 @@ namespace DataSequenceGraph
         private bool addNodeSpecIfMissing(MasterNodeList<T> destinationList, Node node, List<NodeSpec> specList)
         {
             Node foundNode = destinationList.nodeByNumber(node.SequenceNumber);
-            if (foundNode.kind == NodeKind.NullNode)
+            if (foundNode.kind == NodeKind.NullNode && node.kind != NodeKind.NullNode)
             {
                 specList.Add(node.ToNodeSpec());
                 return false;
