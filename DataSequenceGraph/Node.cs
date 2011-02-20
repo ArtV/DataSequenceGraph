@@ -29,5 +29,37 @@ namespace DataSequenceGraph
         {
             return new NodeSpec() { kind = kind, SequenceNumber = SequenceNumber };
         }
+
+        public override bool Equals(System.Object obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+
+            Node p = obj as Node;
+            if ((System.Object)p == null)
+            {
+                return false;
+            }
+
+            return (SequenceNumber == p.SequenceNumber);
+        }
+
+        public bool Equals(Node p)
+        {
+            if ((object)p == null)
+            {
+                return false;
+            }
+
+            return (SequenceNumber == p.SequenceNumber);
+        }
+
+        public override int GetHashCode()
+        {
+            return SequenceNumber;
+        }
+
     }
 }

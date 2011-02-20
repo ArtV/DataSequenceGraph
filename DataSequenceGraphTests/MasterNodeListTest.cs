@@ -24,6 +24,8 @@ namespace DataSequenceGraph
         {
             ValueNode<string> nodeB = (ValueNode<string>) list.nodeByNumber(1);            
             Assert.AreEqual("B", nodeB.Value);
+            Assert.AreEqual(NodeKind.NullNode, list.nodeByNumber(5).kind);
+            Assert.AreEqual(NodeKind.NullNode, list.nodeByNumber(-1).kind);
         }
 
         [Test]

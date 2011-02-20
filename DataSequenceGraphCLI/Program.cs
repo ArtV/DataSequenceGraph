@@ -86,14 +86,22 @@ namespace DataSequenceGraphCLI
         }
 
         static void printEnumeratedChunks(MasterNodeList<string> masterNodeList)
-        {
-            IEnumerable<IEnumerable<string>> outChunks = masterNodeList.enumerateDataChunks();
-            foreach (IEnumerable<string> chunk in outChunks)
+        {            
+            for (int i = 0; i <= 2; i++)
             {
-                foreach (string val in chunk)
+                DataChunkRoute<string> route = masterNodeList.nthDataChunkRoute(i);
+                ValueNode<string> lastNode = null;
+                foreach (EdgeRoute edge in route.componentEdges)
                 {
-                    Console.Out.Write(val);
+                    Console.Out.Write(edge.edge.link.from.SequenceNumber);
+                    if (edge.edge.link.from is ValueNode<string>)
+                    {
+                        Console.Out.Write("," + ((ValueNode<string>)edge.edge.link.from).Value);
+                    }
+                    Console.Out.Write("  ");
+                    lastNode = edge.edge.link.to as ValueNode<string>;
                 }
+                Console.Out.Write(lastNode.SequenceNumber + "," + lastNode.Value);
                 Console.Out.WriteLine();
             }
         }

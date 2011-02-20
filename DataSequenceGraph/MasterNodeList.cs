@@ -123,7 +123,14 @@ namespace DataSequenceGraph
 
         public Node nodeByNumber(int index)
         {
-            return nodeList[index];
+            if (index < 0 || index > nodeList.Count - 1)
+            {
+                return NullNode.o;
+            }
+            else
+            {
+                return nodeList[index];
+            }
         }
 
         public GateNode newGateNode()
