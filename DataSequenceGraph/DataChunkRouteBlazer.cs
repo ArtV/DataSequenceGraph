@@ -16,15 +16,13 @@ namespace DataSequenceGraph
             }
         }
         public MasterNodeList<T> nodeList { get; set; }
-        public Dictionary<Node, List<Route>> nodeRoutesDictionary { get; set; }
         public bool Done { get; private set; }
 
         private int sourceDataIndex;
         private List<DirectedPair> addedLinks { get; set; }
         private IEnumerable<T> sourceDataChunk { get; set; }
 
-        public DataChunkRouteBlazer(IEnumerable<T> sourceDataChunk,MasterNodeList<T> nodeList,
-            Dictionary<Node, List<Route>> nodeRoutesDictionary)
+        public DataChunkRouteBlazer(IEnumerable<T> sourceDataChunk,MasterNodeList<T> nodeList)
         {
             this.Done = false;
             this.sourceDataChunk = sourceDataChunk;
@@ -32,7 +30,6 @@ namespace DataSequenceGraph
             this.nodeList = nodeList;
             RouteFactory<T> factory = new RouteFactory<T>();
             this.chunkRoute = factory.newDataChunkRoute(nodeList.newGateNode());
-            this.nodeRoutesDictionary = nodeRoutesDictionary;
             this.addedLinks = new List<DirectedPair>();
         }
 
@@ -169,26 +166,26 @@ namespace DataSequenceGraph
         {
             updateRoutesListForNode(routeStartingNode);
 
-            return nodeRoutesDictionary[routeStartingNode].Where(route => route.prefixMatches(criterion));
+            return nodeList.nodeRoutesDictionary[routeStartingNode].Where(route => route.prefixMatches(criterion));
         }
 
         private void updateRoutesListForNode(ValueNode<T> routeStartingNode)
         {
             IEnumerable<Route> cachedRoutes = Enumerable.Empty<Route>();
-            if (nodeRoutesDictionary.ContainsKey(routeStartingNode))
+            if (nodeList.nodeRoutesDictionary.ContainsKey(routeStartingNode))
             {
-                cachedRoutes = nodeRoutesDictionary[routeStartingNode];
+                cachedRoutes = nodeList.nodeRoutesDictionary[routeStartingNode];
             }
             else
             {
-                nodeRoutesDictionary[routeStartingNode] = new List<Route>();
+                nodeList.nodeRoutesDictionary[routeStartingNode] = new List<Route>();
             }
 
             IEnumerable<Route> allNewOutgoingEdges = routeStartingNode.OutgoingEdges.Where(route =>
                 route.IsNotStartOfAny(cachedRoutes));
             foreach (var route in allNewOutgoingEdges)
             {
-                nodeRoutesDictionary[routeStartingNode].Add(route);
+                nodeList.nodeRoutesDictionary[routeStartingNode].Add(route);
             }
         }
 
@@ -233,13 +230,13 @@ namespace DataSequenceGraph
         private IEnumerable<Route> followOutgoingRoutes(Route baseRoute)
         {
             Node firstNode = baseRoute.startNode;
-            if (nodeRoutesDictionary.ContainsKey(firstNode))
+            if (nodeList.nodeRoutesDictionary.ContainsKey(firstNode))
             {
-                nodeRoutesDictionary[firstNode].Remove(baseRoute);
+                nodeList.nodeRoutesDictionary[firstNode].Remove(baseRoute);
             }
             else
             {
-                nodeRoutesDictionary[firstNode] = new List<Route>();
+                nodeList.nodeRoutesDictionary[firstNode] = new List<Route>();
             }
 
             Node lastNode = baseRoute.connectedNodes.Last();
@@ -249,7 +246,7 @@ namespace DataSequenceGraph
             foreach (Route route in lastNode.OutgoingEdges)
             {
                 newLongerRoute = routeFactory.newRouteFromConnectedRoutes(baseRoute, route);
-                nodeRoutesDictionary[firstNode].Add(newLongerRoute);
+                nodeList.nodeRoutesDictionary[firstNode].Add(newLongerRoute);
                 yield return newLongerRoute;
             }
         }

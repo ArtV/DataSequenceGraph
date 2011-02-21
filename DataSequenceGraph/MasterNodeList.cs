@@ -12,10 +12,13 @@ namespace DataSequenceGraph
         private List<GateNode> gateNodeList = new List<GateNode>();
         private RouteFactory<T> routeFactory;
 
+        public Dictionary<Node, List<Route>> nodeRoutesDictionary { get; set; }
+
         public MasterNodeList()
         {
             routeFactory = new RouteFactory<T>();
             routeFactory.masterNodeList = this;
+            nodeRoutesDictionary = new Dictionary<Node, List<Route>>();
         }
 
         public IEnumerable<Node> AllNodes

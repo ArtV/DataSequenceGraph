@@ -65,9 +65,9 @@ namespace DataSequenceGraph
 
         public void dataSetup13()
         {
-            chunkRoute = new DataChunkRouteBlazer<string>(srcDataList, list, routePrefixDictionary);
-            chunkRoute2 = new DataChunkRouteBlazer<string>(srcData2List, list, routePrefixDictionary);
-            chunkRoute3 = new DataChunkRouteBlazer<string>(srcData3List, list, routePrefixDictionary);
+            chunkRoute = new DataChunkRouteBlazer<string>(srcDataList, list);
+            chunkRoute2 = new DataChunkRouteBlazer<string>(srcData2List, list);
+            chunkRoute3 = new DataChunkRouteBlazer<string>(srcData3List, list);
         }
 
         private void setup13append()
@@ -93,9 +93,9 @@ namespace DataSequenceGraph
 
         public void dataSetup46()
         {
-            chunkRoute4 = new DataChunkRouteBlazer<string>(srcData4List, list, routePrefixDictionary);
-            chunkRoute5 = new DataChunkRouteBlazer<string>(srcData5List, list, routePrefixDictionary);
-            chunkRoute6 = new DataChunkRouteBlazer<string>(srcData6List, list, routePrefixDictionary);
+            chunkRoute4 = new DataChunkRouteBlazer<string>(srcData4List, list);
+            chunkRoute5 = new DataChunkRouteBlazer<string>(srcData5List, list);
+            chunkRoute6 = new DataChunkRouteBlazer<string>(srcData6List, list);
         }
 
         [Test]

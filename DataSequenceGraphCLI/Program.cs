@@ -18,9 +18,9 @@ namespace DataSequenceGraphCLI
             List<string> srcData2List = new List<string>() { "A", "A", "D" };
             List<string> srcData3List = new List<string>() { "A", "A", "E" };
 
-            DataChunkRouteBlazer<string> chunkRoute = new DataChunkRouteBlazer<string>(srcDataList, masterNodeList, routePrefixDictionary);
-            DataChunkRouteBlazer<string> chunkRoute2 = new DataChunkRouteBlazer<string>(srcData2List, masterNodeList, routePrefixDictionary);
-            DataChunkRouteBlazer<string> chunkRoute3 = new DataChunkRouteBlazer<string>(srcData3List, masterNodeList, routePrefixDictionary);
+            DataChunkRouteBlazer<string> chunkRoute = new DataChunkRouteBlazer<string>(srcDataList, masterNodeList);
+            DataChunkRouteBlazer<string> chunkRoute2 = new DataChunkRouteBlazer<string>(srcData2List, masterNodeList);
+            DataChunkRouteBlazer<string> chunkRoute3 = new DataChunkRouteBlazer<string>(srcData3List, masterNodeList);
 
             chunkRoute.computeFullRoute();
             chunkRoute2.computeFullRoute();
@@ -30,15 +30,15 @@ namespace DataSequenceGraphCLI
         static void threeSixRoutes(MasterNodeList<string> masterNodeList, Dictionary<Node, List<Route>> routePrefixDictionary)
         {
             List<string> srcData4List = new List<string>() { "A", "B", "C", "D", "E", "F" };
-            DataChunkRouteBlazer<string> chunkRoute4 =  new DataChunkRouteBlazer<string>(srcData4List, masterNodeList, routePrefixDictionary);
+            DataChunkRouteBlazer<string> chunkRoute4 = new DataChunkRouteBlazer<string>(srcData4List, masterNodeList);
             chunkRoute4.computeFullRoute();
 
             List<string> srcData5List = new List<string>() { "G", "B", "C", "D", "J", "K" };
-            DataChunkRouteBlazer<string> chunkRoute5 = new DataChunkRouteBlazer<string>(srcData5List, masterNodeList, routePrefixDictionary);
+            DataChunkRouteBlazer<string> chunkRoute5 = new DataChunkRouteBlazer<string>(srcData5List, masterNodeList);
             chunkRoute5.computeFullRoute();
 
             List<string> srcData6List = new List<string>() { "G", "B", "D", "M", "N", "O" };
-            DataChunkRouteBlazer<string> chunkRoute6 = new DataChunkRouteBlazer<string>(srcData6List, masterNodeList, routePrefixDictionary);
+            DataChunkRouteBlazer<string> chunkRoute6 = new DataChunkRouteBlazer<string>(srcData6List, masterNodeList);
             chunkRoute6.computeFullRoute();
         }
 
@@ -48,14 +48,14 @@ namespace DataSequenceGraphCLI
             if (args.Length >= 1 && args[0].ToUpper() == "L")
             {
                 masterNodeList = loadFile(args[1]);
-
+/*
             using (TextReader reader = new StreamReader(new FileStream("common_follow.txt", FileMode.Open, FileAccess.Read)))
             {
                 var sentences = SentenceChunkLoader.ToSentenceChunks(reader);
                 foreach (string sentence in sentences)
                 {
                     var words = SentenceChunkLoader.ToWordValues(sentence);
-                    var blazer = new DataChunkRouteBlazer<string>(words, masterNodeList,new Dictionary<Node, List<Route>>());
+                    var blazer = new DataChunkRouteBlazer<string>(words, masterNodeList);
                     blazer.computeFullRoute();
                 }
             }
@@ -69,8 +69,8 @@ namespace DataSequenceGraphCLI
                 var missing = followRoute.specsForMissingComponents(masterNodeList2);
                 format.ToXMLFile(masterNodeList2, missing.Item1, missing.Item2);
 //                format.ToBinaryAndCSVFiles(masterNodeList2,missing.Item1,missing.Item2);
+  */              
                 
-                /*
                 if (args.Length >= 3 && args[2].ToUpper() == "F")
                 {
                     binaryCSVFiles(masterNodeList);
@@ -79,7 +79,7 @@ namespace DataSequenceGraphCLI
                 {
                     defaultTestOutput(masterNodeList);
                     printEnumeratedChunks(masterNodeList);
-                } */
+                } 
             }
             else if (args.Length >= 2 && args[1] == "3")
             {
@@ -121,7 +121,7 @@ namespace DataSequenceGraphCLI
             foreach (string sentence in sentences)
             {
                 words = SentenceChunkLoader.ToWordValues(sentence);
-                blazer = new DataChunkRouteBlazer<string>(words, masterNodeList, routePrefixDictionary);
+                blazer = new DataChunkRouteBlazer<string>(words, masterNodeList);
                 blazer.computeFullRoute();
             }
             return masterNodeList;

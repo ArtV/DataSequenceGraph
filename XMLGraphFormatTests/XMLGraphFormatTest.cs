@@ -139,7 +139,7 @@ namespace XMLGraphFormatTests
             Assert.AreEqual("", AXmlElem.InnerText);
             Assert.AreEqual(firstAIndex.ToString(), AXmlElem.Attributes[XMLGraphFormat<long>.VALUEREFATTR].Value);
 
-            DataChunkRouteBlazer<string> blaz = new DataChunkRouteBlazer<string>(new List<string> { "G", "G", "G" }, nodeList, prefixD);
+            DataChunkRouteBlazer<string> blaz = new DataChunkRouteBlazer<string>(new List<string> { "G", "G", "G" }, nodeList);
             blaz.computeFullRoute();
             DataChunkRoute<string> GGG = nodeList.nthDataChunkRoute(3);
             secondMissingComponents = GGG.specsForMissingComponents(destinationList);
