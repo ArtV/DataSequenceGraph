@@ -288,7 +288,7 @@ namespace DataSequenceGraph
 
         private DirectedPair latestAddedLinkBeforeOutgoingReqs(Node node)
         {
-            int earliestRequisiteIndex = this.chunkRoute.findEarliestMatchOfRequisites(node);
+            int earliestRequisiteIndex = this.chunkRoute.findEarliestMatchOfRequisites(node.OutgoingEdges).Item1;
             if (earliestRequisiteIndex == -1)
             {
                 return addedLinks[addedLinks.Count - 1];

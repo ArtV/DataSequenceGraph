@@ -17,6 +17,8 @@ namespace DataSequenceGraph
         private ValueNode<string> nodeB;
         private ValueNode<string> nodeC;
         private ValueNode<string> nodeD;
+        private ValueNode<string> nodeD2;
+        private ValueNode<string> nodeD3;
 
         private Route routeAB;
         private Edge edgeAB;
@@ -24,8 +26,15 @@ namespace DataSequenceGraph
         private Edge edgeBC;
         private Route routeCD;
         private Edge edgeCD;
+        private Edge edgeCB;
+        private Route routeCB;
+
         private Edge edgeBD;
         private Route routeBD;
+        private Edge edgeBD2;
+        private Route routeBD2;
+        private Edge edgeBD3;
+        private Route routeBD3;
 
         private Route routeABC;        
 
@@ -39,6 +48,8 @@ namespace DataSequenceGraph
             nodeB = list.newValueNodeFromValue("B");
             nodeC = list.newValueNodeFromValue("C");
             nodeD = list.newValueNodeFromValue("D");
+            nodeD2 = list.newValueNodeFromValue("D");
+            nodeD3 = list.newValueNodeFromValue("D");
 
             routeFactory = new RouteFactory<string>();
 
@@ -84,10 +95,48 @@ namespace DataSequenceGraph
                     to = nodeC
                 }
             };
+            edgeBD2 = new Edge()
+            {
+                link = new DirectedPair()
+                {
+                    from = nodeB,
+                    to = nodeD2
+                },
+                requisiteLink = new DirectedPair()
+                {
+                    from = nodeC,
+                    to = nodeA
+                }
+            };
+            edgeBD3 = new Edge()
+            {
+                link = new DirectedPair()
+                {
+                    from = nodeB,
+                    to = nodeD3
+                },
+                requisiteLink = new DirectedPair()
+                {
+                    from = nodeC,
+                    to = nodeB
+                }
+            };
+            edgeCB = new Edge()
+            {
+                link = new DirectedPair()
+                {
+                    from = nodeC,
+                    to = nodeB
+                }
+            };
+            routeCB = routeFactory.newRouteFromEdge(edgeCB);
             routeAB = routeFactory.newRouteFromEdge(edgeAB);
             routeBC = routeFactory.newRouteFromEdge(edgeBC);
             routeCD = routeFactory.newRouteFromEdge(edgeCD);
+
             routeBD = routeFactory.newRouteFromEdge(edgeBD);
+            routeBD2 = routeFactory.newRouteFromEdge(edgeBD2);
+            routeBD3 = routeFactory.newRouteFromEdge(edgeBD3);
 
             routeABC = routeFactory.newRouteFromConnectedRoutes(routeAB, routeBC);
 
@@ -160,6 +209,14 @@ namespace DataSequenceGraph
             Assert.AreEqual(3, specCD.ToNumber);
             Assert.AreEqual(0, specCD.RequisiteFromNumber);
             Assert.AreEqual(1, specCD.RequisiteToNumber);
+        }
+
+        [Test]
+        public void findNextEdgeToFollow()
+        {
+            EdgeRoute foundRoute = routeCB.findNextEdgeToFollow();
+//            Assert.AreEqual(nodeD3.Value, ((ValueNode<string>)foundRoute.edge.link.to).Value);
+            Assert.AreEqual(nodeD3.SequenceNumber, foundRoute.edge.link.to.SequenceNumber);
         }
     }
 }

@@ -93,36 +93,50 @@ namespace DataSequenceGraph
 
         public EdgeRoute findNextEdgeToFollow()
         {
-            int earliestRequisiteIndex = findEarliestMatchOfRequisites(lastNode);
+            IEnumerable<EdgeRoute> edgesToUnvisitedNodesOrStart = lastNode.OutgoingEdges.Where(route =>
+                route.edge.link.to == startNode ||
+                !connectedNodes.Any(prevNode => prevNode.SequenceNumber == route.edge.link.to.SequenceNumber));                
+            var reqIndexAndEdge = findEarliestMatchOfRequisites(edgesToUnvisitedNodesOrStart);
+            int earliestRequisiteIndex = reqIndexAndEdge.Item1;
             EdgeRoute selectedRoute;
             if (earliestRequisiteIndex == -1)
-            {
-                selectedRoute = lastNode.OutgoingEdges.First();
+            {                
+                selectedRoute = edgesToUnvisitedNodesOrStart.First(route =>
+                    route.edge.requisiteLink.from.kind == NodeKind.NullNode);
             }
             else
             {
-                selectedRoute = lastNode.OutgoingEdges.First(route =>
-                    route.edge.requisiteLink.from == connectedNodes.ElementAt(earliestRequisiteIndex));
+                selectedRoute = reqIndexAndEdge.Item2;
+
             }
             return selectedRoute;
         }
 
-        public int findEarliestMatchOfRequisites(Node node)
+        public Tuple<int,EdgeRoute> findEarliestMatchOfRequisites(IEnumerable<EdgeRoute> edgesToUnvisitedNodesOrStart)
         {
             int earliestRequisiteIndex = -1;
-            foreach (EdgeRoute route in node.OutgoingEdges)
+            int nextToLastIndex = connectedNodes.Count - 2;
+            EdgeRoute matchingRoute = null; 
+            foreach (EdgeRoute route in edgesToUnvisitedNodesOrStart)
             {
                 int indexOfRequisiteMatch = findNode(route.edge.requisiteLink.from);
+                if (indexOfRequisiteMatch > nextToLastIndex ||
+                    connectedNodes.ElementAt(indexOfRequisiteMatch + 1) != route.edge.requisiteLink.to)
+                {
+                    continue;
+                }
                 if (earliestRequisiteIndex == -1)
                 {
                     earliestRequisiteIndex = indexOfRequisiteMatch;
+                    matchingRoute = route;
                 }
-                else if (indexOfRequisiteMatch != -1)
+                else if (indexOfRequisiteMatch != -1 && indexOfRequisiteMatch < earliestRequisiteIndex)
                 {
-                    earliestRequisiteIndex = Math.Min(earliestRequisiteIndex, indexOfRequisiteMatch);
+                    earliestRequisiteIndex = indexOfRequisiteMatch;
+                    matchingRoute = route;
                 }
             }
-            return earliestRequisiteIndex;
+            return Tuple.Create(earliestRequisiteIndex, matchingRoute);
         }
         
         public int findNode(Node otherNode)
