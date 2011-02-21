@@ -68,6 +68,11 @@ namespace DataSequenceGraph.Format
 
         public void ToBinaryAndCSVFiles(MasterNodeList<NodeValType> nodeList, IEnumerable<NodeSpec> nodes, IEnumerable<EdgeRouteSpec> edges)
         {
+            if (binaryFileName == null || binaryFileName.Equals("") ||
+                textFileName == null || textFileName.Equals(""))
+            {
+                throw new InvalidOperationException("binary filename and CSV filename must be set first");
+            }
             using (FileStream fileStream = new FileStream(binaryFileName, FileMode.Create))
             {
                 using (TextWriter textWriter = new StreamWriter(new FileStream(textFileName, FileMode.Create)))
@@ -210,6 +215,11 @@ namespace DataSequenceGraph.Format
 
         public MasterNodeList<NodeValType> ToNodeListFromFiles(MasterNodeList<NodeValType> srcList)
         {
+            if (binaryFileName == null || binaryFileName.Equals("") ||
+                textFileName == null || textFileName.Equals(""))
+            {
+                throw new InvalidOperationException("binary filename and CSV filename must be set first");
+            }
             using (FileStream fs = new FileStream(binaryFileName, FileMode.Open, FileAccess.Read))
             {
                 using (TextReader textReader = new StreamReader(new FileStream(textFileName, FileMode.Open, FileAccess.Read)))
