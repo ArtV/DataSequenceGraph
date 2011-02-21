@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.XPath;
 using DataSequenceGraph;
+using System.IO;
 
 namespace DataSequenceGraph.Format
 {
@@ -25,7 +26,9 @@ namespace DataSequenceGraph.Format
         public const string REQTOATTR = "ReqTo";
 
         public NodeValueExporter<NodeValType> nodeValueExporter { get; set; }
-        public NodeValueParser<NodeValType> nodeValueParser { get; set; }        
+        public NodeValueParser<NodeValType> nodeValueParser { get; set; }
+
+        public string XMLFilename { get; set; }
 
         public XMLGraphFormat()
         {
@@ -37,7 +40,36 @@ namespace DataSequenceGraph.Format
             this.nodeValueExporter = nodeValueConverter;
         }
 
-        public XmlDocument ToXML(MasterNodeList<NodeValType> nodeList, IList<NodeSpec> nodes, IList<EdgeRouteSpec> edges)
+        public XMLGraphFormat(string XMLFilename): this(new ToStringNodeValueExporter<NodeValType>())
+        {
+            this.XMLFilename = XMLFilename;
+        }
+
+        public XMLGraphFormat(string XMLFilename, NodeValueExporter<NodeValType> nodeValueExporter)
+        {
+            this.XMLFilename = XMLFilename;
+            this.nodeValueExporter = nodeValueExporter;
+        }
+
+        public void ToXMLFile(MasterNodeList<NodeValType> nodeList)
+        {
+            ToXMLFile(nodeList, nodeList.AllNodeSpecs, nodeList.AllEdgeSpecs.ToList());
+        }
+
+        public void ToXMLFile(MasterNodeList<NodeValType> nodeList, IList<NodeSpec> nodes, IList<EdgeRouteSpec> edges)
+        {
+            if (XMLFilename == null || XMLFilename.Equals(""))
+            {
+                throw new InvalidOperationException("XML filename must be set for file output ");
+            }
+            XmlDocument doc = ToXMLDocument(nodeList, nodes, edges);
+            using (XmlWriter writer = XmlWriter.Create(XMLFilename))
+            {
+                doc.WriteContentTo(writer);
+            }
+        }
+
+        public XmlDocument ToXMLDocument(MasterNodeList<NodeValType> nodeList, IList<NodeSpec> nodes, IList<EdgeRouteSpec> edges)
         {
             XmlDocument returnDoc = new XmlDocument();
             returnDoc.LoadXml("<" + ROOTELEM + " />");
@@ -46,9 +78,9 @@ namespace DataSequenceGraph.Format
             return returnDoc;
         }
 
-        public XmlDocument ToXML(MasterNodeList<NodeValType> nodeList)
+        public XmlDocument ToXMLDocument(MasterNodeList<NodeValType> nodeList)
         {
-            return ToXML(nodeList, nodeList.AllNodeSpecs, nodeList.AllEdgeSpecs.ToList());
+            return ToXMLDocument(nodeList, nodeList.AllNodeSpecs, nodeList.AllEdgeSpecs.ToList());
         }
 
         private void addNodes(XmlDocument doc,MasterNodeList<NodeValType> nodeList,IList<NodeSpec> nodeSpecs)
@@ -138,6 +170,18 @@ namespace DataSequenceGraph.Format
                 reqToAttr = doc.CreateAttribute(REQTOATTR);
                 reqToAttr.Value = spec.RequisiteToNumber.ToString();
                 edgeElement.Attributes.Append(reqToAttr);
+            }
+        }
+
+        public MasterNodeList<NodeValType> ToNodeListFromFile()
+        {
+            if (XMLFilename == null || XMLFilename.Equals(""))
+            {
+                throw new InvalidOperationException("XML filename must be set for file input ");
+            }
+            using (XmlReader reader = XmlReader.Create(new FileStream(XMLFilename, FileMode.Open, FileAccess.Read)))
+            {
+                return ToNodeList(reader);
             }
         }
 

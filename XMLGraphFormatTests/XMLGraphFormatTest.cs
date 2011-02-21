@@ -17,7 +17,7 @@ namespace XMLGraphFormatTests
         public void testEmptyNodeList()
         {
             MasterNodeList<int> nodeList = new MasterNodeList<int>();
-            XmlDocument emptyDoc = new XMLGraphFormat<int>().ToXML(nodeList);
+            XmlDocument emptyDoc = new XMLGraphFormat<int>().ToXMLDocument(nodeList);
             Assert.AreEqual(XMLGraphFormat<int>.ROOTELEM, emptyDoc.DocumentElement.LocalName);
         }
 
@@ -27,7 +27,7 @@ namespace XMLGraphFormatTests
             MasterNodeList<string> nodeList = new MasterNodeList<string>();
             Dictionary<Node, List<Route>> prefixD = new Dictionary<Node, List<Route>>();
             DataChunkRouteBlazerTest.threeSixChunks(nodeList, prefixD);
-            XmlDocument threeSixDoc = new XMLGraphFormat<string>().ToXML(nodeList);
+            XmlDocument threeSixDoc = new XMLGraphFormat<string>().ToXMLDocument(nodeList);
             XmlNode nodesElement = threeSixDoc.DocumentElement.ChildNodes[0];
             Assert.AreEqual(XMLGraphFormat<int>.NODESROOTELEM, nodesElement.LocalName);
             XmlNodeList nodeElements = nodesElement.ChildNodes;
@@ -78,6 +78,12 @@ namespace XMLGraphFormatTests
             Assert.AreEqual(2, nodeList.AllNodes.Count());
             Assert.IsInstanceOf<ValueNode<string>>(nodeList.AllNodes.ElementAt(1));
             Assert.AreEqual(1, nodeList.getValueNodesByValue("Here").Count());
+
+            format.XMLFilename = "graph_test.xml";
+            format.ToXMLFile(nodeList);
+            MasterNodeList<string> loadedList = format.ToNodeListFromFile();
+            Assert.AreEqual(loadedList.AllNodes.Count(), nodeList.AllNodes.Count());
+            Assert.AreEqual(loadedList.AllEdgeSpecs.Count(), nodeList.AllEdgeSpecs.Count());
         }
 
         [Test]
@@ -86,7 +92,7 @@ namespace XMLGraphFormatTests
             MasterNodeList<string> nodeList = new MasterNodeList<string>();
             Dictionary<Node, List<Route>> prefixD = new Dictionary<Node, List<Route>>();
             DataChunkRouteBlazerTest.threeThreeChunks(nodeList, prefixD);
-            XmlDocument threeThreeDoc = new XMLGraphFormat<string>().ToXML(nodeList);
+            XmlDocument threeThreeDoc = new XMLGraphFormat<string>().ToXMLDocument(nodeList);
             XmlNode nodesElement = threeThreeDoc.DocumentElement.ChildNodes[0];
             XmlNodeList nodeElements = nodesElement.ChildNodes;
 
@@ -121,7 +127,7 @@ namespace XMLGraphFormatTests
             var secondMissingNodeSpecs = secondMissingComponents.Item1;
             Assert.AreEqual(3, secondMissingNodeSpecs.Count);
             var secondMissingEdgeSpecs = secondMissingComponents.Item2;
-            XmlDocument secondMissingDoc = new XMLGraphFormat<string>().ToXML(destinationList, secondMissingNodeSpecs, secondMissingEdgeSpecs);
+            XmlDocument secondMissingDoc = new XMLGraphFormat<string>().ToXMLDocument(destinationList, secondMissingNodeSpecs, secondMissingEdgeSpecs);
             Assert.AreEqual(2, secondMissingDoc.DocumentElement.ChildNodes.Count);
             nodesElement = secondMissingDoc.DocumentElement.ChildNodes[0];
             nodeElements = nodesElement.ChildNodes;            
@@ -139,7 +145,7 @@ namespace XMLGraphFormatTests
             secondMissingComponents = GGG.specsForMissingComponents(destinationList);
             secondMissingNodeSpecs = secondMissingComponents.Item1;
             Assert.AreEqual(4, secondMissingNodeSpecs.Count);
-            secondMissingDoc = new XMLGraphFormat<string>().ToXML(destinationList, secondMissingNodeSpecs, secondMissingEdgeSpecs);
+            secondMissingDoc = new XMLGraphFormat<string>().ToXMLDocument(destinationList, secondMissingNodeSpecs, secondMissingEdgeSpecs);
             nodesElement = secondMissingDoc.DocumentElement.ChildNodes[0];
             nodeElements = nodesElement.ChildNodes;
             XmlNode G2Elem = nodeElements[2];

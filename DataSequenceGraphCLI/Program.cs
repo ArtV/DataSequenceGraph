@@ -129,7 +129,7 @@ namespace DataSequenceGraphCLI
             XMLGraphFormat<string> formatter = new XMLGraphFormat<string>();
             formatter.nodeValueParser = new StringNodeValueParser();
 
-            XmlDocument doc = formatter.ToXML(masterNodeList);
+            XmlDocument doc = formatter.ToXMLDocument(masterNodeList);
 
             doc.WriteContentTo(new XmlTextWriter(Console.Out));
 
