@@ -22,11 +22,11 @@ namespace BinaryAndCSVFormatTests
 
             BinaryAndCSVFormat<string> format = new BinaryAndCSVFormat<string>("nodesEdges.dat", "values.csv");
             format.nodeValueParser = new StringNodeValueParser();
-            format.ToBinaryAndCSV(nodeList);
+            format.ToBinaryAndCSVFiles(nodeList);
 
             nodeList = new MasterNodeList<string>();
             prefixD = new Dictionary<Node, List<Route>>();
-            nodeList = format.ToNodeList();
+            nodeList = format.ToNodeListFromFiles();
             Assert.AreEqual(origCount, nodeList.AllNodes.Count());
             Assert.AreEqual(origEdgeCount, nodeList.AllEdgeSpecs.Count());
         }

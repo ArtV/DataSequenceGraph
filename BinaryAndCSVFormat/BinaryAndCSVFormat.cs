@@ -16,33 +16,81 @@ namespace DataSequenceGraph.Format
         public string binaryFileName { get; set; }
         public string textFileName { get; set; }
 
-        public BinaryAndCSVFormat(string binaryFileName,string textFileName): 
-            this(binaryFileName,textFileName,new ToStringNodeValueExporter<NodeValType>())
-        {
-        }
+        public TextWriter CSVOut { get; set; }
+        public Stream binaryOut { get; set; }
 
-        public BinaryAndCSVFormat(string binaryFileName, string textFileName, NodeValueExporter<NodeValType> nodeValueExporter)
+        public TextReader CSVIn { get; set; }
+        public Stream binaryIn { get; set; }
+
+        public BinaryAndCSVFormat(NodeValueExporter<NodeValType> nodeValueExporter)
         {
-            this.binaryFileName = binaryFileName;
-            this.textFileName = textFileName;
             this.nodeValueExporter = nodeValueExporter;
         }
 
-        public void ToBinaryAndCSV(MasterNodeList<NodeValType> nodeList)
+        public BinaryAndCSVFormat(string binaryFileName,string textFileName): 
+            this(new ToStringNodeValueExporter<NodeValType>())
         {
-            ToBinaryAndCSV(nodeList, nodeList.AllNodeSpecs, nodeList.AllEdgeSpecs);
+            this.binaryFileName = binaryFileName;
+            this.textFileName = textFileName;
         }
 
-        public void ToBinaryAndCSV(MasterNodeList<NodeValType> nodeList, IEnumerable<NodeSpec> nodes, IEnumerable<EdgeRouteSpec> edges)
+        public BinaryAndCSVFormat(string binaryFileName, string textFileName, NodeValueExporter<NodeValType> nodeValueExporter):
+            this(nodeValueExporter)
+        {
+            this.binaryFileName = binaryFileName;
+            this.textFileName = textFileName;
+        }
+
+        public BinaryAndCSVFormat(Stream binaryOut, TextWriter CSVOut) :
+            this(new ToStringNodeValueExporter<NodeValType>())
+        {
+            this.binaryOut = binaryOut;
+            this.CSVOut = CSVOut;
+        }
+
+        public BinaryAndCSVFormat(Stream binaryOut, TextWriter CSVOut, NodeValueExporter<NodeValType> nodeValueExporter)
+        {
+            this.binaryOut = binaryOut;
+            this.CSVOut = CSVOut;
+        }
+
+        public BinaryAndCSVFormat(Stream binaryIn, TextReader CSVIn, NodeValueParser<NodeValType> nodeValueParser)
+        {
+            this.binaryIn = binaryIn;
+            this.CSVIn = CSVIn;
+            this.nodeValueParser = nodeValueParser;
+        }
+
+        public void ToBinaryAndCSVFiles(MasterNodeList<NodeValType> nodeList)
+        {
+            ToBinaryAndCSVFiles(nodeList, nodeList.AllNodeSpecs, nodeList.AllEdgeSpecs);
+        }
+
+        public void ToBinaryAndCSVFiles(MasterNodeList<NodeValType> nodeList, IEnumerable<NodeSpec> nodes, IEnumerable<EdgeRouteSpec> edges)
+        {
+            using (FileStream fileStream = new FileStream(binaryFileName, FileMode.Create))
+            {
+                using (TextWriter textWriter = new StreamWriter(new FileStream(textFileName, FileMode.Create)))
+                {
+                    binaryOut = fileStream;
+                    CSVOut = textWriter;
+                    ToBinaryAndCSVStreams(nodeList, nodes, edges);
+                }
+            }
+        }
+
+        public void ToBinaryAndCSVStreams(MasterNodeList<NodeValType> nodeList)
+        {
+            ToBinaryAndCSVStreams(nodeList, nodeList.AllNodeSpecs, nodeList.AllEdgeSpecs);
+        }
+
+        public void ToBinaryAndCSVStreams(MasterNodeList<NodeValType> nodeList, IEnumerable<NodeSpec> nodes, IEnumerable<EdgeRouteSpec> edges)
         {
             IEnumerable<ValueNodeSpec<NodeValType>> valueNodeSpecs = nodes.OfType<ValueNodeSpec<NodeValType>>();
             var splittedSpecs = splitSpecs(nodeList, nodes);
-            using (FileStream fileStream = new FileStream(binaryFileName, FileMode.Create))
+            using (BinaryWriter w = new BinaryWriter(binaryOut))
             {
-                using (BinaryWriter w = new BinaryWriter(fileStream))
-                {
-                    ToBinary(nodeList, splittedSpecs.Item1, edges, w);
-                }                
+                ToBinary(nodeList, splittedSpecs.Item1, edges, w);
             }
             ToCSV(splittedSpecs.Item2);
         }
@@ -147,27 +195,45 @@ namespace DataSequenceGraph.Format
 
             FileHelperEngine<NodeValueRecord> engine = new FileHelperEngine<NodeValueRecord>();
 
-            engine.WriteFile(textFileName, arr.ToArray());
+            engine.WriteStream(CSVOut, arr.ToArray());
         }
 
-        public MasterNodeList<NodeValType> ToNodeList()
+        public MasterNodeList<NodeValType> ToNodeListFromFiles()
         {
-            return ToNodeList(new MasterNodeList<NodeValType>());
+            return ToNodeListFromFiles(new MasterNodeList<NodeValType>());
         }
 
-        public MasterNodeList<NodeValType> ToNodeList(MasterNodeList<NodeValType> srcList)
+        public MasterNodeList<NodeValType> ToNodeListFromStreams()
+        {
+            return ToNodeListFromStreams(new MasterNodeList<NodeValType>());
+        }
+
+        public MasterNodeList<NodeValType> ToNodeListFromFiles(MasterNodeList<NodeValType> srcList)
+        {
+            using (FileStream fs = new FileStream(binaryFileName, FileMode.Open, FileAccess.Read))
+            {
+                using (TextReader textReader = new StreamReader(new FileStream(textFileName, FileMode.Open, FileAccess.Read)))
+                {
+                    binaryIn = fs;
+                    CSVIn = textReader;
+                    return ToNodeListFromStreams(srcList);
+                }
+            }
+
+        }
+
+        public MasterNodeList<NodeValType> ToNodeListFromStreams(MasterNodeList<NodeValType> srcList)
         {
             IEnumerable<NodeSpec> binNodes = null;
             IEnumerable<EdgeRouteSpec> edges = null;
             srcList.reloadNodesFromSpecs(FromCSV());
-            using (FileStream fs = new FileStream(binaryFileName, FileMode.Open, FileAccess.Read))
+
+            using (BinaryReader r = new BinaryReader(binaryIn))
             {
-                using (BinaryReader r = new BinaryReader(fs))
-                {
-                    binNodes = NodesFromBinary(srcList, r);
-                    edges = EdgesFromBinary(r);
-                }
+                binNodes = NodesFromBinary(srcList, r);
+                edges = EdgesFromBinary(r);
             }
+
             srcList.reloadNodesThenRoutesFromSpecs(binNodes, edges);
             return srcList;
         }
@@ -232,7 +298,7 @@ namespace DataSequenceGraph.Format
 
             engine.ErrorManager.ErrorMode = ErrorMode.SaveAndContinue;
 
-            NodeValueRecord[] res = engine.ReadFile(textFileName);
+            NodeValueRecord[] res = engine.ReadStream(CSVIn);
 
             if (engine.ErrorManager.ErrorCount > 0)
                 engine.ErrorManager.SaveErrors("Errors.txt");
