@@ -24,6 +24,8 @@ namespace DataSequenceGraph
         private Edge edgeBC;
         private Route routeCD;
         private Edge edgeCD;
+        private Edge edgeBD;
+        private Route routeBD;
 
         private Route routeABC;        
 
@@ -69,9 +71,23 @@ namespace DataSequenceGraph
                     to = nodeB
                 }
             };
+            edgeBD = new Edge()
+            {
+                link = new DirectedPair()
+                {
+                    from = nodeB,
+                    to = nodeD
+                },
+                requisiteLink = new DirectedPair()
+                {
+                    from = nodeB,
+                    to = nodeC
+                }
+            };
             routeAB = routeFactory.newRouteFromEdge(edgeAB);
             routeBC = routeFactory.newRouteFromEdge(edgeBC);
             routeCD = routeFactory.newRouteFromEdge(edgeCD);
+            routeBD = routeFactory.newRouteFromEdge(edgeBD);
 
             routeABC = routeFactory.newRouteFromConnectedRoutes(routeAB, routeBC);
 
@@ -118,6 +134,14 @@ namespace DataSequenceGraph
             };
             Assert.IsTrue(routeABC.prefixMatches(criterion));
             Assert.IsTrue(routeABCD.prefixMatches(criterion));
+            
+            criterion = new RouteCriterion<string>()
+            {
+                desiredSequence = new List<string>() { "B", "D" },
+                routeSoFar = routeAB
+            };
+            Assert.IsFalse(routeBD.prefixMatches(criterion));
+            Assert.IsFalse(routeAB.meetsRequisites(routeBD.requisiteLinks));
         }
 
         [Test]

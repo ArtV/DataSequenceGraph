@@ -30,7 +30,7 @@ namespace DataSequenceGraph
         private RouteFactory<T> routeFactory { get; set; }
         private List<EdgeRoute> _componentEdges { get; set; }
 
-        public override IEnumerable<Node> connectedNodes
+        public override IList<Node> connectedNodes
         {
             get 
             {

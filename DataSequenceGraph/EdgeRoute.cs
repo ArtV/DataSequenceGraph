@@ -9,7 +9,15 @@ namespace DataSequenceGraph
     {
         public Edge edge { get; private set; }
 
-        public override IEnumerable<Node> connectedNodes
+        public override IList<Node> connectedNodes
+        {
+            get
+            {
+                return _connectedNodes.ToList().AsReadOnly();
+            }
+        }
+
+        private IEnumerable<Node> _connectedNodes
         {
             get
             {
@@ -23,6 +31,7 @@ namespace DataSequenceGraph
                 }
             }
         }
+
         public override IEnumerable<DirectedPair> requisiteLinks
         {
             get

@@ -7,7 +7,7 @@ namespace DataSequenceGraph
 {
     public abstract class Route
     {
-        public abstract IEnumerable<Node> connectedNodes { get; }
+        public abstract IList<Node> connectedNodes { get; }
         public abstract IEnumerable<DirectedPair> requisiteLinks { get; }
 
         public Node startNode
@@ -44,12 +44,11 @@ namespace DataSequenceGraph
                 myFirstRequisiteLink.to == firstRequisiteLink.to);
         }
 
-        public bool prefixMatches<NodeValType>(RouteCriterion<NodeValType> criterionArg)
+        public bool prefixMatches<NodeValType>(RouteCriterion<NodeValType> criterion)
         {
-            RouteCriterion<NodeValType> criterion = criterionArg as RouteCriterion<NodeValType>;
             IEnumerable<ValueNode<NodeValType>> routeValueNodes = connectedNodes.OfType<ValueNode<NodeValType>>();
             int desiredCount = criterion.desiredSequence.Count();
-            DataChunkRoute<NodeValType> routeInProgress = criterion.routeSoFar;
+            Route routeInProgress = criterion.routeSoFar;
             if (routeValueNodes.Count() < desiredCount)
             {
                 return false;
@@ -72,15 +71,12 @@ namespace DataSequenceGraph
         {
             IEnumerable<DirectedPair> requisiteLinksNoNulls = requisiteLinks.Where(
                 link => link.isBetweenValidNodes());
-            var seq = connectedNodes.GetEnumerator();
+            var seq = connectedNodes.GetEnumerator(); 
             int numRequisitesMatched = 0;
-            for (int sequenceIndex = 0; sequenceIndex <= connectedNodes.Count() - 1;
-                sequenceIndex++)
+            int nextToLastIndex = connectedNodes.Count - 2;
+            int sequenceIndex = 0;
+            while (seq.MoveNext() && sequenceIndex <= nextToLastIndex)
             {
-                if (!seq.MoveNext())
-                {
-                    break;
-                }
                 IEnumerable<DirectedPair> requisiteLinksFrom = requisiteLinksNoNulls.Where(link =>
                     link.from == seq.Current);
                 foreach (DirectedPair link in requisiteLinksFrom)
@@ -90,6 +86,7 @@ namespace DataSequenceGraph
                         numRequisitesMatched++;
                     }
                 }
+                sequenceIndex++;
             }
             return (numRequisitesMatched == requisiteLinksNoNulls.Count());
         }
