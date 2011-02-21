@@ -6,6 +6,7 @@ using DataSequenceGraph;
 using DataSequenceGraph.Format;
 using System.Xml;
 using System.IO;
+using DataSequenceGraph.Chunk;
 
 namespace DataSequenceGraphCLI
 {
@@ -43,8 +44,44 @@ namespace DataSequenceGraphCLI
 
         static void Main(string[] args)
         {
-            MasterNodeList<string> masterNodeList;
-            if (args.Length >= 2 && args[1] == "3")
+            MasterNodeList<string> masterNodeList = null;
+            if (args.Length >= 1 && args[0].ToUpper() == "L")
+            {
+                masterNodeList = loadFile(args[1]);
+
+            using (TextReader reader = new StreamReader(new FileStream("common_follow.txt", FileMode.Open, FileAccess.Read)))
+            {
+                var sentences = SentenceChunkLoader.ToSentenceChunks(reader);
+                foreach (string sentence in sentences)
+                {
+                    var words = SentenceChunkLoader.ToWordValues(sentence);
+                    var blazer = new DataChunkRouteBlazer<string>(words, masterNodeList,new Dictionary<Node, List<Route>>());
+                    blazer.computeFullRoute();
+                }
+            }
+
+                MasterNodeList<string> masterNodeList2 = loadFile(args[1]);
+                DataChunkRoute<string> followRoute = masterNodeList.enumerateDataChunkRoutes().Last();
+
+//                BinaryAndCSVFormat<string> format = new BinaryAndCSVFormat<string>("nodesEdges.dat", "values.txt");
+                XMLGraphFormat<string> format = new XMLGraphFormat<string>("follow.xml");
+                format.nodeValueParser = new StringNodeValueParser();
+                var missing = followRoute.specsForMissingComponents(masterNodeList2);
+                format.ToXMLFile(masterNodeList2, missing.Item1, missing.Item2);
+//                format.ToBinaryAndCSVFiles(masterNodeList2,missing.Item1,missing.Item2);
+                
+                /*
+                if (args.Length >= 3 && args[2].ToUpper() == "F")
+                {
+                    binaryCSVFiles(masterNodeList);
+                }
+                else
+                {
+                    defaultTestOutput(masterNodeList);
+                    printEnumeratedChunks(masterNodeList);
+                } */
+            }
+            else if (args.Length >= 2 && args[1] == "3")
             {
                 masterNodeList = setupNodeList33();
             }
@@ -61,6 +98,33 @@ namespace DataSequenceGraphCLI
             {
                 XMLOut(masterNodeList);
             }
+        }
+
+        static void binaryCSVFiles(MasterNodeList<string> nodeList)
+        {
+            BinaryAndCSVFormat<string> format = new BinaryAndCSVFormat<string>("nodesEdges.dat", "values.txt");
+            format.nodeValueParser = new StringNodeValueParser();
+            format.ToBinaryAndCSVFiles(nodeList);
+        }        
+
+        static MasterNodeList<string> loadFile(string filename)
+        {
+            MasterNodeList<string> masterNodeList = new MasterNodeList<string>();
+            Dictionary<Node, List<Route>> routePrefixDictionary = new Dictionary<Node, List<Route>>();
+            List<string> sentences;
+            List<string> words;
+            DataChunkRouteBlazer<string> blazer;
+            using (TextReader reader = new StreamReader(new FileStream(filename, FileMode.Open, FileAccess.Read)))
+            {
+                sentences = SentenceChunkLoader.ToSentenceChunks(reader);
+            }
+            foreach (string sentence in sentences)
+            {
+                words = SentenceChunkLoader.ToWordValues(sentence);
+                blazer = new DataChunkRouteBlazer<string>(words, masterNodeList, routePrefixDictionary);
+                blazer.computeFullRoute();
+            }
+            return masterNodeList;
         }
 
         static void defaultTestOutput(MasterNodeList<string> masterNodeList)
@@ -87,9 +151,8 @@ namespace DataSequenceGraphCLI
 
         static void printEnumeratedChunks(MasterNodeList<string> masterNodeList)
         {            
-            for (int i = 0; i <= 2; i++)
+            foreach (DataChunkRoute<string> route in masterNodeList.enumerateDataChunkRoutes())
             {
-                DataChunkRoute<string> route = masterNodeList.nthDataChunkRoute(i);
                 ValueNode<string> lastNode = null;
                 foreach (EdgeRoute edge in route.componentEdges)
                 {
@@ -102,6 +165,7 @@ namespace DataSequenceGraphCLI
                     lastNode = edge.edge.link.to as ValueNode<string>;
                 }
                 Console.Out.Write(lastNode.SequenceNumber + "," + lastNode.Value);
+                Console.Out.WriteLine();
                 Console.Out.WriteLine();
             }
         }

@@ -99,6 +99,13 @@ namespace DataSequenceGraph
                 }
             }
             sortAndDedupe(nodeSpecs);
+            edgeSpecs.Add(new EdgeRouteSpec()
+            {
+                FromNumber = lastNode.SequenceNumber,
+                ToNumber = startNode.SequenceNumber,
+                RequisiteFromNumber = startNode.SequenceNumber,
+                RequisiteToNumber = connectedNodes.ElementAt(1).SequenceNumber
+            });
             return new Tuple<IList<NodeSpec>,IList<EdgeRouteSpec>>(nodeSpecs.AsReadOnly(),edgeSpecs.AsReadOnly());
         }
 

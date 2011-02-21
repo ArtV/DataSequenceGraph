@@ -47,9 +47,17 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BinaryAndCSVFormat\BinaryAndCSVFormat.csproj">
+      <Project>{77357CCB-D871-4007-85D8-DE5C2DB17043}</Project>
+      <Name>BinaryAndCSVFormat</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DataSequenceGraph\DataSequenceGraph.csproj">
       <Project>{55CB11B6-B07B-4308-93E3-F95F74B069E2}</Project>
       <Name>DataSequenceGraph</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SentenceChunkLoader\SentenceChunkLoader.csproj">
+      <Project>{FD4B2F07-6C20-43AE-A0E1-E5874CD46EE6}</Project>
+      <Name>SentenceChunkLoader</Name>
     </ProjectReference>
     <ProjectReference Include="..\XMLGraphFormat\XMLGraphFormat.csproj">
       <Project>{E9C47BF8-4F91-4B0E-ACA3-AB521C466190}</Project>

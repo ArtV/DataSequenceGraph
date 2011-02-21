@@ -142,9 +142,17 @@ namespace DataSequenceGraph
 
         public IEnumerable<IEnumerable<T>> enumerateDataChunks()
         {
+            foreach (DataChunkRoute<T> route in enumerateDataChunkRoutes())
+            {
+                yield return route.dataChunk;
+            }
+        }
+
+        public IEnumerable<DataChunkRoute<T>> enumerateDataChunkRoutes()
+        {
             for (int i = 0; i <= gateNodeList.Count - 1; i++)
             {
-                yield return nthDataChunkRoute(i).dataChunk;
+                yield return nthDataChunkRoute(i);
             }
         }
 

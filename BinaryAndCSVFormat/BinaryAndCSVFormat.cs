@@ -3,13 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using DataSequenceGraph;
-using FileHelpers;
 using System.IO;
 
 namespace DataSequenceGraph.Format
 {
     public class BinaryAndCSVFormat<NodeValType>
     {
+        private const short LINECHARLIMIT = 120;
+        private const string DELIMITER = "|";
+
+        private const byte NOTVALUENODE = 0;
+        private const byte EXISTENTVALUENODE = 1;
+        private const byte NEWVALUENODE = 2;
+
         public NodeValueExporter<NodeValType> nodeValueExporter { get; set; }
         public NodeValueParser<NodeValType> nodeValueParser { get; set; }    
 
@@ -63,7 +69,7 @@ namespace DataSequenceGraph.Format
 
         public void ToBinaryAndCSVFiles(MasterNodeList<NodeValType> nodeList)
         {
-            ToBinaryAndCSVFiles(nodeList, nodeList.AllNodeSpecs, nodeList.AllEdgeSpecs);
+            ToBinaryAndCSVFiles(new MasterNodeList<NodeValType>(), nodeList.AllNodeSpecs, nodeList.AllEdgeSpecs);
         }
 
         public void ToBinaryAndCSVFiles(MasterNodeList<NodeValType> nodeList, IEnumerable<NodeSpec> nodes, IEnumerable<EdgeRouteSpec> edges)
@@ -86,30 +92,30 @@ namespace DataSequenceGraph.Format
 
         public void ToBinaryAndCSVStreams(MasterNodeList<NodeValType> nodeList)
         {
-            ToBinaryAndCSVStreams(nodeList, nodeList.AllNodeSpecs, nodeList.AllEdgeSpecs);
+            ToBinaryAndCSVStreams(new MasterNodeList<NodeValType>(), nodeList.AllNodeSpecs, nodeList.AllEdgeSpecs);
         }
 
         public void ToBinaryAndCSVStreams(MasterNodeList<NodeValType> nodeList, IEnumerable<NodeSpec> nodes, IEnumerable<EdgeRouteSpec> edges)
         {
             IEnumerable<ValueNodeSpec<NodeValType>> valueNodeSpecs = nodes.OfType<ValueNodeSpec<NodeValType>>();
-            var splittedSpecs = splitSpecs(nodeList, nodes);
             using (BinaryWriter w = new BinaryWriter(binaryOut))
             {
-                ToBinary(nodeList, splittedSpecs.Item1, edges, w);
+                ToCSV(ToBinary(nodeList, nodes, edges, w));
             }
-            ToCSV(splittedSpecs.Item2);
         }
 
-        private Tuple<IList<Tuple<NodeSpec,int>>, IList<ValueNodeSpec<NodeValType>>> splitSpecs(
-            MasterNodeList<NodeValType> nodeList, IEnumerable<NodeSpec> nodeSpecs)
+        private IList<NodeValType> ToBinary(MasterNodeList<NodeValType> nodeList, IEnumerable<NodeSpec> nodeSpecs, 
+            IEnumerable<EdgeRouteSpec> edgeSpecs, BinaryWriter writer)
         {
-            IList<Tuple<NodeSpec,int>> binaryNodes = new List<Tuple<NodeSpec,int>>();
-            IList<ValueNodeSpec<NodeValType>> textNodes = new List<ValueNodeSpec<NodeValType>>();
+            List<NodeValType> newValues = new List<NodeValType>();
+            byte flags;
             foreach (NodeSpec currentNodeSpec in nodeSpecs)
             {
+                writer.Write(indexToUInt16(currentNodeSpec.SequenceNumber));
                 if (currentNodeSpec.kind != NodeKind.ValueNode)
                 {
-                    binaryNodes.Add(Tuple.Create(currentNodeSpec, -1));
+                    flags = NOTVALUENODE;
+                    writer.Write(flags);
                 }
                 else
                 {
@@ -118,45 +124,25 @@ namespace DataSequenceGraph.Format
                         nodeList.getValueNodesByValue(valSpec.Value).Select(node => node.SequenceNumber);
                     if (nodeIndexesWithValue.Count() > 0 && currentNodeSpec.SequenceNumber != nodeIndexesWithValue.First())
                     {
-                        binaryNodes.Add(Tuple.Create(currentNodeSpec,nodeIndexesWithValue.First()));
+                        flags = EXISTENTVALUENODE;
+                        writer.Write(flags);
+                        writer.Write(indexToUInt16(nodeIndexesWithValue.First()));
                     }
                     else
                     {
-                        nodeIndexesWithValue = nodeSpecs.OfType<ValueNodeSpec<NodeValType>>().Where(
-                            spec => spec.SequenceNumber < valSpec.SequenceNumber &&
-                                    spec.Value.Equals(valSpec.Value)).Select(spec => spec.SequenceNumber);
-                        if (nodeIndexesWithValue.Count() > 0 && valSpec.SequenceNumber != nodeIndexesWithValue.First())
+                        flags = NEWVALUENODE;
+                        writer.Write(flags);
+                        int prevNewValueEntry = newValues.FindIndex(newVal => newVal.Equals(valSpec.Value));
+                        if (prevNewValueEntry != -1)
                         {
-                            binaryNodes.Add(Tuple.Create(currentNodeSpec, nodeIndexesWithValue.First()));
+                            writer.Write(indexToUInt16(prevNewValueEntry));
                         }
                         else
                         {
-                            textNodes.Add(valSpec);
+                            writer.Write(indexToUInt16(newValues.Count));
+                            newValues.Add(valSpec.Value);
                         }
                     }
-                }
-            }
-            return Tuple.Create(binaryNodes, textNodes);
-        }
-
-        private void ToBinary(MasterNodeList<NodeValType> nodeList, IEnumerable<Tuple<NodeSpec,int>> nodeSpecsAndValRefs, 
-            IEnumerable<EdgeRouteSpec> edgeSpecs, BinaryWriter writer)
-        {
-            NodeSpec currentNodeSpec;
-            ValueNodeSpec<NodeValType> valSpec;
-            foreach(var specAndRef in nodeSpecsAndValRefs)
-            {
-                currentNodeSpec = specAndRef.Item1;
-                writer.Write(indexToUInt16(currentNodeSpec.SequenceNumber));
-                if (currentNodeSpec.kind != NodeKind.ValueNode)
-                {
-                    writer.Write(true);
-                }
-                else
-                {
-                    writer.Write(false);
-                    valSpec = currentNodeSpec as ValueNodeSpec<NodeValType>;
-                    writer.Write(indexToUInt16(specAndRef.Item2));
                 }
             }
 
@@ -170,6 +156,8 @@ namespace DataSequenceGraph.Format
                 writer.Write(indexToUInt16(currentEdgeSpec.RequisiteFromNumber));
                 writer.Write(indexToUInt16(currentEdgeSpec.RequisiteToNumber));
             }
+
+            return newValues;
         }
 
         private UInt16 indexToUInt16(int ind)
@@ -182,25 +170,31 @@ namespace DataSequenceGraph.Format
             return Convert.ToInt32(shorty - 1);
         }
 
-        private void ToCSV(IList<ValueNodeSpec<NodeValType>> nodeSpecs)
+        private void ToCSV(IList<NodeValType> nodeValues)
         {
-            List<NodeValueRecord> arr = new List<NodeValueRecord>();
-
-            NodeValueRecord record;
-
-            foreach (ValueNodeSpec<NodeValType> valSpec in nodeSpecs)
+            int lineCounter = 0;
+            string nextVal;
+            bool firstOne = true;
+            foreach (NodeValType nodeValue in nodeValues)
             {
-                record = new NodeValueRecord()
+                nextVal = nodeValueExporter.ToNodeValueString(nodeValue);
+                if (lineCounter + (nextVal.Length + 1) > LINECHARLIMIT)
                 {
-                    SeqNum = valSpec.SequenceNumber,
-                    NodeVal = nodeValueExporter.ToNodeValueString(valSpec.Value)
-                };
-                arr.Add(record);
+                    CSVOut.WriteLine();
+                    CSVOut.Write(nextVal);
+                    lineCounter = nextVal.Length;
+                }
+                else
+                {
+                    if (!firstOne)
+                    {
+                        CSVOut.Write(DELIMITER);
+                    }
+                    CSVOut.Write(nextVal);
+                    lineCounter += (nextVal.Length + 1);
+                }
+                firstOne = false;
             }          
-
-            FileHelperEngine<NodeValueRecord> engine = new FileHelperEngine<NodeValueRecord>();
-
-            engine.WriteStream(CSVOut, arr.ToArray());
         }
 
         public MasterNodeList<NodeValType> ToNodeListFromFiles()
@@ -236,11 +230,11 @@ namespace DataSequenceGraph.Format
         {
             IEnumerable<NodeSpec> binNodes = null;
             IEnumerable<EdgeRouteSpec> edges = null;
-            srcList.reloadNodesFromSpecs(FromCSV());
+            IList<NodeValType> nodeValues = FromCSV();
 
             using (BinaryReader r = new BinaryReader(binaryIn))
             {
-                binNodes = NodesFromBinary(srcList, r);
+                binNodes = NodesFromBinary(srcList, nodeValues, r);
                 edges = EdgesFromBinary(r);
             }
 
@@ -248,18 +242,19 @@ namespace DataSequenceGraph.Format
             return srcList;
         }
 
-        private IList<NodeSpec> NodesFromBinary(MasterNodeList<NodeValType> refList, BinaryReader r)
+        private IList<NodeSpec> NodesFromBinary(MasterNodeList<NodeValType> refList, IList<NodeValType> nodeValues, BinaryReader r)
         {
             List<NodeSpec> newSpecs = new List<NodeSpec>();
             int valRefIndex;
-            bool isGateNode;
+            byte flags;
             NodeSpec newSpec;
+            NodeValType loadedVal;
             ValueNodeSpec<NodeValType> newValSpec;
             UInt16 seqNum = r.ReadUInt16();
             while (seqNum != 0)
             {
-                isGateNode = r.ReadBoolean();
-                if (isGateNode)
+                flags = r.ReadByte();
+                if (flags == NOTVALUENODE)
                 {
                     newSpec = new NodeSpec() { 
                         kind = NodeKind.GateNode, SequenceNumber = UInt16ToIndex(seqNum) 
@@ -269,11 +264,19 @@ namespace DataSequenceGraph.Format
                 else
                 {
                     valRefIndex = UInt16ToIndex(r.ReadUInt16());
+                    if (flags == EXISTENTVALUENODE)
+                    {
+                        loadedVal = ((ValueNode<NodeValType>)refList.nodeByNumber(valRefIndex)).Value;
+                    }
+                    else
+                    {
+                        loadedVal = nodeValues[valRefIndex];
+                    }
                     newValSpec = new ValueNodeSpec<NodeValType>()
                     {
                         kind = NodeKind.ValueNode,
                         SequenceNumber = UInt16ToIndex(seqNum),
-                        Value = ((ValueNode<NodeValType>)refList.nodeByNumber(valRefIndex)).Value
+                        Value = loadedVal
                     };
                     newSpecs.Add(newValSpec);
                 }
@@ -298,32 +301,22 @@ namespace DataSequenceGraph.Format
             return newEdges;
         }
 
-        private IList<ValueNodeSpec<NodeValType>> FromCSV()
+        private IList<NodeValType> FromCSV()
         {
             if (nodeValueParser == null)
             {
                 throw new InvalidOperationException("nodeValueParser must be set to recreate a graph");
             }
-            FileHelperEngine<NodeValueRecord> engine = new FileHelperEngine<NodeValueRecord>();
-
-            engine.ErrorManager.ErrorMode = ErrorMode.SaveAndContinue;
-
-            NodeValueRecord[] res = engine.ReadStream(CSVIn);
-
-            if (engine.ErrorManager.ErrorCount > 0)
-                engine.ErrorManager.SaveErrors("Errors.txt");
-
-            List<ValueNodeSpec<NodeValType>> valSpecs = new List<ValueNodeSpec<NodeValType>>();
-            foreach (NodeValueRecord rec in res)
+            List<NodeValType> nodeValues = new List<NodeValType>();
+            string nextLine;
+            char[] charD = DELIMITER.Substring(0,1).ToCharArray();
+            while ((nextLine = CSVIn.ReadLine()) != null)
             {
-                valSpecs.Add(new ValueNodeSpec<NodeValType>()
-                {
-                    kind = NodeKind.ValueNode, SequenceNumber = rec.SeqNum,
-                    Value = nodeValueParser.parseToValue(rec.NodeVal)
-                });
+                nodeValues.AddRange(nextLine.Split(charD).
+                    Select(strV => nodeValueParser.parseToValue(strV)));
             }
 
-            return valSpecs;
+            return nodeValues;
         }
     }
 }

@@ -107,7 +107,7 @@ namespace XMLGraphFormatTests
             DataChunkRoute<string> firstRoute = nodeList.nthDataChunkRoute(0);
             var missingComponents = firstRoute.specsForMissingComponents(destinationList);
             Assert.AreEqual(4, missingComponents.Item1.Count);
-            Assert.AreEqual(3, missingComponents.Item2.Count);
+            Assert.AreEqual(4, missingComponents.Item2.Count);
             destinationList.reloadNodesThenRoutesFromSpecs(missingComponents.Item1, missingComponents.Item2);
 
             DataChunkRoute<string> secondRoute = nodeList.nthDataChunkRoute(1);

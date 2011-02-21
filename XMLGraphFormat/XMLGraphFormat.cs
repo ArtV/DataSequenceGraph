@@ -53,7 +53,7 @@ namespace DataSequenceGraph.Format
 
         public void ToXMLFile(MasterNodeList<NodeValType> nodeList)
         {
-            ToXMLFile(nodeList, nodeList.AllNodeSpecs, nodeList.AllEdgeSpecs.ToList());
+            ToXMLFile(new MasterNodeList<NodeValType>(), nodeList.AllNodeSpecs, nodeList.AllEdgeSpecs.ToList());
         }
 
         public void ToXMLFile(MasterNodeList<NodeValType> nodeList, IList<NodeSpec> nodes, IList<EdgeRouteSpec> edges)
@@ -80,7 +80,7 @@ namespace DataSequenceGraph.Format
 
         public XmlDocument ToXMLDocument(MasterNodeList<NodeValType> nodeList)
         {
-            return ToXMLDocument(nodeList, nodeList.AllNodeSpecs, nodeList.AllEdgeSpecs.ToList());
+            return ToXMLDocument(new MasterNodeList<NodeValType>(), nodeList.AllNodeSpecs, nodeList.AllEdgeSpecs.ToList());
         }
 
         private void addNodes(XmlDocument doc,MasterNodeList<NodeValType> nodeList,IList<NodeSpec> nodeSpecs)
