@@ -108,14 +108,15 @@ namespace DataSequenceGraph.Format
             IEnumerable<EdgeRouteSpec> edgeSpecs, BinaryWriter writer)
         {
             List<NodeValType> newValues = new List<NodeValType>();
+            ushort seqNumber;
             byte flags;
             foreach (NodeSpec currentNodeSpec in nodeSpecs)
             {
-                writer.Write(indexToUInt16(currentNodeSpec.SequenceNumber));
+                seqNumber = indexToUshort(currentNodeSpec.SequenceNumber);
                 if (currentNodeSpec.kind != NodeKind.ValueNode)
                 {
                     flags = NOTVALUENODE;
-                    writer.Write(flags);
+                    writer.Write(ANDHalfByte(seqNumber, flags));
                 }
                 else
                 {
@@ -125,49 +126,79 @@ namespace DataSequenceGraph.Format
                     if (nodeIndexesWithValue.Count() > 0 && currentNodeSpec.SequenceNumber != nodeIndexesWithValue.First())
                     {
                         flags = EXISTENTVALUENODE;
-                        writer.Write(flags);
-                        writer.Write(indexToUInt16(nodeIndexesWithValue.First()));
+                        writer.Write(ANDHalfByte(seqNumber, flags));
+                        writer.Write(indexToUshort(nodeIndexesWithValue.First()));
                     }
                     else
                     {
                         flags = NEWVALUENODE;
-                        writer.Write(flags);
+                        writer.Write(ANDHalfByte(seqNumber, flags));
                         int prevNewValueEntry = newValues.FindIndex(newVal => newVal.Equals(valSpec.Value));
                         if (prevNewValueEntry != -1)
                         {
-                            writer.Write(indexToUInt16(prevNewValueEntry));
+                            writer.Write(indexToUshort(prevNewValueEntry));
                         }
                         else
                         {
-                            writer.Write(indexToUInt16(newValues.Count));
+                            writer.Write(indexToUshort(newValues.Count));
                             newValues.Add(valSpec.Value);
                         }
                     }
                 }
             }
 
-            UInt16 separator = 0;
+            ushort separator = 0;
             writer.Write(separator);
 
             foreach (EdgeRouteSpec currentEdgeSpec in edgeSpecs)
             {
-                writer.Write(indexToUInt16(currentEdgeSpec.FromNumber));
-                writer.Write(indexToUInt16(currentEdgeSpec.ToNumber));
-                writer.Write(indexToUInt16(currentEdgeSpec.RequisiteFromNumber));
-                writer.Write(indexToUInt16(currentEdgeSpec.RequisiteToNumber));
+                writeTwoUshortsToThreeBytes(indexToUshort(currentEdgeSpec.FromNumber),
+                    indexToUshort(currentEdgeSpec.ToNumber),writer);
+                writeTwoUshortsToThreeBytes(indexToUshort(currentEdgeSpec.RequisiteFromNumber),
+                    indexToUshort(currentEdgeSpec.RequisiteToNumber),writer);
             }
 
             return newValues;
         }
 
-        private UInt16 indexToUInt16(int ind)
+        private ushort indexToUshort(int ind)
         {
             return Convert.ToUInt16(ind + 1);
         }
 
-        private int UInt16ToIndex(UInt16 shorty)
+        private int UshortToIndex(ushort shorty)
         {
             return Convert.ToInt32(shorty - 1);
+        }
+
+        private void writeTwoUshortsToThreeBytes(ushort first,ushort second,BinaryWriter writer)
+        {
+            byte[] outBytes = twoUshortToThreeBytes(first, second);
+            foreach (byte byt in outBytes)
+            {
+                writer.Write(byt);
+            }
+        }
+
+        private byte[] twoUshortToThreeBytes(ushort first, ushort second)
+        {
+            byte[] firstBytes = BitConverter.GetBytes(first);
+            byte[] secondBytes = BitConverter.GetBytes(second);
+
+            byte byteThree = (byte)(firstBytes[1] + (secondBytes[1] << 4));
+
+            return new byte[] { firstBytes[0], secondBytes[0], byteThree };
+        }
+
+        private ushort[] threeBytesToTwoUshort(byte first, byte second, byte third)
+        {
+            byte[] firstBytes = new byte[2];
+            firstBytes[0] = first;
+            byte[] secondBytes = new byte[2];
+            secondBytes[0] = second;
+            secondBytes[1] = (byte)(third >> 4);
+            firstBytes[1] = (byte)(third & 15);
+            return new ushort[] { BitConverter.ToUInt16(firstBytes, 0), BitConverter.ToUInt16(secondBytes, 0) };
         }
 
         private void ToCSV(IList<NodeValType> nodeValues)
@@ -250,20 +281,21 @@ namespace DataSequenceGraph.Format
             NodeSpec newSpec;
             NodeValType loadedVal;
             ValueNodeSpec<NodeValType> newValSpec;
-            UInt16 seqNum = r.ReadUInt16();
+            var seqAndFlags = ReadAndSplitSeqAndFlags(r);
+            ushort seqNum = seqAndFlags.Item1;
             while (seqNum != 0)
             {
-                flags = r.ReadByte();
+                flags = seqAndFlags.Item2;
                 if (flags == NOTVALUENODE)
                 {
                     newSpec = new NodeSpec() { 
-                        kind = NodeKind.GateNode, SequenceNumber = UInt16ToIndex(seqNum) 
+                        kind = NodeKind.GateNode, SequenceNumber = UshortToIndex(seqNum) 
                     };
                     newSpecs.Add(newSpec);
                 }
                 else
                 {
-                    valRefIndex = UInt16ToIndex(r.ReadUInt16());
+                    valRefIndex = UshortToIndex(r.ReadUInt16());
                     if (flags == EXISTENTVALUENODE)
                     {
                         loadedVal = ((ValueNode<NodeValType>)refList.nodeByNumber(valRefIndex)).Value;
@@ -275,30 +307,66 @@ namespace DataSequenceGraph.Format
                     newValSpec = new ValueNodeSpec<NodeValType>()
                     {
                         kind = NodeKind.ValueNode,
-                        SequenceNumber = UInt16ToIndex(seqNum),
+                        SequenceNumber = UshortToIndex(seqNum),
                         Value = loadedVal
                     };
                     newSpecs.Add(newValSpec);
                 }
-                seqNum = r.ReadUInt16();
+                seqAndFlags = ReadAndSplitSeqAndFlags(r);
+                seqNum = seqAndFlags.Item1;
             }
             return newSpecs;
+        }
+
+        private Tuple<ushort, byte> ReadAndSplitSeqAndFlags(BinaryReader r)
+        {
+            return SplitOutHalfByte(r.ReadUInt16());
         }
 
         private IEnumerable<EdgeRouteSpec> EdgesFromBinary(BinaryReader r)
         {
             List<EdgeRouteSpec> newEdges = new List<EdgeRouteSpec>();
             EdgeRouteSpec newSpec;
+            ushort[] twoUshorts;
             while (r.BaseStream.Position != r.BaseStream.Length)
             {
                 newSpec = new EdgeRouteSpec();
-                newSpec.FromNumber = UInt16ToIndex(r.ReadUInt16());
-                newSpec.ToNumber = UInt16ToIndex(r.ReadUInt16());
-                newSpec.RequisiteFromNumber = UInt16ToIndex(r.ReadUInt16());
-                newSpec.RequisiteToNumber = UInt16ToIndex(r.ReadUInt16());
+                twoUshorts = readTwoUshortsInThreeBytes(r);
+                newSpec.FromNumber = UshortToIndex(twoUshorts[0]);
+                newSpec.ToNumber = UshortToIndex(twoUshorts[1]);
+
+                twoUshorts = readTwoUshortsInThreeBytes(r);
+                newSpec.RequisiteFromNumber = UshortToIndex(twoUshorts[0]);
+                newSpec.RequisiteToNumber = UshortToIndex(twoUshorts[1]);
                 newEdges.Add(newSpec);
             }
             return newEdges;
+        }
+
+        private ushort[] readTwoUshortsInThreeBytes(BinaryReader r)
+        {
+            byte[] threeStoredBytes = new byte[3];
+            for (int i = 0; i <= 2; i++)
+            {
+                threeStoredBytes[i] = r.ReadByte();
+            }
+
+            return threeBytesToTwoUshort(threeStoredBytes[0], threeStoredBytes[1], threeStoredBytes[2]);
+        }
+
+        private ushort ANDHalfByte(ushort orig, byte upper)
+        {
+            byte[] origBytes = BitConverter.GetBytes(orig);
+            origBytes[1] = (byte)(origBytes[1] | (upper << 4));
+            return BitConverter.ToUInt16(origBytes, 0);
+        }
+
+        private Tuple<ushort, byte> SplitOutHalfByte(ushort orig)
+        {
+            byte[] origBytes = BitConverter.GetBytes(orig);
+            byte upper = (byte)(origBytes[1] >> 4);
+            origBytes[1] = (byte)(origBytes[1] & 15);
+            return Tuple.Create(BitConverter.ToUInt16(origBytes, 0), upper);
         }
 
         private IList<NodeValType> FromCSV()
