@@ -38,11 +38,11 @@ namespace DataSequenceGraph
             }
         }
 
-        public override IEnumerable<DirectedPair> requisiteLinks
+        public override IEnumerable<Node> requisiteNodes
         {
             get 
             {
-                return chunkRoute.requisiteLinks;
+                return chunkRoute.requisiteNodes;
             }
         }
 
@@ -81,17 +81,19 @@ namespace DataSequenceGraph
             List<NodeSpec> nodeSpecs = new List<NodeSpec>();
             List<EdgeRouteSpec> edgeSpecs = new List<EdgeRouteSpec>();
             DirectedPair link;
-            DirectedPair reqLink;
+            IEnumerable<Node> reqNodes;
             bool foundAllNodes;
             nodeSpecs.Add(startNode.ToNodeSpec());
             foreach (EdgeRoute edge in _componentEdges)
             {
                 link = edge.edge.link;
-                reqLink = edge.edge.requisiteLink;
+                reqNodes = edge.edge.requisiteNodes;
 
                 foundAllNodes = addNodeSpecIfMissing(destinationList,link.to,nodeSpecs);
-                foundAllNodes = foundAllNodes && addNodeSpecIfMissing(destinationList,reqLink.from,nodeSpecs);
-                foundAllNodes = foundAllNodes && addNodeSpecIfMissing(destinationList,reqLink.to,nodeSpecs);
+                foreach (Node reqNode in reqNodes)
+                {
+                    foundAllNodes = foundAllNodes && addNodeSpecIfMissing(destinationList, reqNode, nodeSpecs);
+                }
 
                 if (!foundAllNodes || !edgeOnNodeAlready(destinationList,link.from,edge))                     
                 {
@@ -103,8 +105,7 @@ namespace DataSequenceGraph
             {
                 FromNumber = lastNode.SequenceNumber,
                 ToNumber = startNode.SequenceNumber,
-                RequisiteFromNumber = startNode.SequenceNumber,
-                RequisiteToNumber = connectedNodes.ElementAt(1).SequenceNumber
+                RequisiteNumbers = new int[] { startNode.SequenceNumber }
             });
             return new Tuple<IList<NodeSpec>,IList<EdgeRouteSpec>>(nodeSpecs.AsReadOnly(),edgeSpecs.AsReadOnly());
         }

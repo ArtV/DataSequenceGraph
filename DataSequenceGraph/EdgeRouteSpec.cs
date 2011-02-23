@@ -9,13 +9,11 @@ namespace DataSequenceGraph
     {
         public int FromNumber { get; set; }
         public int ToNumber { get; set; }
-        public int RequisiteFromNumber { get; set; }
-        public int RequisiteToNumber { get; set; }
+        public int[] RequisiteNumbers { get; set; }
 
         public EdgeRouteSpec()
         {
-            RequisiteFromNumber = -1;
-            RequisiteToNumber = -1;
+            RequisiteNumbers = new int[0];
         }
     }
 }

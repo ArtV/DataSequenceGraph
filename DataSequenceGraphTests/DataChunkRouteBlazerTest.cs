@@ -154,15 +154,18 @@ namespace DataSequenceGraph
         public void usesEarlierRequisiteOnNewEdge()
         {
             chunkRouteAppendThriceOther();
-
+            ValueNode<string> Gnode = list.getValueNodesByValue("G").First();
+            GateNode gate6 = (GateNode) list.nodeByNumber(5);
             ValueNode<string> Dnode = list.getValueNodesByValue("D").First();
+            ValueNode<string> Bnode = list.getValueNodesByValue("B").First();
             Route DJroute = Dnode.OutgoingEdges.First(route =>
                 ((ValueNode<string>)route.connectedNodes.ElementAt(1)).Value.Equals("J"));
             Route DMroute = Dnode.OutgoingEdges.Last(route =>
                 ((ValueNode<string>)route.connectedNodes.ElementAt(1)).Value.Equals("M"));
-            int DJrouteIndex = chunkRoute6.chunkRoute.findNode(DJroute.requisiteLinks.First().from);
-            int DMrouteIndex = chunkRoute6.chunkRoute.findNode(DMroute.requisiteLinks.First().from);
-            Assert.Less(DMrouteIndex, DJrouteIndex);
+            Assert.AreEqual(1, DJroute.requisiteNodes.Count());
+            Assert.AreEqual(1, DMroute.requisiteNodes.Count());
+            Assert.AreEqual(Gnode.SequenceNumber , DJroute.requisiteNodes.First().SequenceNumber);
+            Assert.AreEqual(gate6.SequenceNumber , DMroute.requisiteNodes.First().SequenceNumber);
         }
 
         [Test]
@@ -171,8 +174,6 @@ namespace DataSequenceGraph
             setup13append();
             MasterNodeList<string> destinationList = new MasterNodeList<string>();
             Dictionary<Node,List<Route>> destinationDict = new Dictionary<Node, List<Route>>();
-//            new DataChunkRouteBlazer<string>(srcDataList, destinationList, destinationDict).computeFullRoute();
-//            new DataChunkRouteBlazer<string>(srcData2List, destinationList, destinationDict).computeFullRoute();
             DataChunkRoute<string> ABC = list.nthDataChunkRoute(0);
             Tuple<IList<NodeSpec>, IList<EdgeRouteSpec>> missingComponents = 
                 ABC.specsForMissingComponents(destinationList);
