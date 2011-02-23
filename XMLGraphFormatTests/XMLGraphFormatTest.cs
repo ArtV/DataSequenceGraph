@@ -50,8 +50,7 @@ namespace XMLGraphFormatTests
             Assert.AreEqual(XMLGraphFormat<int>.EDGEELEM, firstEdge.LocalName);
             Assert.AreEqual("0", firstEdge.Attributes[XMLGraphFormat<int>.FROMATTR].Value);
             Assert.AreEqual("3", firstEdge.Attributes[XMLGraphFormat<int>.TOATTR].Value);
-            Assert.AreEqual("-1", firstEdge.Attributes[XMLGraphFormat<int>.REQFROMATTR].Value);
-            Assert.AreEqual("-1", firstEdge.Attributes[XMLGraphFormat<int>.REQTOATTR].Value);
+            Assert.AreEqual("", firstEdge.Attributes[XMLGraphFormat<int>.REQATTR].Value);
         }
 
         [Test]
@@ -65,15 +64,15 @@ namespace XMLGraphFormatTests
             <{2} {3}=""0"" {4}=""GateNode"" />
             <{2} {3}=""1"" {4}=""ValueNode"">Here</{2}>            
             </{1}><{5}>
-            <{6} {7}=""0"" {8}=""1"" {9}=""-1"" {10}=""-1"" />
-            <{6} {7}=""1"" {8}=""0"" {9}=""-1"" {10}=""-1"" />
+            <{6} {7}=""0"" {8}=""1"" {9}="""" />
+            <{6} {7}=""1"" {8}=""0"" {9}="""" />
             </{5}></{0}>";
             string myDoc = String.Format(myDocTempl, XMLGraphFormat<int>.ROOTELEM,
                 XMLGraphFormat<uint>.NODESROOTELEM, XMLGraphFormat<bool>.NODEELEM,
                 XMLGraphFormat<long>.SEQNUMATTR, XMLGraphFormat<byte>.NODEKINDATTR,
                 XMLGraphFormat<short>.EDGESROOTELEM, XMLGraphFormat<sbyte>.EDGEELEM,
                 XMLGraphFormat<float>.FROMATTR, XMLGraphFormat<double>.TOATTR,
-                XMLGraphFormat<char>.REQFROMATTR, XMLGraphFormat<ushort>.REQTOATTR);
+                XMLGraphFormat<char>.REQATTR);
             MasterNodeList<string> nodeList = format.ToNodeList(XmlReader.Create(new StringReader(myDoc)));
             Assert.AreEqual(2, nodeList.AllNodes.Count());
             Assert.IsInstanceOf<ValueNode<string>>(nodeList.AllNodes.ElementAt(1));
@@ -120,8 +119,6 @@ namespace XMLGraphFormatTests
             {
                 Assert.AreNotEqual(0, rt.edge.link.from.SequenceNumber);
                 Assert.AreNotEqual(0, rt.edge.link.to.SequenceNumber);
-                Assert.AreNotEqual(0, rt.edge.requisiteLink.from.SequenceNumber);
-                Assert.AreNotEqual(0, rt.edge.requisiteLink.to.SequenceNumber);
             }
             var secondMissingComponents = secondRoute.specsForMissingComponents(destinationList);
             var secondMissingNodeSpecs = secondMissingComponents.Item1;
