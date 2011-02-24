@@ -53,24 +53,22 @@ namespace DataSequenceGraph
             }
         }
 
-        public List<Tuple<NodeSpec, IEnumerable<EdgeRouteSpec>>> AllNodeAndRouteSpecs
-        {
-            get
-            {
-                List<Tuple<NodeSpec, IEnumerable<EdgeRouteSpec>>> retList = new List<Tuple<NodeSpec, IEnumerable<EdgeRouteSpec>>>();
-                foreach (Node node in AllNonNullNodes)
-                {
-                    Tuple<NodeSpec, IEnumerable<EdgeRouteSpec>> retElem = 
-                        new Tuple<NodeSpec, IEnumerable<EdgeRouteSpec>>(node.ToNodeSpec(), nodeToRoutesSpecs(node));                    
-                    retList.Add(retElem);
-                }
-                return retList;
-            }
-        }        
-
         private IEnumerable<EdgeRouteSpec> nodeToRoutesSpecs(Node node)
         {
             return node.OutgoingEdges.Select(route => route.ToEdgeRouteSpec());
+        }
+
+        public IList<NodeAndReqSpec> AllNodeAndReqSpecs
+        {
+            get
+            {
+                List<NodeAndReqSpec> overallList = new List<NodeAndReqSpec>();
+                foreach (DataChunkRoute<T> route in enumerateDataChunkRoutes())
+                {
+                    overallList.AddRange(route.comboSpecsForMissingComponents(new MasterNodeList<T>()));
+                }
+                return overallList.AsReadOnly();
+            }
         }
 
         public IEnumerable<ValueNode<T>> getValueNodesByValue(T desiredValue)
@@ -196,6 +194,18 @@ namespace DataSequenceGraph
         {
             reloadNodesFromSpecs(nodes);
             routeFactory.newRoutesFromSpecs(routes);
+        }
+
+        public void reloadNodeAndReqSpecs(IList<NodeAndReqSpec> specs)
+        {
+            NodeAndReqSpec lastSpec;
+            NodeAndReqSpec curSpec;
+            NodeAndReqSpec nextSpec;
+            for (int i = 0; i <= specs.Count - 1; i++)
+            {
+                curSpec = specs[i];
+            }
+            // TODO  a little complicated to stitch back together into complete edges (and nodes)
         }
 
         public bool trySetNode(NodeSpec spec)

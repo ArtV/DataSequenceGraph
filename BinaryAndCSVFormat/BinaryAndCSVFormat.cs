@@ -13,8 +13,9 @@ namespace DataSequenceGraph.Format
         private const string DELIMITER = "|";
 
         private const byte NOTVALUENODE = 0;
-        private const byte EXISTENTVALUENODE = 1;
+        private const byte DUPLICATEVALUENODE = 1;
         private const byte NEWVALUENODE = 2;
+        private const byte EXISTINGVALUENODE = 3;
 
         public NodeValueExporter<NodeValType> nodeValueExporter { get; set; }
         public NodeValueParser<NodeValType> nodeValueParser { get; set; }    
@@ -69,9 +70,10 @@ namespace DataSequenceGraph.Format
 
         public void ToBinaryAndCSVFiles(MasterNodeList<NodeValType> nodeList)
         {
-            ToBinaryAndCSVFiles(new MasterNodeList<NodeValType>(), nodeList.AllNodeSpecs, nodeList.AllEdgeSpecs);
+//            ToBinaryAndCSVFiles(new MasterNodeList<NodeValType>(), nodeList.AllNodeSpecs, nodeList.AllEdgeSpecs);
+            ToBinaryAndCSVFiles(new MasterNodeList<NodeValType>(), nodeList.AllNodeAndReqSpecs);
         }
-
+/*
         public void ToBinaryAndCSVFiles(MasterNodeList<NodeValType> nodeList, IEnumerable<NodeSpec> nodes, IEnumerable<EdgeRouteSpec> edges)
         {
             if (binaryFileName == null || binaryFileName.Equals("") ||
@@ -89,12 +91,30 @@ namespace DataSequenceGraph.Format
                 }
             }
         }
+*/
+        public void ToBinaryAndCSVFiles(MasterNodeList<NodeValType> nodeList, IList<NodeAndReqSpec> specs)
+        {
+            if (binaryFileName == null || binaryFileName.Equals("") ||
+                textFileName == null || textFileName.Equals(""))
+            {
+                throw new InvalidOperationException("binary filename and CSV filename must be set first");
+            }
+            using (FileStream fileStream = new FileStream(binaryFileName, FileMode.Create))
+            {
+                using (TextWriter textWriter = new StreamWriter(new FileStream(textFileName, FileMode.Create)))
+                {
+                    binaryOut = fileStream;
+                    CSVOut = textWriter;
+                    ToBinaryAndCSVStreams(nodeList, specs);
+                }
+            }
+        }
 
         public void ToBinaryAndCSVStreams(MasterNodeList<NodeValType> nodeList)
         {
-            ToBinaryAndCSVStreams(new MasterNodeList<NodeValType>(), nodeList.AllNodeSpecs, nodeList.AllEdgeSpecs);
+            ToBinaryAndCSVStreams(new MasterNodeList<NodeValType>(), nodeList.AllNodeAndReqSpecs);
         }
-
+/*
         public void ToBinaryAndCSVStreams(MasterNodeList<NodeValType> nodeList, IEnumerable<NodeSpec> nodes, IEnumerable<EdgeRouteSpec> edges)
         {
             IEnumerable<ValueNodeSpec<NodeValType>> valueNodeSpecs = nodes.OfType<ValueNodeSpec<NodeValType>>();
@@ -103,7 +123,85 @@ namespace DataSequenceGraph.Format
                 ToCSV(ToBinary(nodeList, nodes, edges, w));
             }
         }
+*/
+        public void ToBinaryAndCSVStreams(MasterNodeList<NodeValType> nodeList, IList<NodeAndReqSpec> specs)
+        {
+            using (BinaryWriter w = new BinaryWriter(binaryOut))
+            {
+                ToCSV(ToBinary(nodeList, specs, w));
+            }
+        }
 
+        private IList<NodeValType> ToBinary(MasterNodeList<NodeValType> nodeList, IList<NodeAndReqSpec> specs,
+            BinaryWriter writer)
+        {
+            List<NodeValType> newValues = new List<NodeValType>();
+            ushort seqNumber;
+            byte flags;
+            bool combineValueIndexAndReqIndex;
+            ushort valueIndex;
+            foreach (NodeAndReqSpec currentNodeSpec in specs)
+            {
+                valueIndex = 0;
+                combineValueIndexAndReqIndex = false;
+                seqNumber = indexToUshort(currentNodeSpec.fromNode.SequenceNumber);
+                if (currentNodeSpec.fromNode.kind != NodeKind.ValueNode)
+                {
+                    flags = NOTVALUENODE;
+                    writer.Write(ANDHalfByte(seqNumber,flags));
+                }
+                else
+                {
+                    if (!currentNodeSpec.insertFrom)
+                    {
+                        flags = EXISTINGVALUENODE;
+                        writer.Write(ANDHalfByte(seqNumber, flags));
+                    }
+                    else
+                    {
+                        combineValueIndexAndReqIndex = true;
+                        ValueNodeSpec<NodeValType> valSpec = currentNodeSpec.fromNode as ValueNodeSpec<NodeValType>;
+                        IEnumerable<int> nodeIndexesWithValue =
+                            nodeList.getValueNodesByValue(valSpec.Value).Select(node => node.SequenceNumber);
+                        if (nodeIndexesWithValue.Count() > 0 && currentNodeSpec.fromNode.SequenceNumber != nodeIndexesWithValue.First())
+                        {
+                            flags = DUPLICATEVALUENODE;
+                            writer.Write(ANDHalfByte(seqNumber, flags));
+                            valueIndex = indexToUshort(nodeIndexesWithValue.First());
+//                            writer.Write(indexToUshort(nodeIndexesWithValue.First()));
+                        }
+                        else
+                        {
+                            flags = NEWVALUENODE;
+                            writer.Write(ANDHalfByte(seqNumber, flags));
+                            int prevNewValueEntry = newValues.FindIndex(newVal => newVal.Equals(valSpec.Value));
+                            if (prevNewValueEntry != -1)
+                            {
+                                valueIndex = indexToUshort(prevNewValueEntry);
+//                                writer.Write(indexToUshort(prevNewValueEntry));
+                            }
+                            else
+                            {
+                                valueIndex = indexToUshort(newValues.Count);
+//                                writer.Write(indexToUshort(newValues.Count));
+                                newValues.Add(valSpec.Value);
+                            }
+                        }
+                    }
+                }
+
+                if (combineValueIndexAndReqIndex)
+                {
+                    writeTwoUshortsToThreeBytes(valueIndex, indexToUshort(currentNodeSpec.ReqSequenceNumber),writer);
+                }
+                else
+                {
+                    writer.Write(indexToUshort(currentNodeSpec.ReqSequenceNumber));
+                }
+            }
+            return newValues;
+        }
+/*
         private IList<NodeValType> ToBinary(MasterNodeList<NodeValType> nodeList, IEnumerable<NodeSpec> nodeSpecs, 
             IEnumerable<EdgeRouteSpec> edgeSpecs, BinaryWriter writer)
         {
@@ -125,7 +223,7 @@ namespace DataSequenceGraph.Format
                         nodeList.getValueNodesByValue(valSpec.Value).Select(node => node.SequenceNumber);
                     if (nodeIndexesWithValue.Count() > 0 && currentNodeSpec.SequenceNumber != nodeIndexesWithValue.First())
                     {
-                        flags = EXISTENTVALUENODE;
+                        flags = DUPLICATEVALUENODE;
                         writer.Write(ANDHalfByte(seqNumber, flags));
                         writer.Write(indexToUshort(nodeIndexesWithValue.First()));
                     }
@@ -160,7 +258,7 @@ namespace DataSequenceGraph.Format
 
             return newValues;
         }
-
+*/
         private ushort indexToUshort(int ind)
         {
             return Convert.ToUInt16(ind + 1);
@@ -259,50 +357,73 @@ namespace DataSequenceGraph.Format
 
         public MasterNodeList<NodeValType> ToNodeListFromStreams(MasterNodeList<NodeValType> srcList)
         {
-            IEnumerable<NodeSpec> binNodes = null;
-            IEnumerable<EdgeRouteSpec> edges = null;
+//            IEnumerable<NodeSpec> binNodes = null;
+//            IEnumerable<EdgeRouteSpec> edges = null;
+            IList<NodeAndReqSpec> specs = null;
             IList<NodeValType> nodeValues = FromCSV();
 
             using (BinaryReader r = new BinaryReader(binaryIn))
             {
-                binNodes = NodesFromBinary(srcList, nodeValues, r);
-                edges = EdgesFromBinary(r);
+                specs = NodesFromBinary(srcList, nodeValues, r);
+//                binNodes = NodesFromBinary(srcList, nodeValues, r);
+//                edges = EdgesFromBinary(r);
             }
 
-            srcList.reloadNodesThenRoutesFromSpecs(binNodes, edges);
+//            srcList.reloadNodesThenRoutesFromSpecs(binNodes, edges);
+            srcList.reloadNodeAndReqSpecs(specs);
             return srcList;
         }
 
-        private IList<NodeSpec> NodesFromBinary(MasterNodeList<NodeValType> refList, IList<NodeValType> nodeValues, BinaryReader r)
+        private IList<NodeAndReqSpec> NodesFromBinary(MasterNodeList<NodeValType> refList, IList<NodeValType> nodeValues, BinaryReader r)
         {
-            List<NodeSpec> newSpecs = new List<NodeSpec>();
+            List<NodeAndReqSpec> newSpecs = new List<NodeAndReqSpec>();
             int valRefIndex;
             byte flags;
-            NodeSpec newSpec;
+            NodeSpec newNonValueNodeSpec;
             NodeValType loadedVal;
             ValueNodeSpec<NodeValType> newValSpec;
-            var seqAndFlags = ReadAndSplitSeqAndFlags(r);
-            ushort seqNum = seqAndFlags.Item1;
-            while (seqNum != 0)
+            NodeAndReqSpec totalSpec;
+            ushort seqNum;
+            int reqIndex;
+            ushort[] twoUShorts;
+            while (r.BaseStream.Position != r.BaseStream.Length)
             {
+                var seqAndFlags = ReadAndSplitSeqAndFlags(r);
+                seqNum = seqAndFlags.Item1;
+                totalSpec = new NodeAndReqSpec()
+                {
+                    insertFrom = true,
+                    ReqSequenceNumber = -1
+                };
                 flags = seqAndFlags.Item2;
                 if (flags == NOTVALUENODE)
                 {
-                    newSpec = new NodeSpec() { 
+                    newNonValueNodeSpec = new NodeSpec() { 
                         kind = NodeKind.GateNode, SequenceNumber = UshortToIndex(seqNum) 
                     };
-                    newSpecs.Add(newSpec);
+                    totalSpec.fromNode = newNonValueNodeSpec;
+                    reqIndex = UshortToIndex(r.ReadUInt16());
                 }
                 else
                 {
-                    valRefIndex = UshortToIndex(r.ReadUInt16());
-                    if (flags == EXISTENTVALUENODE)
+                    if (flags == EXISTINGVALUENODE)
                     {
-                        loadedVal = ((ValueNode<NodeValType>)refList.nodeByNumber(valRefIndex)).Value;
+                        loadedVal = ((ValueNode<NodeValType>)refList.nodeByNumber(UshortToIndex(seqNum))).Value;
+                        reqIndex = UshortToIndex(r.ReadUInt16());
                     }
                     else
                     {
-                        loadedVal = nodeValues[valRefIndex];
+                        twoUShorts = readTwoUshortsInThreeBytes(r);
+                        valRefIndex = UshortToIndex(twoUShorts[0]);
+                        reqIndex = UshortToIndex(twoUShorts[1]);
+                        if (flags == DUPLICATEVALUENODE)
+                        {
+                            loadedVal = ((ValueNode<NodeValType>)refList.nodeByNumber(valRefIndex)).Value;
+                        }
+                        else  // == NEWVALUENODE
+                        {
+                            loadedVal = nodeValues[valRefIndex];
+                        }
                     }
                     newValSpec = new ValueNodeSpec<NodeValType>()
                     {
@@ -310,39 +431,40 @@ namespace DataSequenceGraph.Format
                         SequenceNumber = UshortToIndex(seqNum),
                         Value = loadedVal
                     };
-                    newSpecs.Add(newValSpec);
+                    totalSpec.fromNode = newValSpec;
                 }
-                seqAndFlags = ReadAndSplitSeqAndFlags(r);
-                seqNum = seqAndFlags.Item1;
+                newSpecs.Add(totalSpec);
+
+
             }
-            return newSpecs;
+            return newSpecs.AsReadOnly();
         }
 
         private Tuple<ushort, byte> ReadAndSplitSeqAndFlags(BinaryReader r)
         {
             return SplitOutHalfByte(r.ReadUInt16());
         }
-
+/*
         private IEnumerable<EdgeRouteSpec> EdgesFromBinary(BinaryReader r)
         {
             List<EdgeRouteSpec> newEdges = new List<EdgeRouteSpec>();
-            EdgeRouteSpec newSpec;
+            EdgeRouteSpec newNonValueNodeSpec;
             ushort[] twoUshorts;
             while (r.BaseStream.Position != r.BaseStream.Length)
             {
-                newSpec = new EdgeRouteSpec();
+                newNonValueNodeSpec = new EdgeRouteSpec();
                 twoUshorts = readTwoUshortsInThreeBytes(r);
-                newSpec.FromNumber = UshortToIndex(twoUshorts[0]);
-                newSpec.ToNumber = UshortToIndex(twoUshorts[1]);
+                newNonValueNodeSpec.FromNumber = UshortToIndex(twoUshorts[0]);
+                newNonValueNodeSpec.ToNumber = UshortToIndex(twoUshorts[1]);
 
                 twoUshorts = readTwoUshortsInThreeBytes(r);
-                newSpec.RequisiteFromNumber = UshortToIndex(twoUshorts[0]);
-                newSpec.RequisiteToNumber = UshortToIndex(twoUshorts[1]);
-                newEdges.Add(newSpec);
+                newNonValueNodeSpec.RequisiteFromNumber = UshortToIndex(twoUshorts[0]);
+                newNonValueNodeSpec.RequisiteToNumber = UshortToIndex(twoUshorts[1]);
+                newEdges.Add(newNonValueNodeSpec);
             }
             return newEdges;
         }
-
+*/
         private ushort[] readTwoUshortsInThreeBytes(BinaryReader r)
         {
             byte[] threeStoredBytes = new byte[3];
