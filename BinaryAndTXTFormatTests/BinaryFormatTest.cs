@@ -6,10 +6,10 @@ using NUnit.Framework;
 using DataSequenceGraph;
 using DataSequenceGraph.Format;
 
-namespace BinaryAndCSVFormatTests
+namespace BinaryAndTXTFormatTests
 {
     [TestFixture]
-    public class BinaryAndCSVFormatTest
+    public class BinaryAndTXTFormatTest
     {
         [Test]
         public void threeThreeTest()
@@ -19,15 +19,17 @@ namespace BinaryAndCSVFormatTests
             DataChunkRouteBlazerTest.threeThreeChunks(nodeList, prefixD);
             int origCount = nodeList.AllNodes.Count();
             int origEdgeCount = nodeList.AllEdgeSpecs.Count();
+            Assert.AreEqual(3, nodeList.enumerateDataChunkRoutes().Count());
 
-            BinaryAndCSVFormat<string> format = new BinaryAndCSVFormat<string>("nodesEdges.dat", "values.csv");
+            BinaryAndTXTFormat<string> format = new BinaryAndTXTFormat<string>("nodesEdges.dat", "values.csv");
             format.nodeValueParser = new StringNodeValueParser();
-            format.ToBinaryAndCSVFiles(nodeList);
+            format.ToBinaryAndTXTFiles(nodeList);
 
             nodeList = new MasterNodeList<string>();
             prefixD = new Dictionary<Node, List<Route>>();
             nodeList = format.ToNodeListFromFiles();
             Assert.AreEqual(origCount, nodeList.AllNodes.Count());
+            Assert.AreEqual(3, nodeList.enumerateDataChunkRoutes().Count());
             Assert.AreEqual(origEdgeCount, nodeList.AllEdgeSpecs.Count());
         }
     }

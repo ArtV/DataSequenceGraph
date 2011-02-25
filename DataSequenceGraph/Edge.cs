@@ -9,13 +9,11 @@ namespace DataSequenceGraph
     {
         public DirectedPair link { get; set; }
 
-        public DirectedPair requisiteLink { get; set; }
+        public IEnumerable<Node> requisiteNodes { get; set; }
 
         public Edge()
         {
-            this.requisiteLink = new DirectedPair() { 
-                from = NullNode.o, to = NullNode.o
-            };
+            this.requisiteNodes = new List<Node>();
         }
 
         public override bool Equals(System.Object obj)
@@ -31,7 +29,7 @@ namespace DataSequenceGraph
                 return false;
             }
 
-            return (link.Equals(p.link) && requisiteLink.Equals(p.requisiteLink));
+            return link.Equals(p.link);
         }
 
         public bool Equals(Edge p)
@@ -41,12 +39,12 @@ namespace DataSequenceGraph
                 return false;
             }
 
-            return (link.Equals(p.link) && requisiteLink.Equals(p.requisiteLink));
+            return link.Equals(p.link);
         }
 
         public override int GetHashCode()
         {
-            return (link.GetHashCode() ^ requisiteLink.GetHashCode());
+            return link.GetHashCode();
         }
     }
 }

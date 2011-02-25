@@ -73,7 +73,7 @@ namespace DataSequenceGraphCLI
                 
                 if (args.Length >= 3 && args[2].ToUpper() == "F")
                 {
-                    binaryCSVFiles(masterNodeList);
+                    binaryTEXTFiles(masterNodeList);
                 }
                 else
                 {
@@ -84,6 +84,12 @@ namespace DataSequenceGraphCLI
             else if (args.Length >= 2 && args[1] == "3")
             {
                 masterNodeList = setupNodeList33();
+            }
+            else if (args.Length >= 2 && args[1].ToUpper() == "R")
+            {
+                BinaryAndTXTFormat<string> format = new BinaryAndTXTFormat<string>("nodesEdges.dat", "values.txt");
+                format.nodeValueParser = new StringNodeValueParser();
+                masterNodeList = format.ToNodeListFromFiles();
             }
             else
             {
@@ -100,11 +106,11 @@ namespace DataSequenceGraphCLI
             }
         }
 
-        static void binaryCSVFiles(MasterNodeList<string> nodeList)
+        static void binaryTEXTFiles(MasterNodeList<string> nodeList)
         {
-            BinaryAndCSVFormat<string> format = new BinaryAndCSVFormat<string>("nodesEdges.dat", "values.txt");
+            BinaryAndTXTFormat<string> format = new BinaryAndTXTFormat<string>("nodesEdges.dat", "values.txt");
             format.nodeValueParser = new StringNodeValueParser();
-            format.ToBinaryAndCSVFiles(nodeList);
+            format.ToBinaryAndTXTFiles(nodeList);
         }        
 
         static MasterNodeList<string> loadFile(string filename)
@@ -141,8 +147,8 @@ namespace DataSequenceGraphCLI
                 {
                     outStr = route.connectedNodes.ElementAt(0).SequenceNumber + "," +
                         route.connectedNodes.ElementAt(1).SequenceNumber +
-                        " if already " + route.requisiteLinks.ElementAt(0).from.SequenceNumber + "," +
-                        route.requisiteLinks.ElementAt(0).to.SequenceNumber;
+                        (route.requisiteNodes.Count() > 0 ?
+                         (" if already " + route.requisiteNodes.ElementAt(0).SequenceNumber) : "");
                     Console.Out.WriteLine(outStr);
                 }
             }

@@ -78,5 +78,15 @@ namespace DataSequenceGraph
             Assert.True(list.trySetNode(new ValueNodeSpec<string>() { kind = NodeKind.ValueNode, Value = "C", SequenceNumber = 5 }));
             Assert.AreEqual("C", ((ValueNode<string>)list.AllNodes.ElementAt(5)).Value);
         }
+
+        [Test]
+        public void getNodeAndReqSpecs()
+        {
+            MasterNodeList<string> nodeList = new MasterNodeList<string>();
+            Dictionary<Node, List<Route>> prefixD = new Dictionary<Node, List<Route>>();
+            DataChunkRouteBlazerTest.threeThreeChunks(nodeList, prefixD);
+            IList<NodeAndReqSpec> specs = nodeList.AllNodeAndReqSpecs;
+            Assert.AreEqual(12, specs.Count);
+        }
     }
 }
