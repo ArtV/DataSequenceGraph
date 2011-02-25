@@ -47,9 +47,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BinaryAndCSVFormat\BinaryAndCSVFormat.csproj">
+    <ProjectReference Include="..\BinaryAndTXTFormat\BinaryAndTXTFormat.csproj">
       <Project>{77357CCB-D871-4007-85D8-DE5C2DB17043}</Project>
-      <Name>BinaryAndCSVFormat</Name>
+      <Name>BinaryAndTXTFormat</Name>
     </ProjectReference>
     <ProjectReference Include="..\DataSequenceGraph\DataSequenceGraph.csproj">
       <Project>{55CB11B6-B07B-4308-93E3-F95F74B069E2}</Project>

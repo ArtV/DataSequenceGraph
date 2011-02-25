@@ -15,9 +15,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLGraphFormat", "XMLGraphF
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLGraphFormatTests", "XMLGraphFormatTests\XMLGraphFormatTests.csproj", "{0AF2AA5A-9069-4C95-B15C-CDEB1CAF63F9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryAndCSVFormat", "BinaryAndCSVFormat\BinaryAndCSVFormat.csproj", "{77357CCB-D871-4007-85D8-DE5C2DB17043}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryAndTXTFormat", "BinaryAndTXTFormat\BinaryAndTXTFormat.csproj", "{77357CCB-D871-4007-85D8-DE5C2DB17043}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryAndCSVFormatTests", "BinaryAndCSVFormatTests\BinaryAndCSVFormatTests.csproj", "{A37394E0-7E90-4918-8D3F-5EBEF9CB9AC6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryFormatTests", "BinaryAndTXTFormatTests\BinaryFormatTests.csproj", "{A37394E0-7E90-4918-8D3F-5EBEF9CB9AC6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

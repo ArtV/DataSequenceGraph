@@ -62,10 +62,14 @@ namespace DataSequenceGraph
         {
             get
             {
+                IList<NodeAndReqSpec> specs;
+                MasterNodeList<T> newList = new MasterNodeList<T>();
                 List<NodeAndReqSpec> overallList = new List<NodeAndReqSpec>();
                 foreach (DataChunkRoute<T> route in enumerateDataChunkRoutes())
                 {
-                    overallList.AddRange(route.comboSpecsForMissingComponents(new MasterNodeList<T>()));
+                    specs = route.comboSpecsForMissingComponents(newList);
+                    overallList.AddRange(specs);
+                    newList.reloadNodeAndReqSpecs(specs);
                 }
                 return overallList.AsReadOnly();
             }
@@ -198,14 +202,57 @@ namespace DataSequenceGraph
 
         public void reloadNodeAndReqSpecs(IList<NodeAndReqSpec> specs)
         {
-            NodeAndReqSpec lastSpec;
+            EdgeRouteSpec edgeSpec;
             NodeAndReqSpec curSpec;
             NodeAndReqSpec nextSpec;
+            int lastGateNodeIndex = -1;
             for (int i = 0; i <= specs.Count - 1; i++)
-            {
+            {                
                 curSpec = specs[i];
+                if (curSpec.fromNode.kind == NodeKind.GateNode)
+                {
+                    lastGateNodeIndex = curSpec.fromNode.SequenceNumber;
+                }
+                if (curSpec.insertFrom)
+                {
+                    trySetNode(curSpec.fromNode);
+                }
+                if ((i + 1) <= specs.Count - 1)
+                {
+                    nextSpec = specs[i + 1];
+                    if (nextSpec.insertFrom)
+                    {
+                        trySetNode(nextSpec.fromNode);
+                    }
+                    if (nextSpec.fromNode.kind == NodeKind.GateNode)
+                    {
+                        edgeSpec = new EdgeRouteSpec()
+                        {
+                            FromNumber = curSpec.fromNode.SequenceNumber,
+                            ToNumber = lastGateNodeIndex,
+                            RequisiteNumbers = new int[] { lastGateNodeIndex }
+                        };
+                        routeFactory.newRoutesFromSpecs(new List<EdgeRouteSpec>() { edgeSpec });
+                    }
+                    else if (curSpec.ReqSequenceNumber != -1 || curSpec.fromNode.kind == NodeKind.GateNode)
+                    {
+                        edgeSpec = new EdgeRouteSpec()
+                        {
+                            FromNumber = curSpec.fromNode.SequenceNumber,
+                            ToNumber = nextSpec.fromNode.SequenceNumber,
+                            RequisiteNumbers = new int[] { curSpec.ReqSequenceNumber }
+                        };
+                        routeFactory.newRoutesFromSpecs(new List<EdgeRouteSpec>() { edgeSpec });
+                    }
+                }                
             }
-            // TODO  a little complicated to stitch back together into complete edges (and nodes)
+            edgeSpec = new EdgeRouteSpec()
+            {
+                FromNumber = specs[specs.Count - 1].fromNode.SequenceNumber,
+                ToNumber = lastGateNodeIndex,
+                RequisiteNumbers = new int[] { lastGateNodeIndex }
+            };
+            routeFactory.newRoutesFromSpecs(new List<EdgeRouteSpec>() { edgeSpec });
         }
 
         public bool trySetNode(NodeSpec spec)
@@ -226,6 +273,10 @@ namespace DataSequenceGraph
                     {
                         ValueNode<T> newValueNode = newNode as ValueNode<T>;
                         cacheValueNode(newValueNode);
+                    }
+                    if (newNode is GateNode)
+                    {
+                        gateNodeList.Add(newNode as GateNode);
                     }
                     return true;
                 }

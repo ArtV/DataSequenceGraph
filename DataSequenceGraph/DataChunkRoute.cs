@@ -115,7 +115,6 @@ namespace DataSequenceGraph
             List<NodeAndReqSpec> specList = new List<NodeAndReqSpec>();
             followToEnd();
             DirectedPair link;
-            IEnumerable<Node> reqNodes;
             EdgeRoute curRoute;
             NodeAndReqSpec curSpec;
             Node earliestRequisiteNode;
@@ -128,7 +127,6 @@ namespace DataSequenceGraph
                 nodeIsNecessaryForPreviousEdge = nextEdgeNodeIsNecessary;
                 curRoute = _componentEdges[i];
                 link = curRoute.edge.link;
-                reqNodes = curRoute.edge.requisiteNodes;
 
                 if (link.from.kind == NodeKind.GateNode)
                 {
@@ -185,19 +183,7 @@ namespace DataSequenceGraph
                 });
             }
             // last edge to gate node is implied, no need for a spec!
-/*            specList.Add(new NodeAndReqSpec()
-            {
-                fromNode = lastNode.ToNodeSpec(),
-                to
-            };
-            edgeSpecs.Add(new EdgeRouteSpec()
-            {
-                FromNumber = lastNode.SequenceNumber,
-                ToNumber = startNode.SequenceNumber,
-                RequisiteNumbers = new int[] { startNode.SequenceNumber }
-            }); */
             return specList.AsReadOnly();
-//            return new Tuple<IList<NodeSpec>, IList<EdgeRouteSpec>>(nodeSpecs.AsReadOnly(), edgeSpecs.AsReadOnly());
         }
 
         private bool edgeOnNodeAlready(MasterNodeList<T> destinationList,Node node, EdgeRoute edge)
@@ -254,8 +240,12 @@ namespace DataSequenceGraph
             {
                 return true;
             }
-            EdgeRoute otherEdge = otherFrom.OutgoingEdges.First(
+            EdgeRoute otherEdge = otherFrom.OutgoingEdges.FirstOrDefault(
                 otherOut => otherOut.edge.link.to.SequenceNumber == otherTo.SequenceNumber);
+            if (otherEdge == null)
+            {
+                return true;
+            }
             return !(otherEdge.requisiteNodes.Any(
                 otherReqNode => otherReqNode.SequenceNumber == reqNode.SequenceNumber));
         }
