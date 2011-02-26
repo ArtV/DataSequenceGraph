@@ -166,6 +166,10 @@ namespace DataSequenceGraph
                     curSpec.ReqSequenceNumber = earliestRequisiteNode.SequenceNumber;
                     nextEdgeNodeIsNecessary = true;
                 }
+                else
+                {
+                    nextEdgeNodeIsNecessary = false;
+                }
 
                 if (fromIsMissing || edgeOrReqIsMissing || nodeIsNecessaryForPreviousEdge)
                 {
@@ -240,14 +244,14 @@ namespace DataSequenceGraph
             {
                 return true;
             }
-            EdgeRoute otherEdge = otherFrom.OutgoingEdges.FirstOrDefault(
+            IEnumerable<EdgeRoute> otherEdges = otherFrom.OutgoingEdges.Where(
                 otherOut => otherOut.edge.link.to.SequenceNumber == otherTo.SequenceNumber);
-            if (otherEdge == null)
+            if (otherEdges.Count() == 0)
             {
                 return true;
             }
-            return !(otherEdge.requisiteNodes.Any(
-                otherReqNode => otherReqNode.SequenceNumber == reqNode.SequenceNumber));
+            return !(otherEdges.Any(otherEdge => otherEdge.requisiteNodes.Any(
+                otherReqNode => otherReqNode.SequenceNumber == reqNode.SequenceNumber)));
         }
 
     }

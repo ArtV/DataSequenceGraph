@@ -48,8 +48,8 @@ namespace DataSequenceGraphCLI
             if (args.Length >= 1 && args[0].ToUpper() == "L")
             {
                 masterNodeList = loadFile(args[1]);
-/*
-            using (TextReader reader = new StreamReader(new FileStream("common_follow.txt", FileMode.Open, FileAccess.Read)))
+
+            using (TextReader reader = new StreamReader(new FileStream("common_follow2.txt", FileMode.Open, FileAccess.Read)))
             {
                 var sentences = SentenceChunkLoader.ToSentenceChunks(reader);
                 foreach (string sentence in sentences)
@@ -63,13 +63,17 @@ namespace DataSequenceGraphCLI
                 MasterNodeList<string> masterNodeList2 = loadFile(args[1]);
                 DataChunkRoute<string> followRoute = masterNodeList.enumerateDataChunkRoutes().Last();
 
-//                BinaryAndCSVFormat<string> format = new BinaryAndCSVFormat<string>("nodesEdges.dat", "values.txt");
-                XMLGraphFormat<string> format = new XMLGraphFormat<string>("follow.xml");
+                BinaryAndTXTFormat<string> format = new BinaryAndTXTFormat<string>("nodesEdges2.dat", "values2.txt");
+//                XMLGraphFormat<string> format = new XMLGraphFormat<string>("follow.xml");
                 format.nodeValueParser = new StringNodeValueParser();
-                var missing = followRoute.specsForMissingComponents(masterNodeList2);
-                format.ToXMLFile(masterNodeList2, missing.Item1, missing.Item2);
-//                format.ToBinaryAndCSVFiles(masterNodeList2,missing.Item1,missing.Item2);
-  */              
+//                var missing = followRoute.specsForMissingComponents(masterNodeList2);
+//                format.ToXMLFile(masterNodeList2, missing.Item1, missing.Item2);
+//                format.ToBinaryAndTXTFiles(masterNodeList2,missing.Item1,missing.Item2);
+                var missing = followRoute.comboSpecsForMissingComponents(masterNodeList2);
+                nodeAndReqOutput(missing);
+                format.ToBinaryAndTXTFiles(masterNodeList2, missing);
+
+                
                 
                 if (args.Length >= 3 && args[2].ToUpper() == "F")
                 {
@@ -131,6 +135,14 @@ namespace DataSequenceGraphCLI
                 blazer.computeFullRoute();
             }
             return masterNodeList;
+        }
+
+        static void nodeAndReqOutput(IEnumerable<NodeAndReqSpec> specs)
+        {
+            foreach(NodeAndReqSpec spec in specs)
+            {
+                Console.Out.WriteLine(spec.fromNode.SequenceNumber + "," + spec.insertFrom + "," + spec.ReqSequenceNumber);
+            }
         }
 
         static void defaultTestOutput(MasterNodeList<string> masterNodeList)
