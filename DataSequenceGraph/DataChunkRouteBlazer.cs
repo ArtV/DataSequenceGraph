@@ -274,6 +274,15 @@ namespace DataSequenceGraph
                         link = newLink
                     };
             }
+            else if (nextNode.kind == NodeKind.GateNode)
+            {
+                newEdge =
+                    new Edge()
+                    {
+                        link = newLink,
+                        requisiteNodes = new List<Node>() { chunkRoute.startNode }
+                    };
+            }
             else
             {
                 Node lastAddedNode = latestAddedNodeBeforeOutgoingReqs(previousLastNode);
@@ -290,15 +299,25 @@ namespace DataSequenceGraph
 
         private Node latestAddedNodeBeforeOutgoingReqs(Node node)
         {
+            int checkedNodeIndex = chunkRoute.findNode(new List<Node> { node });
             int earliestRequisiteIndex = this.chunkRoute.findEarliestMatchOfRequisites(node.OutgoingEdges).Item1;
+            int indexToStartSearch = addedNodes.Count - 1;
+            if (addedNodes[indexToStartSearch].SequenceNumber == node.SequenceNumber)
+            {
+                indexToStartSearch--;
+            }
+            if (indexToStartSearch < 0)
+            {
+                indexToStartSearch = 0;
+            }
             if (earliestRequisiteIndex == -1)
             {
-                return addedNodes[addedNodes.Count - 1];
+                return addedNodes[indexToStartSearch];
             }
             else
             {
                 int linkPositionInNodes;
-                for (int linkIndex = addedNodes.Count - 1; linkIndex >= 0; linkIndex--)
+                for (int linkIndex = indexToStartSearch; linkIndex >= 0; linkIndex--)
                 {
                     linkPositionInNodes = this.chunkRoute.findNode(new List<Node>() { addedNodes[linkIndex] });
                     if (linkPositionInNodes < earliestRequisiteIndex)

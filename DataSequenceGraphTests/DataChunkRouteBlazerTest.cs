@@ -158,14 +158,22 @@ namespace DataSequenceGraph
             GateNode gate6 = (GateNode) list.nodeByNumber(5);
             ValueNode<string> Dnode = list.getValueNodesByValue("D").First();
             ValueNode<string> Bnode = list.getValueNodesByValue("B").First();
+            ValueNode<string> Cnode = list.getValueNodesByValue("C").First();
             Route DJroute = Dnode.OutgoingEdges.First(route =>
                 ((ValueNode<string>)route.connectedNodes.ElementAt(1)).Value.Equals("J"));
             Route DMroute = Dnode.OutgoingEdges.Last(route =>
                 ((ValueNode<string>)route.connectedNodes.ElementAt(1)).Value.Equals("M"));
+            Route DEroute = Dnode.OutgoingEdges.Last(route =>
+                ((ValueNode<string>)route.connectedNodes.ElementAt(1)).Value.Equals("E"));
             Assert.AreEqual(1, DJroute.requisiteNodes.Count());
             Assert.AreEqual(1, DMroute.requisiteNodes.Count());
             Assert.AreEqual(Gnode.SequenceNumber , DJroute.requisiteNodes.First().SequenceNumber);
             Assert.AreEqual(gate6.SequenceNumber , DMroute.requisiteNodes.First().SequenceNumber);
+            Assert.AreEqual(Cnode.SequenceNumber, DEroute.requisiteNodes.First().SequenceNumber);
+            
+            ValueNode<string> Onode = list.getValueNodesByValue("O").First();
+            Route OgateRoute = Onode.OutgoingEdges.First();
+            Assert.AreEqual(gate6.SequenceNumber, OgateRoute.requisiteNodes.First().SequenceNumber);
         }
 
         [Test]

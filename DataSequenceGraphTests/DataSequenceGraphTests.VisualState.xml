@@ -5,11 +5,11 @@
   <ExcludeCategories>false</ExcludeCategories>
   <Nodes>
     <Node UniqueName="[0-1000]C:\Users\Administrator\DataSequenceGraph\DataSequenceGraphTests\DataSequenceGraphTests.nunit" Expanded="true" />
-    <Node UniqueName="[0-1024]C:\Users\Administrator\DataSequenceGraph\DataSequenceGraphTests\bin\Release\DataSequenceGraphTests.dll" Expanded="true" />
-    <Node UniqueName="[0-1025]DataSequenceGraph" Expanded="true" />
-    <Node UniqueName="[0-1016]DataSequenceGraph.DataChunkRouteBlazerTest" Expanded="true" />
-    <Node UniqueName="[0-1009]DataSequenceGraph.MasterNodeListTest" Expanded="true" />
+    <Node UniqueName="[0-1025]C:\Users\Administrator\DataSequenceGraph\DataSequenceGraphTests\bin\Debug\DataSequenceGraphTests.dll" Expanded="true" />
+    <Node UniqueName="[0-1026]DataSequenceGraph" Expanded="true" />
+    <Node UniqueName="[0-1017]DataSequenceGraph.DataChunkRouteBlazerTest" Expanded="true" />
+    <Node UniqueName="[0-1010]DataSequenceGraph.MasterNodeListTest" Expanded="true" />
     <Node UniqueName="[0-1001]DataSequenceGraph.RouteTest" Expanded="true" />
-    <Node UniqueName="[0-1005]DataSequenceGraph.ValueNodeTest" Expanded="true" />
+    <Node UniqueName="[0-1006]DataSequenceGraph.ValueNodeTest" Expanded="true" />
   </Nodes>
 </VisualState>
