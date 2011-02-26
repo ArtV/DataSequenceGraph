@@ -67,9 +67,8 @@ namespace DataSequenceGraph
         {
             var seq = connectedNodes.GetEnumerator(); 
             int numRequisitesMatched = 0;
-            int nextToLastIndex = connectedNodes.Count - 2;
             int sequenceIndex = 0;
-            while (seq.MoveNext() && sequenceIndex <= nextToLastIndex)
+            while (seq.MoveNext())
             {
                 IEnumerable<Node> requisiteNodesMatching = requisiteNodes.Where(node =>
                     node == seq.Current);

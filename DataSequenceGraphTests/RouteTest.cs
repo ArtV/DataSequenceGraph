@@ -88,7 +88,7 @@ namespace DataSequenceGraph
                 },
                 requisiteNodes = new List<Node>()
                 {
-                    nodeB
+                    nodeA
                 }
             };
             edgeBD2 = new Edge()
@@ -177,8 +177,8 @@ namespace DataSequenceGraph
                 desiredSequence = new List<string>() { "B", "D" },
                 routeSoFar = routeAB
             };
-            Assert.IsFalse(routeBD.prefixMatches(criterion));
-            Assert.IsFalse(routeAB.meetsRequisites(routeBD.requisiteNodes));
+            Assert.IsTrue(routeBD.prefixMatches(criterion));
+            Assert.IsTrue(routeAB.meetsRequisites(routeBD.requisiteNodes));
         }
 
         [Test]
