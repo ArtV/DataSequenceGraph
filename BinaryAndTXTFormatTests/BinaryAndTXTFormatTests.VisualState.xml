@@ -5,7 +5,7 @@
   <ExcludeCategories>false</ExcludeCategories>
   <Nodes>
     <Node UniqueName="[0-1000]C:\Users\Administrator\DataSequenceGraph\BinaryAndTXTFormatTests\BinaryAndTXTFormatTests.nunit" Expanded="true" />
-    <Node UniqueName="[0-1003]C:\Users\Administrator\DataSequenceGraph\BinaryAndTXTFormatTests\bin\Release\BinaryAndTXTFormatTests.dll" Expanded="true" />
+    <Node UniqueName="[0-1003]C:\Users\Administrator\DataSequenceGraph\BinaryAndTXTFormatTests\bin\Debug\BinaryAndTXTFormatTests.dll" Expanded="true" />
     <Node UniqueName="[0-1004]BinaryAndTXTFormatTests" Expanded="true" />
     <Node UniqueName="[0-1001]BinaryAndTXTFormatTests.BinaryAndTXTFormatTest" Expanded="true" />
   </Nodes>
