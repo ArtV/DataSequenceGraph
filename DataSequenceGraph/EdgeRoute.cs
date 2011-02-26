@@ -13,22 +13,24 @@ namespace DataSequenceGraph
         {
             get
             {
-                return _connectedNodes.ToList().AsReadOnly();
+                return _connectedNodes;
             }
         }
 
-        private IEnumerable<Node> _connectedNodes
+        private IList<Node> _connectedNodes
         {
             get
             {
+                List<Node> retNodes = new List<Node>(2);
                 if (edge.link.from.kind != NodeKind.NullNode)
                 {
-                    yield return edge.link.from;
+                    retNodes.Add(edge.link.from);
                 }
                 if (edge.link.to.kind != NodeKind.NullNode)
                 {
-                    yield return edge.link.to;
+                    retNodes.Add(edge.link.to);
                 }
+                return retNodes.AsReadOnly();
             }
         }
 

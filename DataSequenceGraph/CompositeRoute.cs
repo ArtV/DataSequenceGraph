@@ -14,15 +14,27 @@ namespace DataSequenceGraph
         internal CompositeRoute(IEnumerable<Route> componentRoutes)
         {
             this._startRoute = componentRoutes.First();
-            this._connectedNodes = new List<Node>();
+            List<Node> newNodeList = new List<Node>();
             this._requisiteNodes = Enumerable.Empty<Node>();
+            bool isFirstRoute = true;
             foreach(Route route in componentRoutes)
             {
-                this._connectedNodes = this._connectedNodes.Concat(route.connectedNodes).Distinct().ToList().AsReadOnly();
+                IEnumerable<Node> newNodes;
+                if (isFirstRoute)
+                {
+                    newNodes = route.connectedNodes;
+                }
+                else
+                {
+                    newNodes = route.connectedNodes.Skip(1);
+                }
+                newNodeList.AddRange(newNodes);
+                this._connectedNodes = newNodeList.AsReadOnly();
                 if (!meetsRequisites(route.requisiteNodes))
                 {
                     this._requisiteNodes = this._requisiteNodes.Concat(route.requisiteNodes);
                 }
+                isFirstRoute = false;
             }
         }
 

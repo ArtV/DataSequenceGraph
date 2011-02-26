@@ -126,6 +126,13 @@ namespace DataSequenceGraph
         }
 
         [Test]
+        public void newRouteFromRoutes()
+        {
+            Assert.AreEqual(3, routeABC.connectedNodes.Count);
+            Assert.AreEqual(0, routeABCD.requisiteNodes.Count());
+        }
+
+        [Test]
         public void newRouteFromEdges()
         {
             Edge newEdge = new Edge() 
