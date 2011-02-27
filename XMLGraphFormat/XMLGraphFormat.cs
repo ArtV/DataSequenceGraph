@@ -164,15 +164,7 @@ namespace DataSequenceGraph.Format
 
                 reqAttr = doc.CreateAttribute(REQATTR);
                 reqStr = "";
-                bool first = true;
-                foreach (int nodeNum in spec.RequisiteNumbers)
-                {
-                    if (!first)
-                    {
-                        reqStr += ",";
-                    }
-                    reqStr += nodeNum;
-                }
+                reqStr = spec.RequisiteFromNumber + "," + spec.RequisiteToNumber;
                 edgeElement.Attributes.Append(reqAttr);
             }
         }
@@ -259,21 +251,25 @@ namespace DataSequenceGraph.Format
             List<EdgeRouteSpec> newNodeSpecs = new List<EdgeRouteSpec>();
             foreach (XPathNavigator edgeNav in edges)
             {
-                int[] reqNum;
+                int reqFromNum;
+                int reqToNum;
                 string[] req = ((string)edgeNav.Evaluate("string(@" + REQATTR + ")")).Split(new char[] { ',' });
                 if (req.Length == 0 || (req.Length == 1 && req[0].Trim() == ""))
                 {
-                    reqNum = new int[0];
+                    reqFromNum = -1;
+                    reqToNum = -1;
                 }
                 else
                 {
-                    reqNum = req.Select(str => Convert.ToInt32(str)).ToArray();
+                    reqFromNum = Convert.ToInt32(req[0]);
+                    reqToNum = Convert.ToInt32(req[1]);
                 }
                 newNodeSpecs.Add(new EdgeRouteSpec()
                 {
                     FromNumber = Convert.ToInt32(edgeNav.Evaluate("number(@" + FROMATTR + ")")),
                     ToNumber = Convert.ToInt32(edgeNav.Evaluate("number(@" + TOATTR + ")")),
-                    RequisiteNumbers = reqNum
+                    RequisiteFromNumber = reqFromNum,
+                    RequisiteToNumber = reqToNum
                 });
             }
             return newNodeSpecs;

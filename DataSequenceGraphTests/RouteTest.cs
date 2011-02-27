@@ -74,9 +74,10 @@ namespace DataSequenceGraph
                     from = nodeC,
                     to = nodeD
                 },
-                requisiteNodes = new List<Node>()
+                requisiteLink = new DirectedPair()
                 {
-                    nodeA
+                    from = nodeA,
+                    to = nodeB
                 }
             };
             edgeBD = new Edge()
@@ -86,9 +87,10 @@ namespace DataSequenceGraph
                     from = nodeB,
                     to = nodeD
                 },
-                requisiteNodes = new List<Node>()
+                requisiteLink = new DirectedPair()
                 {
-                    nodeA
+                    from = nodeA,
+                    to = nodeB
                 }
             };
             edgeBD2 = new Edge()
@@ -98,9 +100,10 @@ namespace DataSequenceGraph
                     from = nodeB,
                     to = nodeD2
                 },
-                requisiteNodes = new List<Node>()
+                requisiteLink = new DirectedPair()
                 {
-                    nodeC
+                    from = nodeC,
+                    to = nodeB
                 }
             };
 
@@ -129,7 +132,7 @@ namespace DataSequenceGraph
         public void newRouteFromRoutes()
         {
             Assert.AreEqual(3, routeABC.connectedNodes.Count);
-            Assert.AreEqual(0, routeABCD.requisiteNodes.Count());
+            Assert.AreEqual(0, routeABCD.requisiteLinks.Count());
         }
 
         [Test]
@@ -142,9 +145,10 @@ namespace DataSequenceGraph
                     from = nodeA,
                     to = nodeB
                 },
-                requisiteNodes = new List<Node>()
+                requisiteLink = new DirectedPair()
                 {
-                    nodeC
+                    from = nodeC,
+                    to = nodeD
                 }
             };
             Route route = routeFactory.newRouteFromEdge(newEdge);
@@ -178,7 +182,7 @@ namespace DataSequenceGraph
                 routeSoFar = routeAB
             };
             Assert.IsTrue(routeBD.prefixMatches(criterion));
-            Assert.IsTrue(routeAB.meetsRequisites(routeBD.requisiteNodes));
+            Assert.IsTrue(routeAB.meetsRequisites(routeBD.requisiteLinks));
         }
 
         [Test]
@@ -195,7 +199,7 @@ namespace DataSequenceGraph
             EdgeRouteSpec specCD = (routeCD as EdgeRoute).ToEdgeRouteSpec();
             Assert.AreEqual(2, specCD.FromNumber);
             Assert.AreEqual(3, specCD.ToNumber);
-            Assert.AreEqual(0, specCD.RequisiteNumbers.First());
+            Assert.AreEqual(0, specCD.RequisiteFromNumber);
         }
     }
 }

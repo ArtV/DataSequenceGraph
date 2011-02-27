@@ -9,13 +9,13 @@ namespace DataSequenceGraph
     {
         private Route _startRoute { get; set; }
         private IList<Node> _connectedNodes { get; set; }
-        private IEnumerable<Node> _requisiteNodes { get; set; }
+        private IEnumerable<DirectedPair> _requisiteLinks { get; set; }
 
         internal CompositeRoute(IEnumerable<Route> componentRoutes)
         {
             this._startRoute = componentRoutes.First();
             List<Node> newNodeList = new List<Node>();
-            this._requisiteNodes = Enumerable.Empty<Node>();
+            this._requisiteLinks = Enumerable.Empty<DirectedPair>();
             bool isFirstRoute = true;
             foreach(Route route in componentRoutes)
             {
@@ -30,9 +30,9 @@ namespace DataSequenceGraph
                 }
                 newNodeList.AddRange(newNodes);
                 this._connectedNodes = newNodeList.AsReadOnly();
-                if (!meetsRequisites(route.requisiteNodes))
+                if (!this.meetsRequisites(route.requisiteLinks))
                 {
-                    this._requisiteNodes = this._requisiteNodes.Concat(route.requisiteNodes);
+                    this._requisiteLinks = this._requisiteLinks.Concat(route.requisiteLinks);
                 }
                 isFirstRoute = false;
             }
@@ -46,11 +46,11 @@ namespace DataSequenceGraph
             }
         }
 
-        public override IEnumerable<Node> requisiteNodes
+        public override IEnumerable<DirectedPair> requisiteLinks
         {
             get
             {
-                return _requisiteNodes;
+                return _requisiteLinks;
             }
         }
     }

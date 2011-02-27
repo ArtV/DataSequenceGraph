@@ -38,11 +38,11 @@ namespace DataSequenceGraph
             }
         }
 
-        public override IEnumerable<Node> requisiteNodes
+        public override IEnumerable<DirectedPair> requisiteLinks
         {
             get 
             {
-                return chunkRoute.requisiteNodes;
+                return chunkRoute.requisiteLinks;
             }
         }
 
@@ -81,19 +81,17 @@ namespace DataSequenceGraph
             List<NodeSpec> nodeSpecs = new List<NodeSpec>();
             List<EdgeRouteSpec> edgeSpecs = new List<EdgeRouteSpec>();
             DirectedPair link;
-            IEnumerable<Node> reqNodes;
+            DirectedPair reqLink;
             bool foundAllNodes;
             nodeSpecs.Add(startNode.ToNodeSpec());
             foreach (EdgeRoute edge in _componentEdges)
             {
                 link = edge.edge.link;
-                reqNodes = edge.edge.requisiteNodes;
+                reqLink = edge.edge.requisiteLink;
 
                 foundAllNodes = addNodeSpecIfMissing(destinationList,link.to,nodeSpecs);
-                foreach (Node reqNode in reqNodes)
-                {
-                    foundAllNodes = foundAllNodes && addNodeSpecIfMissing(destinationList, reqNode, nodeSpecs);
-                }
+                foundAllNodes = foundAllNodes && addNodeSpecIfMissing(destinationList,reqLink.from,nodeSpecs);
+                foundAllNodes = foundAllNodes && addNodeSpecIfMissing(destinationList,reqLink.to,nodeSpecs);
 
                 if (!foundAllNodes || !edgeOnNodeAlready(destinationList,link.from,edge))                     
                 {
@@ -105,7 +103,8 @@ namespace DataSequenceGraph
             {
                 FromNumber = lastNode.SequenceNumber,
                 ToNumber = startNode.SequenceNumber,
-                RequisiteNumbers = new int[] { startNode.SequenceNumber }
+                RequisiteFromNumber = startNode.SequenceNumber,
+                RequisiteToNumber = connectedNodes.ElementAt(1).SequenceNumber
             });
             return new Tuple<IList<NodeSpec>,IList<EdgeRouteSpec>>(nodeSpecs.AsReadOnly(),edgeSpecs.AsReadOnly());
         }
@@ -115,9 +114,10 @@ namespace DataSequenceGraph
             List<NodeAndReqSpec> specList = new List<NodeAndReqSpec>();
             followToEnd();
             DirectedPair link;
+            DirectedPair reqLink;
             EdgeRoute curRoute;
             NodeAndReqSpec curSpec;
-            Node earliestRequisiteNode;
+//            Node earliestRequisiteNode;
             bool fromIsMissing;
             bool edgeOrReqIsMissing;
             bool nodeIsNecessaryForPreviousEdge = false;
@@ -127,6 +127,7 @@ namespace DataSequenceGraph
                 nodeIsNecessaryForPreviousEdge = nextEdgeNodeIsNecessary;
                 curRoute = _componentEdges[i];
                 link = curRoute.edge.link;
+                reqLink = curRoute.edge.requisiteLink;
 
                 if (link.from.kind == NodeKind.GateNode)
                 {
@@ -134,18 +135,20 @@ namespace DataSequenceGraph
                     {
                         insertFrom = true,
                         fromNode = link.from.ToNodeSpec(),
-                        ReqSequenceNumber = -1
+                        ReqFromSequenceNumber = -1,
+                        ReqToSequenceNumber = -1
                     });
                     nextEdgeNodeIsNecessary = true;
                     continue;
                 }
 
-                earliestRequisiteNode = connectedNodes[findEarliestMatchOfRequisites(new EdgeRoute[] { curRoute }).Item1];
+//                earliestRequisiteNode = connectedNodes[findEarliestMatchOfRequisites(new EdgeRoute[] { curRoute }).Item1];
                 curSpec = new NodeAndReqSpec()
                 {
                     fromNode = link.from.ToNodeSpec(),
                     insertFrom = false,
-                    ReqSequenceNumber = -1
+                    ReqFromSequenceNumber = -1,
+                    ReqToSequenceNumber = -1
                 };
                 fromIsMissing = false;
                 edgeOrReqIsMissing = false;                
@@ -158,12 +161,13 @@ namespace DataSequenceGraph
                 }
                 else
                 {
-                    edgeOrReqIsMissing = isMissingEdgeOrReq(destinationList, link.from, link.to, earliestRequisiteNode);                    
+                    edgeOrReqIsMissing = isMissingEdgeOrReq(destinationList, link.from, link.to, reqLink.from, reqLink.to);                    
                 }
 
                 if (edgeOrReqIsMissing)
                 {
-                    curSpec.ReqSequenceNumber = earliestRequisiteNode.SequenceNumber;
+                    curSpec.ReqFromSequenceNumber = reqLink.from.SequenceNumber;
+                    curSpec.ReqToSequenceNumber = reqLink.to.SequenceNumber;
                     nextEdgeNodeIsNecessary = true;
                 }
                 else
@@ -183,7 +187,8 @@ namespace DataSequenceGraph
                 {
                     insertFrom = nodeIsMissing(destinationList, finalNode),
                     fromNode = finalNode.ToNodeSpec(),
-                    ReqSequenceNumber = -1
+                    ReqFromSequenceNumber = -1,
+                    ReqToSequenceNumber = -1
                 });
             }
             // last edge to gate node is implied, no need for a spec!
@@ -232,7 +237,7 @@ namespace DataSequenceGraph
             return (foundNode.kind == NodeKind.NullNode && node.kind != NodeKind.NullNode);
         }
 
-        private bool isMissingEdgeOrReq(MasterNodeList<T> destinationList, Node fromNode, Node toNode, Node reqNode)
+        private bool isMissingEdgeOrReq(MasterNodeList<T> destinationList, Node fromNode, Node toNode, Node reqFromNode, Node reqToNode)
         {
             Node otherFrom = destinationList.nodeByNumber(fromNode.SequenceNumber);
             if (otherFrom.kind == NodeKind.NullNode)
@@ -250,8 +255,9 @@ namespace DataSequenceGraph
             {
                 return true;
             }
-            return !(otherEdges.Any(otherEdge => otherEdge.requisiteNodes.Any(
-                otherReqNode => otherReqNode.SequenceNumber == reqNode.SequenceNumber)));
+            return !(otherEdges.Any(otherEdge => 
+                otherEdge.edge.requisiteLink.from.SequenceNumber == reqFromNode.SequenceNumber
+                && otherEdge.edge.requisiteLink.to.SequenceNumber == reqToNode.SequenceNumber)); 
         }
 
     }

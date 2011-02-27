@@ -19,7 +19,7 @@ namespace DataSequenceGraph
         public bool Done { get; private set; }
 
         private int sourceDataIndex;
-        private List<Node> addedNodes { get; set; }
+        private List<DirectedPair> addedLinks { get; set; }
         private IEnumerable<T> sourceDataChunk { get; set; }
 
         public DataChunkRouteBlazer(IEnumerable<T> sourceDataChunk,MasterNodeList<T> nodeList)
@@ -30,7 +30,7 @@ namespace DataSequenceGraph
             this.nodeList = nodeList;
             RouteFactory<T> factory = new RouteFactory<T>();
             this.chunkRoute = factory.newDataChunkRoute(nodeList.newGateNode());
-            this.addedNodes = new List<Node>() { chunkRoute.startNode };
+            this.addedLinks = new List<DirectedPair>();
         }
 
         public void computeFullRoute()
@@ -51,19 +51,13 @@ namespace DataSequenceGraph
             var nextValueSequence = SourceData.Skip(sourceDataIndex);
             if (nextValueSequence.Count() > 0)
             {
-                bool added = false;
                 ValueNode<T> topCandidateNode = findTopCandidateNode(nextValueSequence);
                 if (topCandidateNode == null)
                 {
                     topCandidateNode = nodeList.newValueNodeFromValue(nextValueSequence.ElementAt(0));
-                    added = true;
                 }
                     
                 proceedToNode(topCandidateNode);
-                if (added)
-                {
-                    addedNodes.Add(topCandidateNode);
-                }
             }
 
             sourceDataIndex++;
@@ -280,28 +274,33 @@ namespace DataSequenceGraph
                     new Edge()
                     {
                         link = newLink,
-                        requisiteNodes = new List<Node>() { chunkRoute.startNode }
+                        requisiteLink = new DirectedPair()
+                        {
+                            from = chunkRoute.startNode,
+                            to = chunkRoute.connectedNodes.ElementAt(1)
+                        },
                     };
             }
             else
             {
-                Node lastAddedNode = latestAddedNodeBeforeOutgoingReqs(previousLastNode);
+                DirectedPair lastAddedLink = latestAddedLinkBeforeOutgoingReqs(previousLastNode);
                 newEdge =
                     new Edge()
                     {
                         link = newLink,
-                        requisiteNodes = new List<Node>() { lastAddedNode }
+                        requisiteLink = lastAddedLink
                     };
             }
+            addNewLinkIfDifferent(newLink);            
             EdgeRoute newRoute = new RouteFactory<T>().newRouteFromEdge(newEdge);
             this.chunkRoute.appendEdge(newRoute);
         }
 
-        private Node latestAddedNodeBeforeOutgoingReqs(Node node)
+        private DirectedPair latestAddedLinkBeforeOutgoingReqs(Node node)
         {
-            int checkedNodeIndex = chunkRoute.findNode(new List<Node> { node });
+//            int checkedNodeIndex = chunkRoute.findNode(new List<Node> { node });
             int earliestRequisiteIndex = this.chunkRoute.findEarliestMatchOfRequisites(node.OutgoingEdges).Item1;
-            int indexToStartSearch = addedNodes.Count - 1;
+/*            int indexToStartSearch = addedNodes.Count - 1;
             if (addedNodes[indexToStartSearch].SequenceNumber == node.SequenceNumber)
             {
                 indexToStartSearch--;
@@ -309,23 +308,32 @@ namespace DataSequenceGraph
             if (indexToStartSearch < 0)
             {
                 indexToStartSearch = 0;
-            }
+            } */
             if (earliestRequisiteIndex == -1)
             {
-                return addedNodes[indexToStartSearch];
+                return addedLinks[addedLinks.Count - 1];
             }
             else
             {
                 int linkPositionInNodes;
-                for (int linkIndex = indexToStartSearch; linkIndex >= 0; linkIndex--)
+                for (int linkIndex = addedLinks.Count - 1; linkIndex >= 0; linkIndex--)
                 {
-                    linkPositionInNodes = this.chunkRoute.findNode(new List<Node>() { addedNodes[linkIndex] });
+                    linkPositionInNodes = this.chunkRoute.findNode(addedLinks[linkIndex].from);
                     if (linkPositionInNodes < earliestRequisiteIndex)
                     {
-                        return addedNodes[linkIndex];
+                        return addedLinks[linkIndex];
                     }
                 }
-                return addedNodes[0];
+                return addedLinks[0];
+            }
+        }
+
+        private void addNewLinkIfDifferent(DirectedPair newLink)
+        {
+            Node fromNode = newLink.from;
+            if (!fromNode.OutgoingEdges.Any(oldRoute => oldRoute.edge.link.to == newLink.to))
+            {
+                addedLinks.Add(newLink);
             }
         }
     }

@@ -34,11 +34,11 @@ namespace DataSequenceGraph
             }
         }
 
-        public override IEnumerable<Node> requisiteNodes
+        public override IEnumerable<DirectedPair> requisiteLinks
         {
             get
             {
-                return edge.requisiteNodes;
+                yield return edge.requisiteLink;
             }
         }
 
@@ -49,12 +49,12 @@ namespace DataSequenceGraph
 
         public EdgeRouteSpec ToEdgeRouteSpec()
         {
-            int[] requisNodes = edge.requisiteNodes.Select(node => node.SequenceNumber).ToArray();
             EdgeRouteSpec retSpec = new EdgeRouteSpec()
             {
                 FromNumber = edge.link.from.SequenceNumber,
                 ToNumber = edge.link.to.SequenceNumber,
-                RequisiteNumbers = requisNodes
+                RequisiteFromNumber = edge.requisiteLink.from.SequenceNumber,
+                RequisiteToNumber = edge.requisiteLink.to.SequenceNumber
             };
             return retSpec;
         }

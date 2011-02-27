@@ -8,7 +8,7 @@ namespace DataSequenceGraph
     public abstract class Route
     {
         public abstract IList<Node> connectedNodes { get; }
-        public abstract IEnumerable<Node> requisiteNodes { get; }
+        public abstract IEnumerable<DirectedPair> requisiteLinks { get; }
 
         public Node startNode
         {
@@ -34,10 +34,14 @@ namespace DataSequenceGraph
         public bool startsWith(Route startingRoute)
         {            
             IEnumerable<Node> firstTwoNodes = startingRoute.connectedNodes.Take(2);
+            DirectedPair firstRequisiteLink = startingRoute.requisiteLinks.First<DirectedPair>();
 
             IEnumerable<Node> myFirstTwoNodes = this.connectedNodes.Take(2);
+            DirectedPair myFirstRequisiteLink = this.requisiteLinks.First<DirectedPair>();
             return (myFirstTwoNodes.ElementAt(0) == firstTwoNodes.ElementAt(0) &&
-                myFirstTwoNodes.ElementAt(1) == firstTwoNodes.ElementAt(1));
+                myFirstTwoNodes.ElementAt(1) == firstTwoNodes.ElementAt(1) &&
+                myFirstRequisiteLink.from == firstRequisiteLink.from &&
+                myFirstRequisiteLink.to == firstRequisiteLink.to);
         }
 
         public bool prefixMatches<NodeValType>(RouteCriterion<NodeValType> criterion)
@@ -58,32 +62,37 @@ namespace DataSequenceGraph
                 }
                 else
                 {
-                    return criterion.routeSoFar.meetsRequisites(requisiteNodes);
+                    return criterion.routeSoFar.meetsRequisites(requisiteLinks);
                 }
             }
         }
 
-        public bool meetsRequisites(IEnumerable<Node> requisiteNodes)
+        public bool meetsRequisites(IEnumerable<DirectedPair> requisiteLinks)
         {
+            IEnumerable<DirectedPair> requisiteLinksNoNulls = requisiteLinks.Where(
+                link => link.isBetweenValidNodes());
             var seq = connectedNodes.GetEnumerator(); 
             int numRequisitesMatched = 0;
             int sequenceIndex = 0;
-            while (seq.MoveNext())
+            int nextToLastIndex = connectedNodes.Count - 2;
+            while (seq.MoveNext() && sequenceIndex <= nextToLastIndex)
             {
-                IEnumerable<Node> requisiteNodesMatching = requisiteNodes.Where(node =>
-                    node == seq.Current);
-                numRequisitesMatched += requisiteNodesMatching.Count();
+                IEnumerable<DirectedPair> requisiteLinksFrom = requisiteLinksNoNulls.Where(link =>
+                    link.from == seq.Current);
+                foreach (DirectedPair link in requisiteLinksFrom)
+                {
+                    if (connectedNodes.ElementAt(sequenceIndex + 1) == link.to)
+                    {
+                        numRequisitesMatched++;
+                    }
+                }
                 sequenceIndex++;
             }
-            return (numRequisitesMatched == requisiteNodes.Count());
+            return (numRequisitesMatched == requisiteLinksNoNulls.Count());
         }
 
         public EdgeRoute findNextEdgeToFollow()
         {
-            if (lastNode.kind == NodeKind.GateNode)
-            {
-                return lastNode.OutgoingEdges.First();
-            }
             IEnumerable<EdgeRoute> edgesToUnvisitedNodesOrStart = lastNode.OutgoingEdges.Where(route =>
                 route.edge.link.to == startNode ||
                 !connectedNodes.Any(prevNode => prevNode.SequenceNumber == route.edge.link.to.SequenceNumber));                
@@ -92,8 +101,8 @@ namespace DataSequenceGraph
             EdgeRoute selectedRoute;
             if (earliestRequisiteIndex == -1)
             {                
-                throw new InvalidOperationException("no earliest requisite found at node " +
-                    lastNode.SequenceNumber + " for the route starting at " + startNode.SequenceNumber);
+                selectedRoute = edgesToUnvisitedNodesOrStart.First(route =>
+                    route.edge.requisiteLink.from.kind == NodeKind.NullNode);
             }
             else
             {
@@ -106,10 +115,16 @@ namespace DataSequenceGraph
         public Tuple<int,EdgeRoute> findEarliestMatchOfRequisites(IEnumerable<EdgeRoute> edgesToUnvisitedNodesOrStart)
         {
             int earliestRequisiteIndex = -1;
+            int nextToLastIndex = connectedNodes.Count - 2;
             EdgeRoute matchingRoute = null; 
             foreach (EdgeRoute route in edgesToUnvisitedNodesOrStart)
             {
-                int indexOfRequisiteMatch = findNode(route.edge.requisiteNodes);
+                int indexOfRequisiteMatch = findNode(route.edge.requisiteLink.from);
+                if (indexOfRequisiteMatch > nextToLastIndex ||
+                    connectedNodes.ElementAt(indexOfRequisiteMatch + 1) != route.edge.requisiteLink.to)
+                {
+                    continue;
+                }
                 if (earliestRequisiteIndex == -1)
                 {
                     earliestRequisiteIndex = indexOfRequisiteMatch;
@@ -124,12 +139,12 @@ namespace DataSequenceGraph
             return Tuple.Create(earliestRequisiteIndex, matchingRoute);
         }
         
-        public int findNode(IEnumerable<Node> otherNodes)
+        public int findNode(Node otherNode)
         {
             int counter = 0;
             foreach (Node node in connectedNodes)
             {
-                if (otherNodes.Any(otherNode => otherNode == node))
+                if (node == otherNode)
                 {
                     return counter;
                 }

@@ -141,7 +141,8 @@ namespace DataSequenceGraphCLI
         {
             foreach(NodeAndReqSpec spec in specs)
             {
-                Console.Out.WriteLine(spec.fromNode.SequenceNumber + "," + spec.insertFrom + "," + spec.ReqSequenceNumber);
+                Console.Out.WriteLine(spec.fromNode.SequenceNumber + "," + spec.insertFrom + 
+                    "," + spec.ReqFromSequenceNumber + "," + spec.ReqToSequenceNumber);
             }
         }
 
@@ -155,12 +156,12 @@ namespace DataSequenceGraphCLI
                     outStr += (node as ValueNode<string>).Value;
                 }
                 Console.Out.WriteLine(outStr);
-                foreach (Route route in node.OutgoingEdges)
+                foreach (EdgeRoute route in node.OutgoingEdges)
                 {
                     outStr = route.connectedNodes.ElementAt(0).SequenceNumber + "," +
                         route.connectedNodes.ElementAt(1).SequenceNumber +
-                        (route.requisiteNodes.Count() > 0 ?
-                         (" if already " + route.requisiteNodes.ElementAt(0).SequenceNumber) : "");
+                        " if already " + route.edge.requisiteLink.from.SequenceNumber + "," +
+                        route.edge.requisiteLink.to.SequenceNumber;
                     Console.Out.WriteLine(outStr);
                 }
             }

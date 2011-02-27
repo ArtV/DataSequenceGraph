@@ -60,7 +60,14 @@ namespace DataSequenceGraph
                     to = masterNodeList.nodeByNumber(spec.ToNumber)
                 }
             };
-            specEdge.requisiteNodes = spec.RequisiteNumbers.Select(reqNum => masterNodeList.nodeByNumber(reqNum));
+            if (spec.RequisiteFromNumber >= 0 && spec.RequisiteToNumber >= 0)
+            {
+                specEdge.requisiteLink = new DirectedPair()
+                {
+                    from = masterNodeList.nodeByNumber(spec.RequisiteFromNumber),
+                    to = masterNodeList.nodeByNumber(spec.RequisiteToNumber)
+                };
+            }
             return newRouteFromEdge(specEdge);
         }
 

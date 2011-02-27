@@ -110,12 +110,10 @@ namespace DataSequenceGraph.Format
             List<NodeValType> newValues = new List<NodeValType>();
             ushort seqNumber;
             byte flags;
-            bool combineValueIndexAndReqIndex;
             ushort valueIndex;
             foreach (NodeAndReqSpec currentNodeSpec in specs)
             {
                 valueIndex = 0;
-                combineValueIndexAndReqIndex = false;
                 seqNumber = indexToUshort(currentNodeSpec.fromNode.SequenceNumber);
                 if (currentNodeSpec.fromNode.kind != NodeKind.ValueNode)
                 {
@@ -131,7 +129,6 @@ namespace DataSequenceGraph.Format
                     }
                     else
                     {
-                        combineValueIndexAndReqIndex = true;
                         ValueNodeSpec<NodeValType> valSpec = currentNodeSpec.fromNode as ValueNodeSpec<NodeValType>;
                         IEnumerable<int> nodeIndexesWithValue =
                             nodeList.getValueNodesByValue(valSpec.Value).Select(node => node.SequenceNumber);
@@ -156,17 +153,12 @@ namespace DataSequenceGraph.Format
                                 newValues.Add(valSpec.Value);
                             }
                         }
+                        writer.Write(valueIndex);
                     }
                 }
 
-                if (combineValueIndexAndReqIndex)
-                {
-                    writeTwoUshortsToThreeBytes(valueIndex, indexToUshort(currentNodeSpec.ReqSequenceNumber),writer);
-                }
-                else
-                {
-                    writer.Write(indexToUshort(currentNodeSpec.ReqSequenceNumber));
-                }
+                writeTwoUshortsToThreeBytes(indexToUshort(currentNodeSpec.ReqFromSequenceNumber), 
+                    indexToUshort(currentNodeSpec.ReqToSequenceNumber),writer);
             }
             return newValues;
         }
@@ -289,7 +281,8 @@ namespace DataSequenceGraph.Format
             ValueNodeSpec<NodeValType> newValSpec;
             NodeAndReqSpec totalSpec;
             ushort seqNum;
-            int reqIndex;
+            int reqFromIndex;
+            int reqToIndex;
             ushort[] twoUShorts;
             while (r.BaseStream.Position != r.BaseStream.Length)
             {
@@ -298,7 +291,8 @@ namespace DataSequenceGraph.Format
                 totalSpec = new NodeAndReqSpec()
                 {
                     insertFrom = true,
-                    ReqSequenceNumber = -1
+                    ReqFromSequenceNumber = -1,
+                    ReqToSequenceNumber = -1
                 };
                 flags = seqAndFlags.Item2;
                 if (flags == NOTVALUENODE)
@@ -312,20 +306,25 @@ namespace DataSequenceGraph.Format
                         kind = NodeKind.GateNode, SequenceNumber = UshortToIndex(seqNum) 
                     };
                     totalSpec.fromNode = newNonValueNodeSpec;
-                    reqIndex = UshortToIndex(r.ReadUInt16());
+                    twoUShorts = readTwoUshortsInThreeBytes(r);
+                    reqFromIndex = UshortToIndex(twoUShorts[0]);
+                    reqToIndex = UshortToIndex(twoUShorts[1]);
                 }
                 else
                 {
                     if (flags == EXISTINGVALUENODE)
                     {
                         loadedVal = ((ValueNode<NodeValType>)refList.nodeByNumber(UshortToIndex(seqNum))).Value;
-                        reqIndex = UshortToIndex(r.ReadUInt16());
+                        twoUShorts = readTwoUshortsInThreeBytes(r);
+                        reqFromIndex = UshortToIndex(twoUShorts[0]);
+                        reqToIndex = UshortToIndex(twoUShorts[1]);
                     }
                     else
                     {
+                        valRefIndex = UshortToIndex(r.ReadUInt16());
                         twoUShorts = readTwoUshortsInThreeBytes(r);
-                        valRefIndex = UshortToIndex(twoUShorts[0]);
-                        reqIndex = UshortToIndex(twoUShorts[1]);
+                        reqFromIndex = UshortToIndex(twoUShorts[0]);
+                        reqToIndex = UshortToIndex(twoUShorts[1]);
                         if (flags == DUPLICATEVALUENODE)
                         {
                             loadedVal = ((ValueNode<NodeValType>)refList.nodeByNumber(valRefIndex)).Value;
@@ -343,7 +342,8 @@ namespace DataSequenceGraph.Format
                     };
                     totalSpec.fromNode = newValSpec;
                 }
-                totalSpec.ReqSequenceNumber = reqIndex;
+                totalSpec.ReqFromSequenceNumber = reqFromIndex;
+                totalSpec.ReqToSequenceNumber = reqToIndex;
                 newSpecs.Add(totalSpec);
             }
             refList.reloadNodeAndReqSpecs(newSpecs);

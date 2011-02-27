@@ -9,6 +9,7 @@ namespace DataSequenceGraph
     {
         public NodeSpec fromNode { get; set; }
         public bool insertFrom { get; set; }
-        public int ReqSequenceNumber { get; set; }
+        public int ReqFromSequenceNumber { get; set; }
+        public int ReqToSequenceNumber { get; set; }
     }
 }

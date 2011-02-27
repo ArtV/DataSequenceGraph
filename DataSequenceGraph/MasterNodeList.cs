@@ -230,17 +230,19 @@ namespace DataSequenceGraph
                         {
                             FromNumber = curSpec.fromNode.SequenceNumber,
                             ToNumber = lastGateNodeIndex,
-                            RequisiteNumbers = new int[] { lastGateNodeIndex }
+                            RequisiteToNumber = curSpec.ReqToSequenceNumber,
+                            RequisiteFromNumber = curSpec.ReqFromSequenceNumber
                         };
                         routeFactory.newRoutesFromSpecs(new List<EdgeRouteSpec>() { edgeSpec });
                     }
-                    else if (curSpec.ReqSequenceNumber != -1 || curSpec.fromNode.kind == NodeKind.GateNode)
+                    else if (curSpec.ReqFromSequenceNumber != -1 || curSpec.fromNode.kind == NodeKind.GateNode)
                     {
                         edgeSpec = new EdgeRouteSpec()
                         {
                             FromNumber = curSpec.fromNode.SequenceNumber,
                             ToNumber = nextSpec.fromNode.SequenceNumber,
-                            RequisiteNumbers = new int[] { curSpec.ReqSequenceNumber }
+                            RequisiteToNumber = curSpec.ReqToSequenceNumber,
+                            RequisiteFromNumber = curSpec.ReqFromSequenceNumber
                         };
                         routeFactory.newRoutesFromSpecs(new List<EdgeRouteSpec>() { edgeSpec });
                     }
@@ -250,7 +252,8 @@ namespace DataSequenceGraph
             {
                 FromNumber = specs[specs.Count - 1].fromNode.SequenceNumber,
                 ToNumber = lastGateNodeIndex,
-                RequisiteNumbers = new int[] { lastGateNodeIndex }
+                RequisiteFromNumber = lastGateNodeIndex,
+                RequisiteToNumber = specs[1].fromNode.SequenceNumber
             };
             routeFactory.newRoutesFromSpecs(new List<EdgeRouteSpec>() { edgeSpec });
         }
