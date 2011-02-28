@@ -117,7 +117,6 @@ namespace DataSequenceGraph
             DirectedPair reqLink;
             EdgeRoute curRoute;
             NodeAndReqSpec curSpec;
-//            Node earliestRequisiteNode;
             bool fromIsMissing;
             bool edgeOrReqIsMissing;
             bool nodeIsNecessaryForPreviousEdge = false;
@@ -142,7 +141,6 @@ namespace DataSequenceGraph
                     continue;
                 }
 
-//                earliestRequisiteNode = connectedNodes[findEarliestMatchOfRequisites(new EdgeRoute[] { curRoute }).Item1];
                 curSpec = new NodeAndReqSpec()
                 {
                     fromNode = link.from.ToNodeSpec(),
