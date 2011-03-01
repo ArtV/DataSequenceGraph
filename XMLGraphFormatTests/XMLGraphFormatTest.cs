@@ -50,7 +50,7 @@ namespace XMLGraphFormatTests
             Assert.AreEqual(XMLGraphFormat<int>.EDGEELEM, firstEdge.LocalName);
             Assert.AreEqual("0", firstEdge.Attributes[XMLGraphFormat<int>.FROMATTR].Value);
             Assert.AreEqual("3", firstEdge.Attributes[XMLGraphFormat<int>.TOATTR].Value);
-            Assert.AreEqual("", firstEdge.Attributes[XMLGraphFormat<int>.REQATTR].Value);
+            Assert.AreEqual("-1,-1", firstEdge.Attributes[XMLGraphFormat<int>.REQATTR].Value);
         }
 
         [Test]
@@ -106,7 +106,7 @@ namespace XMLGraphFormatTests
             DataChunkRoute<string> firstRoute = nodeList.nthDataChunkRoute(0);
             var missingComponents = firstRoute.specsForMissingComponents(destinationList);
             Assert.AreEqual(4, missingComponents.Item1.Count);
-            Assert.AreEqual(4, missingComponents.Item2.Count);
+            Assert.AreEqual(3, missingComponents.Item2.Count);
             destinationList.reloadNodesThenRoutesFromSpecs(missingComponents.Item1, missingComponents.Item2);
 
             DataChunkRoute<string> secondRoute = nodeList.nthDataChunkRoute(1);

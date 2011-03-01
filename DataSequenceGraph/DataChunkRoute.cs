@@ -83,7 +83,7 @@ namespace DataSequenceGraph
             DirectedPair link;
             DirectedPair reqLink;
             bool foundAllNodes;
-            nodeSpecs.Add(startNode.ToNodeSpec());
+            addNodeSpecIfMissing(destinationList, startNode, nodeSpecs);
             foreach (EdgeRoute edge in _componentEdges)
             {
                 link = edge.edge.link;
@@ -99,13 +99,6 @@ namespace DataSequenceGraph
                 }
             }
             sortAndDedupe(nodeSpecs);
-            edgeSpecs.Add(new EdgeRouteSpec()
-            {
-                FromNumber = lastNode.SequenceNumber,
-                ToNumber = startNode.SequenceNumber,
-                RequisiteFromNumber = startNode.SequenceNumber,
-                RequisiteToNumber = connectedNodes.ElementAt(1).SequenceNumber
-            });
             return new Tuple<IList<NodeSpec>,IList<EdgeRouteSpec>>(nodeSpecs.AsReadOnly(),edgeSpecs.AsReadOnly());
         }
 
@@ -128,7 +121,7 @@ namespace DataSequenceGraph
                 link = curRoute.edge.link;
                 reqLink = curRoute.edge.requisiteLink;
 
-                if (link.from.kind == NodeKind.GateNode)
+                if (link.from.kind == NodeKind.GateNode && nodeIsMissing(destinationList,link.from))
                 {
                     specList.Add(new NodeAndReqSpec()
                     {
