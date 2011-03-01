@@ -7,6 +7,7 @@ using DataSequenceGraph.Format;
 using System.Xml;
 using System.IO;
 using DataSequenceGraph.Chunk;
+using CommandLine;
 
 namespace DataSequenceGraphCLI
 {
@@ -44,83 +45,215 @@ namespace DataSequenceGraphCLI
 
         static void Main(string[] args)
         {
-            MasterNodeList<string> masterNodeList = null;
-            if (args.Length >= 1 && args[0].ToUpper() == "L")
+            Args arguments = new Args();
+            ICommandLineParser parser = new CommandLineParser(new CommandLineParserSettings(Console.Error));
+            if (parser.ParseArguments(args, arguments))
             {
-                masterNodeList = loadFile(args[1]);
-
-            using (TextReader reader = new StreamReader(new FileStream("common_follow2.txt", FileMode.Open, FileAccess.Read)))
-            {
-                var sentences = SentenceChunkLoader.ToSentenceChunks(reader);
-                foreach (string sentence in sentences)
+                if (arguments.HandCodedList != -1 && (arguments.InDatFile != null || arguments.InTxtFile != null
+                    || arguments.InXMLFile != null))
                 {
-                    var words = SentenceChunkLoader.ToWordValues(sentence);
-                    var blazer = new DataChunkRouteBlazer<string>(words, masterNodeList);
-                    blazer.computeFullRoute();
+                    Console.Out.WriteLine("Hand-coded graph is in place of loading a primary graph.");
                 }
-            }
-
-                MasterNodeList<string> masterNodeList2 = loadFile(args[1]);
-                DataChunkRoute<string> followRoute = masterNodeList.enumerateDataChunkRoutes().Last();
-
-                BinaryAndTXTFormat<string> format = new BinaryAndTXTFormat<string>("nodesEdges2.dat", "values2.txt");
-//                XMLGraphFormat<string> format = new XMLGraphFormat<string>("follow.xml");
-                format.nodeValueParser = new StringNodeValueParser();
-//                var missing = followRoute.specsForMissingComponents(masterNodeList2);
-//                format.ToXMLFile(masterNodeList2, missing.Item1, missing.Item2);
-//                format.ToBinaryAndTXTFiles(masterNodeList2,missing.Item1,missing.Item2);
-                var missing = followRoute.comboSpecsForMissingComponents(masterNodeList2);
-                nodeAndReqOutput(missing);
-                format.ToBinaryAndTXTFiles(masterNodeList2, missing);
-
-                
-                
-                if (args.Length >= 3 && args[2].ToUpper() == "F")
+                else if (arguments.HandCodedList == -1 && arguments.InXMLFile == null && arguments.InDatFile == null
+                    && arguments.InSrcFile == null)
                 {
-                    binaryTEXTFiles(masterNodeList);
+                    Console.Out.WriteLine("Must specify a primary graph, and/or a sentence source file to split.");
+                }
+                else if (arguments.Quiet && arguments.OutXMLFile == null && arguments.OutDatFile == null &&
+                    arguments.OutTxtFile == null)
+                {
+                    Console.Out.WriteLine("Quiet display and nowhere to send file output. Nothing to do.");
+                }
+                else if (arguments.InXMLFile != null && (arguments.InDatFile != null || arguments.InTxtFile != null))
+                {
+                    Console.Out.WriteLine("For primary graph, specify XML file, or both edge data file and value text file.");
+                }
+                else if ((arguments.InDatFile == null && arguments.InTxtFile != null) ||
+                         (arguments.InDatFile != null && arguments.InTxtFile == null))
+                {
+                    Console.Out.WriteLine("Primary graph edge data file must be paired with a values text file.");
+                }
+                else if (arguments.OutXMLFile != null && (arguments.OutDatFile != null || arguments.OutTxtFile != null))
+                {
+                    Console.Out.WriteLine("For output file, specify XML filename, or both edge data filename and value text filename.");
+                }
+                else if ((arguments.OutDatFile == null && arguments.OutTxtFile != null) ||
+                         (arguments.OutDatFile != null && arguments.OutDatFile == null))
+                {
+                    Console.Out.WriteLine("Output edge data file must be paired with a values text file.");
+                }
+                else if (arguments.InSrcFile != null && (arguments.InXMLFile2 != null || arguments.InDatFile2 != null
+                    || arguments.InTxtFile2 != null))
+                {
+                    Console.Out.WriteLine("Sentence source file cannot be processed simultaneously with a secondary graph.");
+                }
+                else if (arguments.InXMLFile2 != null && (arguments.InDatFile2 != null || arguments.InTxtFile2 != null))
+                {
+                    Console.Out.WriteLine("For secondary graph, specify XML filename, or both edge data filename and value text filename.");
+                }
+                else if ((arguments.InDatFile2 == null && arguments.InTxtFile2 != null) ||
+                         (arguments.InDatFile2 != null && arguments.InTxtFile2 == null))
+                {
+                    Console.Out.WriteLine("Secondary graph data file must be paired with a values text file.");
                 }
                 else
                 {
-                    defaultTestOutput(masterNodeList);
-                    printEnumeratedChunks(masterNodeList);
-                } 
-            }
-            else if (args.Length >= 2 && args[1] == "3")
-            {
-                masterNodeList = setupNodeList33();
-            }
-            else if (args.Length >= 2 && args[1].ToUpper() == "R")
-            {
-                BinaryAndTXTFormat<string> format = new BinaryAndTXTFormat<string>("nodesEdges.dat", "values.txt");
-                format.nodeValueParser = new StringNodeValueParser();
-                masterNodeList = format.ToNodeListFromFiles();
-            }
-            else
-            {
-                masterNodeList = setupNodeList();
-            }
-            if (args.Length == 0 || (args.Length >= 1 && args[0].ToUpper() == "D"))
-            {
-                defaultTestOutput(masterNodeList);
-                printEnumeratedChunks(masterNodeList);
-            }
-            else if (args[0].ToUpper() == "X")
-            {
-                XMLOut(masterNodeList);
+                    if (arguments.OutDatFile == null && arguments.OutTxtFile == null && arguments.OutXMLFile == null)
+                    {
+                        arguments.Verbose = true;
+                    }
+
+                    // ---- stage 1
+                    MasterNodeList<string> firstList;
+                    if (arguments.InXMLFile != null)
+                    {
+                        XMLGraphFormat<string> inXml = new XMLGraphFormat<string>(arguments.InXMLFile);
+                        inXml.nodeValueParser = new StringNodeValueParser();
+                        firstList = inXml.ToNodeListFromFile();
+                    }
+                    else if (arguments.InDatFile != null && arguments.InTxtFile != null)
+                    {
+                        BinaryAndTXTFormat<string> inOth = new BinaryAndTXTFormat<string>(arguments.InDatFile, arguments.InTxtFile);
+                        inOth.nodeValueParser = new StringNodeValueParser();
+                        firstList = inOth.ToNodeListFromFiles();
+                    }
+                    else if (arguments.HandCodedList == 0)
+                    {
+                        firstList = setupNodeList33();
+                    }
+                    else if (arguments.HandCodedList == 1)
+                    {
+                        firstList = setupNodeList();
+                    }
+                    else
+                    {
+                        firstList = new MasterNodeList<string>();
+                    }
+
+                    // ---- stage 2
+                    MasterNodeList<string> secondList = null;
+                    IList<NodeAndReqSpec> nodeReqSpecs = null;
+                    IList<NodeSpec> nodeSpecs = null;
+                    IList<EdgeRouteSpec> edgeSpecs = null;
+                    if (arguments.InXMLFile2 != null)
+                    {
+                        XMLGraphFormat<string> inXml2 = new XMLGraphFormat<string>(arguments.InXMLFile2);
+                        inXml2.nodeValueParser = new StringNodeValueParser();
+                        secondList = inXml2.ToNodeListFromFile();
+                    }
+                    else if (arguments.InDatFile2 != null && arguments.InTxtFile2 != null)
+                    {
+                        BinaryAndTXTFormat<string> inOth2 = new BinaryAndTXTFormat<string>(arguments.InDatFile2, arguments.InTxtFile2);
+                        inOth2.nodeValueParser = new StringNodeValueParser();
+                        secondList = inOth2.ToNodeListFromFiles();
+                    }
+
+                    if (arguments.InSrcFile != null)
+                    {
+                        loadFile(arguments.InSrcFile, firstList, arguments.Quiet);
+                    }
+                    else if (secondList != null)
+                    {
+                        if (arguments.Chunk != -1)
+                        {
+                            DataChunkRoute<string> nthRoute = firstList.nthDataChunkRoute(arguments.Chunk - 1);
+                            if (arguments.OutXMLFile != null)
+                            {
+                                var missing = nthRoute.specsForMissingComponents(secondList);
+                                nodeSpecs = missing.Item1;
+                                edgeSpecs = missing.Item2;
+                            }
+                            else if (arguments.OutDatFile != null && arguments.OutTxtFile != null)
+                            {
+                                nodeReqSpecs = nthRoute.comboSpecsForMissingComponents(secondList);
+                            }
+                        }
+                        else if (arguments.AllMissing)
+                        {
+                            nodeReqSpecs = Enumerable.Empty<NodeAndReqSpec>().ToList();
+                            nodeSpecs = Enumerable.Empty<NodeSpec>().ToList();
+                            edgeSpecs = Enumerable.Empty<EdgeRouteSpec>().ToList();
+                            foreach (DataChunkRoute<string> chRoute in firstList.enumerateDataChunkRoutes())
+                            {
+                                nodeReqSpecs = nodeReqSpecs.Concat(chRoute.comboSpecsForMissingComponents(secondList)).ToList();
+                                if (arguments.OutXMLFile != null)
+                                {
+                                    var missing = chRoute.specsForMissingComponents(secondList);
+                                    nodeSpecs = nodeSpecs.Concat(missing.Item1).ToList();
+                                    edgeSpecs = edgeSpecs.Concat(missing.Item2).ToList();
+                                }
+                            }
+                        }
+                        else
+                        {
+                            firstList.reloadNodeAndReqSpecs(secondList.AllNodeAndReqSpecs);
+                        }
+                    }
+                    else if (arguments.Chunk != -1)
+                    {
+                        secondList = new MasterNodeList<string>();
+                        DataChunkRoute<string> nthRoute = firstList.nthDataChunkRoute(arguments.Chunk - 1);
+                        if (arguments.OutXMLFile != null)
+                        {
+                            var missing = nthRoute.specsForMissingComponents(secondList);
+                            nodeSpecs = missing.Item1;
+                            edgeSpecs = missing.Item2;
+                        }
+                        else if (arguments.OutDatFile != null && arguments.OutTxtFile != null)
+                        {
+                            nodeReqSpecs = nthRoute.comboSpecsForMissingComponents(secondList);
+                        }
+                        secondList = new MasterNodeList<string>();
+                    }
+
+
+                    // ---- stage 3                    
+                    if (arguments.Verbose && arguments.Chunk == -1)
+                    {
+                        defaultTestOutput(firstList);
+                        printEnumeratedChunks(firstList);
+                    }
+                    if (arguments.Chunk != -1 && !arguments.Quiet)
+                    {
+                        printChunk(firstList.nthDataChunkRoute(arguments.Chunk - 1));
+                    }
+                    if (arguments.AllMissing && !arguments.Quiet)
+                    {
+                        nodeAndReqOutput(nodeReqSpecs);
+                    }
+
+                    // ---- stage 4
+                    if (arguments.OutXMLFile != null)
+                    {
+                        XMLGraphFormat<string> outX = new XMLGraphFormat<string>(arguments.OutXMLFile);
+                        if (nodeSpecs != null)
+                        {
+                            outX.ToXMLFile(secondList, nodeSpecs, edgeSpecs);
+                        }
+                        else
+                        {
+                            outX.ToXMLFile(firstList);
+                        }
+                    }
+
+                    if (arguments.OutDatFile != null && arguments.OutTxtFile != null)
+                    {
+                        BinaryAndTXTFormat<string> outOth = new BinaryAndTXTFormat<string>(arguments.OutDatFile, arguments.OutTxtFile);
+                        if (nodeReqSpecs != null)
+                        {
+                            outOth.ToBinaryAndTXTFiles(secondList, nodeReqSpecs);
+                        }
+                        else
+                        {
+                            outOth.ToBinaryAndTXTFiles(firstList);
+                        }
+                    }
+                }
             }
         }
 
-        static void binaryTEXTFiles(MasterNodeList<string> nodeList)
+        static void loadFile(string filename,MasterNodeList<string> masterNodeList,bool quiet)
         {
-            BinaryAndTXTFormat<string> format = new BinaryAndTXTFormat<string>("nodesEdges.dat", "values.txt");
-            format.nodeValueParser = new StringNodeValueParser();
-            format.ToBinaryAndTXTFiles(nodeList);
-        }        
-
-        static MasterNodeList<string> loadFile(string filename)
-        {
-            MasterNodeList<string> masterNodeList = new MasterNodeList<string>();
-            Dictionary<Node, List<Route>> routePrefixDictionary = new Dictionary<Node, List<Route>>();
             List<string> sentences;
             List<string> words;
             DataChunkRouteBlazer<string> blazer;
@@ -133,8 +266,12 @@ namespace DataSequenceGraphCLI
                 words = SentenceChunkLoader.ToWordValues(sentence);
                 blazer = new DataChunkRouteBlazer<string>(words, masterNodeList);
                 blazer.computeFullRoute();
+                if (!quiet)
+                {
+                    Console.Out.WriteLine("Added sentence starting with " + words.First() + " at start node " +
+                        blazer.chunkRoute.startNode.SequenceNumber);
+                }
             }
-            return masterNodeList;
         }
 
         static void nodeAndReqOutput(IEnumerable<NodeAndReqSpec> specs)
@@ -142,7 +279,7 @@ namespace DataSequenceGraphCLI
             foreach(NodeAndReqSpec spec in specs)
             {
                 Console.Out.WriteLine(spec.fromNode.SequenceNumber + "," + spec.insertFrom + 
-                    "," + spec.ReqFromSequenceNumber + "," + spec.ReqToSequenceNumber);
+                    " if already " + spec.ReqFromSequenceNumber + "," + spec.ReqToSequenceNumber);
             }
         }
 
@@ -169,24 +306,31 @@ namespace DataSequenceGraphCLI
         }
 
         static void printEnumeratedChunks(MasterNodeList<string> masterNodeList)
-        {            
+        {
+            var ind = 1;
             foreach (DataChunkRoute<string> route in masterNodeList.enumerateDataChunkRoutes())
             {
-                ValueNode<string> lastNode = null;
-                foreach (EdgeRoute edge in route.componentEdges)
-                {
-                    Console.Out.Write(edge.edge.link.from.SequenceNumber);
-                    if (edge.edge.link.from is ValueNode<string>)
-                    {
-                        Console.Out.Write("," + ((ValueNode<string>)edge.edge.link.from).Value);
-                    }
-                    Console.Out.Write("  ");
-                    lastNode = edge.edge.link.to as ValueNode<string>;
-                }
-                Console.Out.Write(lastNode.SequenceNumber + "," + lastNode.Value);
-                Console.Out.WriteLine();
-                Console.Out.WriteLine();
+                Console.Out.Write("#" + ind + ": ");
+                printChunk(route);
+                ind++;
             }
+        }
+
+        static void printChunk(DataChunkRoute<string> route)
+        {
+            ValueNode<string> lastNode = null;
+            foreach (EdgeRoute edge in route.componentEdges)
+            {
+                Console.Out.Write(edge.edge.link.from.SequenceNumber);
+                if (edge.edge.link.from is ValueNode<string>)
+                {
+                    Console.Out.Write("," + ((ValueNode<string>)edge.edge.link.from).Value);
+                }
+                Console.Out.Write("  ");
+                lastNode = edge.edge.link.to as ValueNode<string>;
+            }
+            Console.Out.Write(lastNode.SequenceNumber + "," + lastNode.Value);
+            Console.Out.WriteLine();
         }
 
         static MasterNodeList<string> setupNodeList()
@@ -206,20 +350,5 @@ namespace DataSequenceGraphCLI
             threeThreeRoutes(masterNodeList, routePrefixDictionary);
             return masterNodeList;
         }
-
-        static void XMLOut(MasterNodeList<string> masterNodeList)
-        {
-            XMLGraphFormat<string> formatter = new XMLGraphFormat<string>();
-            formatter.nodeValueParser = new StringNodeValueParser();
-
-            XmlDocument doc = formatter.ToXMLDocument(masterNodeList);
-
-            doc.WriteContentTo(new XmlTextWriter(Console.Out));
-
-            masterNodeList = formatter.ToNodeList(new XmlTextReader(new StringReader(doc.OuterXml)));
-
-            defaultTestOutput(masterNodeList);
-            printEnumeratedChunks(masterNodeList);
-        }      
     }
 }
