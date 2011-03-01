@@ -165,6 +165,7 @@ namespace DataSequenceGraph.Format
                 reqAttr = doc.CreateAttribute(REQATTR);
                 reqStr = "";
                 reqStr = spec.RequisiteFromNumber + "," + spec.RequisiteToNumber;
+                reqAttr.Value = reqStr;
                 edgeElement.Attributes.Append(reqAttr);
             }
         }
