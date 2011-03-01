@@ -25,7 +25,7 @@ namespace SentenceChunkLoaderTests
         [Test]
         public void wordsTest()
         {
-            List<string> wordValues = SentenceChunkLoader.ToWordValues("a bad, gn'ome is lickety-split (here) now");
+            List<string> wordValues = SentenceChunkLoader.ToWordValues("a bad, gn'ome is\" lickety-split (here) now");
             Assert.AreEqual(7, wordValues.Count);
             Assert.AreEqual("a", wordValues[0]);
             Assert.AreEqual("bad", wordValues[1]);

@@ -28,7 +28,7 @@ namespace DataSequenceGraph.Chunk
         public static List<string> ToWordValues(string sentence)
         {
             List<string> words = new List<string>();
-            string wordsPattern = @"((?:\w|'|-)+?)(?:\s|\(|\)|,|$)+";
+            string wordsPattern = @"((?:\w|'|-)+?)(?:\s|\(|\)|,|$|"")+";
             foreach (Match match in Regex.Matches(sentence, wordsPattern, RegexOptions.Compiled))
             {
                 words.Add(match.Groups[1].Value);
