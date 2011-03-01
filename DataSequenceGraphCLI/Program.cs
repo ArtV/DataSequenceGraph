@@ -217,6 +217,10 @@ namespace DataSequenceGraphCLI
                     {
                         printChunk(firstList.nthDataChunkRoute(arguments.Chunk - 1));
                     }
+                    if (arguments.Chunk != -1 && arguments.Verbose)
+                    {
+                        nodeAndReqOutput(nodeReqSpecs);
+                    }
                     if (arguments.AllMissing && !arguments.Quiet)
                     {
                         nodeAndReqOutput(nodeReqSpecs);
@@ -278,8 +282,9 @@ namespace DataSequenceGraphCLI
         {
             foreach(NodeAndReqSpec spec in specs)
             {
-                Console.Out.WriteLine(spec.fromNode.SequenceNumber + "," + spec.insertFrom + 
-                    " if already " + spec.ReqFromSequenceNumber + "," + spec.ReqToSequenceNumber);
+                Console.Out.WriteLine(spec.fromNode.SequenceNumber + " " + 
+                    (spec.insertFrom ? "(new node)" : "") + 
+                    " if already " + spec.ReqFromSequenceNumber + ".." + spec.ReqToSequenceNumber);
             }
         }
 
@@ -287,7 +292,12 @@ namespace DataSequenceGraphCLI
         {
             foreach (var node in masterNodeList.AllNodes)
             {
-                string outStr = node.SequenceNumber + " " + node.GetType() + " ";
+                if (node.kind == NodeKind.NullNode)
+                {
+                    continue;
+                }
+                string typ = (node.kind == NodeKind.GateNode ? "Gate" : "Value:");
+                string outStr = node.SequenceNumber + " " +  typ + " ";
                 if (node.kind == NodeKind.ValueNode)
                 {
                     outStr += (node as ValueNode<string>).Value;
@@ -295,9 +305,9 @@ namespace DataSequenceGraphCLI
                 Console.Out.WriteLine(outStr);
                 foreach (EdgeRoute route in node.OutgoingEdges)
                 {
-                    outStr = route.connectedNodes.ElementAt(0).SequenceNumber + "," +
+                    outStr = "   .." +
                         route.connectedNodes.ElementAt(1).SequenceNumber +
-                        " if already " + route.edge.requisiteLink.from.SequenceNumber + "," +
+                        " if already " + route.edge.requisiteLink.from.SequenceNumber + ".." +
                         route.edge.requisiteLink.to.SequenceNumber;
                     Console.Out.WriteLine(outStr);
                 }
@@ -307,6 +317,7 @@ namespace DataSequenceGraphCLI
 
         static void printEnumeratedChunks(MasterNodeList<string> masterNodeList)
         {
+            Console.Out.WriteLine("------ Chunks in graph: ");
             var ind = 1;
             foreach (DataChunkRoute<string> route in masterNodeList.enumerateDataChunkRoutes())
             {
@@ -324,12 +335,12 @@ namespace DataSequenceGraphCLI
                 Console.Out.Write(edge.edge.link.from.SequenceNumber);
                 if (edge.edge.link.from is ValueNode<string>)
                 {
-                    Console.Out.Write("," + ((ValueNode<string>)edge.edge.link.from).Value);
+                    Console.Out.Write(":" + ((ValueNode<string>)edge.edge.link.from).Value);
                 }
-                Console.Out.Write("  ");
+                Console.Out.Write("..");
                 lastNode = edge.edge.link.to as ValueNode<string>;
             }
-            Console.Out.Write(lastNode.SequenceNumber + "," + lastNode.Value);
+            Console.Out.Write(lastNode.SequenceNumber + ":" + lastNode.Value);
             Console.Out.WriteLine();
         }
 

@@ -12,7 +12,7 @@ namespace DataSequenceGraphCLI
         [Option("q", "quiet", HelpText = "Display no command output.")]
         public bool Quiet = false;
 
-        [Option("v", "verbose", HelpText = "Display all produced nodes and edges.")]
+        [Option("v", "verbose", HelpText = "Display all nodes and edges sent to output files.")]
         public bool Verbose = false;
 
         [Option("x", "loadxml", HelpText = "XML graph file to load as primary.")]
@@ -24,7 +24,7 @@ namespace DataSequenceGraphCLI
         [Option("t", "loadvalues", HelpText = "Text file of graph data values to load as primary (pair with -e).")]
         public string InTxtFile = null;
 
-        [Option("s", "splittext", HelpText = "Text file to be split into sentence chunks which are split into word values.")]
+        [Option("s", "splittext", HelpText = "Text file to be split into sentence chunks made of word values (clashes with -c, -m, -y, -f, -u).")]
         public string InSrcFile = null;
 
         [Option("X", "outxml", HelpText = "XML graph file for output.")]
@@ -36,7 +36,7 @@ namespace DataSequenceGraphCLI
         [Option("T", "outvalues", HelpText = "Text file of graph data values for output (pair with -E).")]
         public string OutTxtFile = null;
 
-        [Option("c", "chunk", HelpText = "Process the nth stored chunk of the primary loaded graph.")]
+        [Option("c", "chunk", HelpText = "Process only the nth stored chunk of the primary graph (clashes with -m, -s).")]
         public int Chunk = -1;
 
         [Option("y", "load2xml", HelpText = "XML graph file to load as secondary/smaller.")]
@@ -48,16 +48,22 @@ namespace DataSequenceGraphCLI
         [Option("u", "load2values", HelpText = "Text file of graph data values to load as secondary/smaller (pair with -f).")]
         public string InTxtFile2 = null;
 
-        [Option("m", "allmissing", HelpText = "Find all nodes and edges in the primary graph that are missing in the secondary.")]
+        [Option("m", "allmissing", HelpText = "For ALL chunks in the primary graph, find the nodes/edges absent in the secondary graph (conflicts with -c, -s).")]
         public bool AllMissing = false;
 
-        [Option("h", "hc", HelpText = "Use the specified hand-coded graph as the primary.")]
+        [Option("h", "hc", HelpText = "Use the numbered hand/hard-coded graph as the primary.")]
         public int HandCodedList = -1;
 
         [HelpOption(HelpText = "Display this help screen.")]
         public string GetUsage()
         {            
             HelpText txt = new HelpText("DataSequenceGraph CLI");
+            txt.AddPreOptionsLine(
+"  * Supported graph formats are either 1) XML file, 2) binary edge file plus delimited text file of node value strings.");
+            txt.AddPreOptionsLine("  * Omitting output file parameters implies verbose display output instead.");
+            txt.AddPreOptionsLine("  * -s adds the new chunks from the source file to the primary graph if specified, else a new graph.");
+            txt.AddPreOptionsLine("  * Without -c or -m, the secondary graph will be merged into the primary graph.");
+            txt.AddPreOptionsLine("  * With -c or -m, output is the nodes/edges from the primary graph absent from the secondary/destination graph.");
             txt.AddOptions(this);
             return txt;
         }
