@@ -58,5 +58,36 @@ namespace DataSequenceGraph
             };
             return retSpec;
         }
+
+        public override bool Equals(System.Object obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+
+            EdgeRoute p = obj as EdgeRoute;
+            if ((System.Object)p == null)
+            {
+                return false;
+            }
+
+            return (edge.Equals(p.edge));
+        }
+
+        public bool Equals(EdgeRoute p)
+        {
+            if ((object)p == null)
+            {
+                return false;
+            }
+
+            return (edge.Equals(p.edge));
+        }
+
+        public override int GetHashCode()
+        {
+            return (edge.GetHashCode());
+        }
     }
 }
