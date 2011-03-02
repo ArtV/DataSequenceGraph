@@ -145,7 +145,14 @@ namespace DataSequenceGraphCLI
                     {
                         BinaryAndTXTFormat<string> inOth2 = new BinaryAndTXTFormat<string>(arguments.InDatFile2, arguments.InTxtFile2);
                         inOth2.nodeValueParser = new StringNodeValueParser();
-                        secondList = inOth2.ToNodeListFromFiles();
+                        if (arguments.Chunk == -1 && !arguments.AllMissing)  // means to merge 2nd into 1st
+                        {
+                            inOth2.ToNodeListFromFiles(firstList);
+                        }
+                        else
+                        {
+                            secondList = inOth2.ToNodeListFromFiles();
+                        }
                     }
 
                     if (arguments.InSrcFile != null)
@@ -157,15 +164,12 @@ namespace DataSequenceGraphCLI
                         if (arguments.Chunk != -1)
                         {
                             DataChunkRoute<string> nthRoute = firstList.nthDataChunkRoute(arguments.Chunk - 1);
+                            nodeReqSpecs = nthRoute.comboSpecsForMissingComponents(secondList);
                             if (arguments.OutXMLFile != null)
                             {
                                 var missing = nthRoute.specsForMissingComponents(secondList);
                                 nodeSpecs = missing.Item1;
                                 edgeSpecs = missing.Item2;
-                            }
-                            else if (arguments.OutDatFile != null && arguments.OutTxtFile != null)
-                            {
-                                nodeReqSpecs = nthRoute.comboSpecsForMissingComponents(secondList);
                             }
                         }
                         else if (arguments.AllMissing)
@@ -183,10 +187,6 @@ namespace DataSequenceGraphCLI
                                     edgeSpecs = edgeSpecs.Concat(missing.Item2).ToList();
                                 }
                             }
-                        }
-                        else
-                        {
-                            firstList.reloadNodeAndReqSpecs(secondList.AllNodeAndReqSpecs);
                         }
                     }
                     else if (arguments.Chunk != -1)
