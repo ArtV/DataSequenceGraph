@@ -19,6 +19,9 @@ namespace DataSequenceGraph.Format
         private const byte DUPLICATEVALUENODEPREVEDGEREQ = 4;
         private const byte NEWVALUENODEPREVEGDEREQ = 5;
         private const byte EXISTINGVALUENODEPREVEDGEREQ = 6;
+        private const byte DUPLICATEVALUENODENOTEDGE = 7;
+        private const byte NEWVALUENODENOTEDGE = 8;
+        private const byte EXISTINGVALUENODENOTEDGE = 9;
 
         public NodeValueExporter<NodeValType> nodeValueExporter { get; set; }
         public NodeValueParser<NodeValType> nodeValueParser { get; set; }    
@@ -142,7 +145,11 @@ namespace DataSequenceGraph.Format
                     }
                     if (!currentNodeSpec.insertFrom)
                     {
-                        if (usePreviousEdgeAsReq)
+                        if (currentNodeSpec.ReqFromSequenceNumber == -1 && currentNodeSpec.ReqToSequenceNumber == -1)
+                        {
+                            flags = EXISTINGVALUENODENOTEDGE;
+                        }
+                        else if (usePreviousEdgeAsReq)
                         {
                             flags = EXISTINGVALUENODEPREVEDGEREQ;
                         }
@@ -159,7 +166,11 @@ namespace DataSequenceGraph.Format
                             nodeList.getValueNodesByValue(valSpec.Value).Select(node => node.SequenceNumber);
                         if (nodeIndexesWithValue.Count() > 0 && currentNodeSpec.fromNode.SequenceNumber != nodeIndexesWithValue.First())
                         {
-                            if (usePreviousEdgeAsReq)
+                            if (currentNodeSpec.ReqFromSequenceNumber == -1 && currentNodeSpec.ReqToSequenceNumber == -1)
+                            {
+                                flags = DUPLICATEVALUENODENOTEDGE;
+                            }
+                            else if (usePreviousEdgeAsReq)
                             {
                                 flags = DUPLICATEVALUENODEPREVEDGEREQ;
                             }
@@ -172,7 +183,11 @@ namespace DataSequenceGraph.Format
                         }
                         else
                         {
-                            if (usePreviousEdgeAsReq)
+                            if (currentNodeSpec.ReqFromSequenceNumber == -1 && currentNodeSpec.ReqToSequenceNumber == -1)
+                            {
+                                flags = NEWVALUENODENOTEDGE;
+                            }
+                            else if (usePreviousEdgeAsReq)
                             {
                                 flags = NEWVALUENODEPREVEGDEREQ;
                             }
@@ -194,7 +209,8 @@ namespace DataSequenceGraph.Format
                         }
                         writer.Write(valueIndex);
                     }
-                    if (!usePreviousEdgeAsReq)
+                    if (!usePreviousEdgeAsReq && currentNodeSpec.ReqFromSequenceNumber != -1 &&
+                        currentNodeSpec.ReqToSequenceNumber != -1)
                     {
                         writeTwoUshortsToThreeBytes(indexToUshort(currentNodeSpec.ReqFromSequenceNumber),
                             indexToUshort(currentNodeSpec.ReqToSequenceNumber), writer);
@@ -357,15 +373,21 @@ namespace DataSequenceGraph.Format
                 }
                 else
                 {
-                    if (flags == EXISTINGVALUENODE || flags == EXISTINGVALUENODEPREVEDGEREQ)
+                    if (flags == EXISTINGVALUENODE || flags == EXISTINGVALUENODEPREVEDGEREQ
+                        || flags == EXISTINGVALUENODENOTEDGE)
                     {
                         loadedVal = ((ValueNode<NodeValType>)refList.nodeByNumber(seqNumInt)).Value;
-                        if (flags == EXISTINGVALUENODEPREVEDGEREQ)
+                        if (flags == EXISTINGVALUENODENOTEDGE)
+                        {
+                            reqFromIndex = -1;
+                            reqToIndex = -1;
+                        }
+                        else if (flags == EXISTINGVALUENODEPREVEDGEREQ)
                         {
                             reqFromIndex = prevFromIndex;
                             reqToIndex = seqNumInt;
                         }
-                        else
+                        else // == EXISTINGVALUENODE
                         {
                             twoUShorts = readTwoUshortsInThreeBytes(r);
                             reqFromIndex = UshortToIndex(twoUShorts[0]);
@@ -375,7 +397,12 @@ namespace DataSequenceGraph.Format
                     else
                     {
                         valRefIndex = UshortToIndex(r.ReadUInt16());
-                        if (flags == NEWVALUENODEPREVEGDEREQ || flags == DUPLICATEVALUENODEPREVEDGEREQ)
+                        if (flags == NEWVALUENODENOTEDGE || flags == DUPLICATEVALUENODENOTEDGE)
+                        {
+                            reqFromIndex = -1;
+                            reqToIndex = -1;
+                        }
+                        else if (flags == NEWVALUENODEPREVEGDEREQ || flags == DUPLICATEVALUENODEPREVEDGEREQ)
                         {
                             reqFromIndex = prevFromIndex;
                             reqToIndex = seqNumInt;
@@ -386,11 +413,12 @@ namespace DataSequenceGraph.Format
                             reqFromIndex = UshortToIndex(twoUShorts[0]);
                             reqToIndex = UshortToIndex(twoUShorts[1]);
                         }
-                        if (flags == DUPLICATEVALUENODE)
+                        if (flags == DUPLICATEVALUENODE || flags == DUPLICATEVALUENODENOTEDGE ||
+                            flags == DUPLICATEVALUENODEPREVEDGEREQ)
                         {
                             loadedVal = ((ValueNode<NodeValType>)refList.nodeByNumber(valRefIndex)).Value;
                         }
-                        else  // == NEWVALUENODE
+                        else  // == NEWVALUENODE, NEWVALUENODENOTEGDE, NEWVALUENODEPREVEDGEREQ
                         {
                             loadedVal = nodeValues[valRefIndex];
                         }
