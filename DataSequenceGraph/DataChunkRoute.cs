@@ -74,6 +74,14 @@ namespace DataSequenceGraph
             }
         }
 
+        public void followUntilNode(int sequenceNumber)
+        {
+            while (lastNode.SequenceNumber != sequenceNumber)
+            {
+                appendEdge(findNextEdgeToFollow());                
+            }
+        }
+
         public Tuple<IList<NodeSpec>, IList<EdgeRouteSpec>> specsForMissingComponents(
             MasterNodeList<T> destinationList)
         {
@@ -127,19 +135,16 @@ namespace DataSequenceGraph
                     {
                         insertFrom = true,
                         fromNode = link.from.ToNodeSpec(),
-                        ReqFromSequenceNumber = -1,
-                        ReqToSequenceNumber = -1
+                        reqFromRouteIndex = -1
                     });
                     nextEdgeNodeIsNecessary = true;
                     continue;
                 }
-
                 curSpec = new NodeAndReqSpec()
                 {
                     fromNode = link.from.ToNodeSpec(),
                     insertFrom = false,
-                    ReqFromSequenceNumber = -1,
-                    ReqToSequenceNumber = -1
+                    reqFromRouteIndex = -1
                 };
                 fromIsMissing = false;
                 edgeOrReqIsMissing = false;                
@@ -157,8 +162,7 @@ namespace DataSequenceGraph
 
                 if (edgeOrReqIsMissing)
                 {
-                    curSpec.ReqFromSequenceNumber = reqLink.from.SequenceNumber;
-                    curSpec.ReqToSequenceNumber = reqLink.to.SequenceNumber;
+                    curSpec.reqFromRouteIndex = findNode(reqLink.from);
                     nextEdgeNodeIsNecessary = true;
                 }
                 else
@@ -178,8 +182,7 @@ namespace DataSequenceGraph
                 {
                     insertFrom = nodeIsMissing(destinationList, finalNode),
                     fromNode = finalNode.ToNodeSpec(),
-                    ReqFromSequenceNumber = -1,
-                    ReqToSequenceNumber = -1
+                    reqFromRouteIndex = -1
                 });
             }
             // last edge to gate node is implied, no need for a spec!

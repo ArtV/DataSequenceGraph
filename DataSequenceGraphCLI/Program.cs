@@ -245,7 +245,7 @@ namespace DataSequenceGraphCLI
                         BinaryAndTXTFormat<string> outOth = new BinaryAndTXTFormat<string>(arguments.OutDatFile, arguments.OutTxtFile);
                         if (nodeReqSpecs != null)
                         {
-                            outOth.ToBinaryAndTXTFiles(secondList, nodeReqSpecs);
+                            outOth.ToBinaryAndTXTFiles(firstList,secondList, nodeReqSpecs);
                         }
                         else
                         {
@@ -284,8 +284,8 @@ namespace DataSequenceGraphCLI
             {
                 Console.Out.WriteLine(spec.fromNode.SequenceNumber + " " + 
                     (spec.insertFrom ? "(new node)" : "") + 
-                    " if already " + spec.ReqFromSequenceNumber + ".." + spec.ReqToSequenceNumber);
-            }
+                    " if already route edge #:" + spec.reqFromRouteIndex);
+            } 
         }
 
         static void defaultTestOutput(MasterNodeList<string> masterNodeList)

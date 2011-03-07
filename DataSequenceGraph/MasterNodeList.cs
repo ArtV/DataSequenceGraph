@@ -168,6 +168,13 @@ namespace DataSequenceGraph
             return chunkRoute;
         }
 
+        public DataChunkRoute<T> dataChunkRouteStartingAt(GateNode node)
+        {
+            DataChunkRoute<T> chunkRoute = routeFactory.newDataChunkRoute(node);
+            chunkRoute.followToEnd();
+            return chunkRoute;
+        }
+
         public void reloadNodesFromSpecs(IEnumerable<NodeSpec> specs)
         {
             foreach (NodeSpec spec in specs)
@@ -205,6 +212,7 @@ namespace DataSequenceGraph
             EdgeRouteSpec edgeSpec;
             NodeAndReqSpec curSpec;
             NodeAndReqSpec nextSpec;
+            DataChunkRoute<T> routeBeingLoaded = null;
             int lastGateNodeIndex = -1;
             for (int i = 0; i <= specs.Count - 1; i++)
             {                
@@ -212,10 +220,16 @@ namespace DataSequenceGraph
                 if (curSpec.fromNode.kind == NodeKind.GateNode)
                 {
                     lastGateNodeIndex = curSpec.fromNode.SequenceNumber;
-                }
-                if (curSpec.insertFrom)
-                {
                     trySetNode(curSpec.fromNode);
+                    routeBeingLoaded = routeFactory.newDataChunkRoute(gateNodeList[gateNodeList.Count - 1]);
+                }
+                else
+                {
+                    if (curSpec.insertFrom)
+                    {
+                        trySetNode(curSpec.fromNode);
+                    }
+                    routeBeingLoaded.followUntilNode(curSpec.fromNode.SequenceNumber);
                 }
                 if ((i + 1) <= specs.Count - 1)
                 {
@@ -230,21 +244,44 @@ namespace DataSequenceGraph
                         {
                             FromNumber = curSpec.fromNode.SequenceNumber,
                             ToNumber = lastGateNodeIndex,
-                            RequisiteToNumber = curSpec.ReqToSequenceNumber,
-                            RequisiteFromNumber = curSpec.ReqFromSequenceNumber
+                            RequisiteToNumber = -1,
+                            RequisiteFromNumber = -1
                         };
                         routeFactory.newRoutesFromSpecs(new List<EdgeRouteSpec>() { edgeSpec });
                     }
-                    else if (curSpec.ReqFromSequenceNumber != -1 || curSpec.fromNode.kind == NodeKind.GateNode)
+                    else
                     {
+                        bool addEdge = curSpec.fromNode.kind == NodeKind.GateNode;
                         edgeSpec = new EdgeRouteSpec()
                         {
                             FromNumber = curSpec.fromNode.SequenceNumber,
                             ToNumber = nextSpec.fromNode.SequenceNumber,
-                            RequisiteToNumber = curSpec.ReqToSequenceNumber,
-                            RequisiteFromNumber = curSpec.ReqFromSequenceNumber
+                            RequisiteFromNumber = -1,
+                            RequisiteToNumber = -1
                         };
-                        routeFactory.newRoutesFromSpecs(new List<EdgeRouteSpec>() { edgeSpec });
+                        if (curSpec.usePrevEdgeAsReq)
+                        {
+                            addEdge = true;
+                            edgeSpec.RequisiteFromNumber = specs[i - 1].fromNode.SequenceNumber;
+                            edgeSpec.RequisiteToNumber = curSpec.fromNode.SequenceNumber;
+                        }
+                        else if (curSpec.useStartEdgeAsReq)
+                        {
+                            addEdge = true;
+                            edgeSpec.RequisiteFromNumber = routeBeingLoaded.componentEdges[0].edge.link.from.SequenceNumber;
+                            edgeSpec.RequisiteToNumber = routeBeingLoaded.componentEdges[0].edge.link.to.SequenceNumber;
+                        }
+                        else if (curSpec.reqFromRouteIndex != -1)
+                        {
+                            addEdge = true;
+                            EdgeRoute reqEdge = routeBeingLoaded.componentEdges[curSpec.reqFromRouteIndex];
+                            edgeSpec.RequisiteFromNumber = reqEdge.edge.link.from.SequenceNumber;
+                            edgeSpec.RequisiteToNumber = reqEdge.edge.link.to.SequenceNumber;
+                        }
+                        if (addEdge)
+                        {
+                            routeFactory.newRoutesFromSpecs(new List<EdgeRouteSpec>() { edgeSpec });
+                        }
                     }
                 }                
             }
