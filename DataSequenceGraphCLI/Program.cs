@@ -199,12 +199,16 @@ namespace DataSequenceGraphCLI
                         }
                         else if (arguments.Missing)
                         {
+                            List<NodeAndReqSpec> overallList = new List<NodeAndReqSpec>();
                             nodeReqSpecs = Enumerable.Empty<NodeAndReqSpec>().ToList();
                             nodeSpecs = Enumerable.Empty<NodeSpec>().ToList();
                             edgeSpecs = Enumerable.Empty<EdgeRouteSpec>().ToList();
+                            IList<NodeAndReqSpec> tempSpecs;
                             foreach (DataChunkRoute<string> chRoute in firstList.enumerateDataChunkRoutes())
                             {
-                                nodeReqSpecs = nodeReqSpecs.Concat(chRoute.comboSpecsForMissingComponents(secondList)).ToList();
+                                tempSpecs = chRoute.comboSpecsForMissingComponents(secondList);
+                                overallList.AddRange(tempSpecs);
+                                secondList.reloadNodeAndReqSpecs(tempSpecs);
                                 if (arguments.OutXMLFile != null)
                                 {
                                     var missing = chRoute.specsForMissingComponents(secondList);
@@ -212,6 +216,7 @@ namespace DataSequenceGraphCLI
                                     edgeSpecs = edgeSpecs.Concat(missing.Item2).ToList();
                                 }
                             }
+                            nodeReqSpecs = overallList;
                         }
                     }
                     else if (arguments.Chunk != -1)
