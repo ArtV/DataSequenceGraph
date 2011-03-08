@@ -305,16 +305,39 @@ namespace DataSequenceGraphCLI
 
         static void nodeAndReqOutput(IEnumerable<NodeAndReqSpec> specs)
         {
+            Console.Out.WriteLine();
             foreach(NodeAndReqSpec spec in specs)
             {
-                Console.Out.WriteLine(spec.fromNode.SequenceNumber + " " + 
-                    (spec.insertFrom ? "(new node)" : "") + 
-                    " if already route edge #:" + spec.reqFromRouteIndex);
+                NodeSpec node = spec.fromNode;
+                Console.Out.Write(node.SequenceNumber);
+                Console.Out.Write(node.kind == NodeKind.GateNode ? " Gate" : " Value");
+                Console.Out.Write(spec.insertFrom ? " (new)" : "");
+                if (spec.fromNode.kind == NodeKind.GateNode)
+                {
+                    Console.Out.WriteLine(" no requisite to next required");
+                }
+                else if (spec.usePrevEdgeAsReq)
+                {
+                    Console.Out.WriteLine(" requisite to next is prev. edge");
+                }
+                else if (spec.useStartEdgeAsReq)
+                {
+                    Console.Out.WriteLine(" requisite to next is starting edge");
+                }
+                else if (spec.reqFromRouteIndex == -1)
+                {
+                    Console.Out.WriteLine(" no implied edge to next node");
+                }
+                else
+                {
+                    Console.Out.WriteLine(" requisite is route edge #" + spec.reqFromRouteIndex); 
+                }
             } 
         }
 
         static void defaultTestOutput(MasterNodeList<string> masterNodeList)
         {
+            Console.Out.WriteLine();
             foreach (var node in masterNodeList.AllNodes)
             {
                 if (node.kind == NodeKind.NullNode)
@@ -342,6 +365,7 @@ namespace DataSequenceGraphCLI
 
         static void printEnumeratedChunks(MasterNodeList<string> masterNodeList)
         {
+            Console.Out.WriteLine();
             Console.Out.WriteLine("------ Chunks in graph: ");
             var ind = 1;
             foreach (DataChunkRoute<string> route in masterNodeList.enumerateDataChunkRoutes())
@@ -354,6 +378,7 @@ namespace DataSequenceGraphCLI
 
         static void printChunk(DataChunkRoute<string> route)
         {
+            Console.Out.WriteLine();
             ValueNode<string> lastNode = null;
             foreach (EdgeRoute edge in route.componentEdges)
             {
