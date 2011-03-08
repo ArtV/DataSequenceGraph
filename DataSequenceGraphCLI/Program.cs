@@ -310,7 +310,15 @@ namespace DataSequenceGraphCLI
             {
                 NodeSpec node = spec.fromNode;
                 Console.Out.Write(node.SequenceNumber);
-                Console.Out.Write(node.kind == NodeKind.GateNode ? " Gate" : " Value");
+                if (node.kind == NodeKind.GateNode)
+                {
+                    Console.Out.Write(" Gate");
+                }
+                else
+                {
+                    Console.Out.Write(" Value \"" + (spec.fromNode as ValueNodeSpec<string>).Value +
+                        "\"");
+                }
                 Console.Out.Write(spec.insertFrom ? " (new)" : "");
                 if (spec.fromNode.kind == NodeKind.GateNode)
                 {
