@@ -24,7 +24,7 @@ namespace DataSequenceGraphCLI
         [Option("t", "loadvalues", HelpText = "Text file of graph data values to load as primary (pair with -e).")]
         public string InTxtFile = null;
 
-        [Option("s", "splittext", HelpText = "Text file to be split into sentence chunks made of word values (clashes with -c, -m, -y, -f, -u).")]
+        [Option("s", "splittext", HelpText = "Text file to be split into sentence chunks made of word values (clashes with -c, -y, -f, -u).")]
         public string InSrcFile = null;
 
         [Option("X", "outxml", HelpText = "XML graph file for output.")]
@@ -48,8 +48,8 @@ namespace DataSequenceGraphCLI
         [Option("u", "load2values", HelpText = "Text file of graph data values to load as secondary/smaller (pair with -f).")]
         public string InTxtFile2 = null;
 
-        [Option("m", "allmissing", HelpText = "For ALL chunks in the primary graph, find the nodes/edges absent in the secondary graph (conflicts with -c, -s).")]
-        public bool AllMissing = false;
+        [Option("m", "missing", HelpText = "Instead of adding and sending the result to output, find the difference or missing parts. (conflicts with -c).")]
+        public bool Missing = false;
 
         [Option("h", "hc", HelpText = "Use the numbered hand/hard-coded graph as the primary.")]
         public int HandCodedList = -1;
@@ -62,6 +62,7 @@ namespace DataSequenceGraphCLI
 "  * Supported graph formats are either 1) XML file, 2) binary edge file plus delimited text file of node value strings.");
             txt.AddPreOptionsLine("  * Omitting output file parameters implies verbose display output instead.");
             txt.AddPreOptionsLine("  * -s adds the new chunks from the source file to the primary graph if specified, else a new graph.");
+            txt.AddPreOptionsLine("  * -s and -m sends to output the nodes/edges that need to be added for the chunks from the source file.");
             txt.AddPreOptionsLine("  * Without -c or -m, the secondary graph will be merged into the primary graph.");
             txt.AddPreOptionsLine("  * With -c or -m, output is the nodes/edges from the primary graph absent from the secondary/destination graph.");
             txt.AddOptions(this);

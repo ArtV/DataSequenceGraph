@@ -105,33 +105,58 @@ namespace DataSequenceGraphCLI
 
                     // ---- stage 1
                     MasterNodeList<string> firstList;
+                    MasterNodeList<string> secondList = null;
+                    bool dupeList = false;
+                    if (arguments.InSrcFile != null && arguments.Missing)
+                    {
+                        dupeList = true;
+                    }
                     if (arguments.InXMLFile != null)
                     {
                         XMLGraphFormat<string> inXml = new XMLGraphFormat<string>(arguments.InXMLFile);
                         inXml.nodeValueParser = new StringNodeValueParser();
                         firstList = inXml.ToNodeListFromFile();
+                        if (dupeList)
+                        {
+                            secondList = inXml.ToNodeListFromFile();
+                        }
                     }
                     else if (arguments.InDatFile != null && arguments.InTxtFile != null)
                     {
                         BinaryAndTXTFormat<string> inOth = new BinaryAndTXTFormat<string>(arguments.InDatFile, arguments.InTxtFile);
                         inOth.nodeValueParser = new StringNodeValueParser();
                         firstList = inOth.ToNodeListFromFiles();
+                        if (dupeList)
+                        {
+                            secondList = inOth.ToNodeListFromFiles();
+                        }
                     }
                     else if (arguments.HandCodedList == 0)
                     {
                         firstList = setupNodeList33();
+                        if (dupeList)
+                        {
+                            secondList = setupNodeList33();
+                        }
                     }
                     else if (arguments.HandCodedList == 1)
                     {
                         firstList = setupNodeList();
+                        if (dupeList)
+                        {
+                            secondList = setupNodeList();
+                        }
                     }
                     else
                     {
                         firstList = new MasterNodeList<string>();
+                        if (dupeList)
+                        {
+                            secondList = new MasterNodeList<string>();
+                        }
                     }
 
                     // ---- stage 2
-                    MasterNodeList<string> secondList = null;
                     IList<NodeAndReqSpec> nodeReqSpecs = null;
                     IList<NodeSpec> nodeSpecs = null;
                     IList<EdgeRouteSpec> edgeSpecs = null;
@@ -145,7 +170,7 @@ namespace DataSequenceGraphCLI
                     {
                         BinaryAndTXTFormat<string> inOth2 = new BinaryAndTXTFormat<string>(arguments.InDatFile2, arguments.InTxtFile2);
                         inOth2.nodeValueParser = new StringNodeValueParser();
-                        if (arguments.Chunk == -1 && !arguments.AllMissing)  // means to merge 2nd into 1st
+                        if (arguments.Chunk == -1 && !arguments.Missing)  // means to merge 2nd into 1st
                         {
                             inOth2.ToNodeListFromFiles(firstList);
                         }
@@ -158,6 +183,17 @@ namespace DataSequenceGraphCLI
                     if (arguments.InSrcFile != null)
                     {
                         loadFile(arguments.InSrcFile, firstList, arguments.Quiet);
+                        if (arguments.Missing)
+                        {
+                            DataChunkRoute<string> srcChunk = firstList.enumerateDataChunkRoutes().Last();
+                            nodeReqSpecs = srcChunk.comboSpecsForMissingComponents(secondList);
+                            if (arguments.OutXMLFile != null)
+                            {
+                                var missingStuff = srcChunk.specsForMissingComponents(secondList);
+                                nodeSpecs = missingStuff.Item1.ToList();
+                                edgeSpecs = missingStuff.Item2.ToList();
+                            }
+                        }
                     }
                     else if (secondList != null)
                     {
@@ -172,7 +208,7 @@ namespace DataSequenceGraphCLI
                                 edgeSpecs = missing.Item2;
                             }
                         }
-                        else if (arguments.AllMissing)
+                        else if (arguments.Missing)
                         {
                             nodeReqSpecs = Enumerable.Empty<NodeAndReqSpec>().ToList();
                             nodeSpecs = Enumerable.Empty<NodeSpec>().ToList();
@@ -221,7 +257,7 @@ namespace DataSequenceGraphCLI
                     {
                         nodeAndReqOutput(nodeReqSpecs);
                     }
-                    if (arguments.AllMissing && !arguments.Quiet)
+                    if (arguments.Missing && !arguments.Quiet)
                     {
                         nodeAndReqOutput(nodeReqSpecs);
                     }
