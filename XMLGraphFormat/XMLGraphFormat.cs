@@ -62,7 +62,9 @@ namespace DataSequenceGraph.Format
                 throw new InvalidOperationException("XML filename must be set for file output ");
             }
             XmlDocument doc = ToXMLDocument(nodeList, nodes, edges);
-            using (XmlWriter writer = XmlWriter.Create(XMLFilename))
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            using (XmlWriter writer = XmlWriter.Create(XMLFilename,settings))
             {
                 doc.WriteContentTo(writer);
             }
