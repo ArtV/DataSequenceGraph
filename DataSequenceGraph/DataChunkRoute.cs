@@ -138,6 +138,7 @@ namespace DataSequenceGraph
                         reqFromRouteIndex = -1
                     });
                     nextEdgeNodeIsNecessary = true;
+                    nodeIsNecessaryForPreviousEdge = true;
                     continue;
                 }
                 curSpec = new NodeAndReqSpec()
