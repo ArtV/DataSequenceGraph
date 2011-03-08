@@ -183,19 +183,8 @@ namespace DataSequenceGraphCLI
                     if (arguments.InSrcFile != null)
                     {
                         loadFile(arguments.InSrcFile, firstList, arguments.Quiet);
-                        if (arguments.Missing)
-                        {
-                            DataChunkRoute<string> srcChunk = firstList.enumerateDataChunkRoutes().Last();
-                            nodeReqSpecs = srcChunk.comboSpecsForMissingComponents(secondList);
-                            if (arguments.OutXMLFile != null)
-                            {
-                                var missingStuff = srcChunk.specsForMissingComponents(secondList);
-                                nodeSpecs = missingStuff.Item1.ToList();
-                                edgeSpecs = missingStuff.Item2.ToList();
-                            }
-                        }
                     }
-                    else if (secondList != null)
+                    if (secondList != null)
                     {
                         if (arguments.Chunk != -1)
                         {
