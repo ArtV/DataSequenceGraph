@@ -208,13 +208,13 @@ namespace DataSequenceGraphCLI
                             {
                                 tempSpecs = chRoute.comboSpecsForMissingComponents(secondList);
                                 overallList.AddRange(tempSpecs);
-                                secondList.reloadNodeAndReqSpecs(tempSpecs);
                                 if (arguments.OutXMLFile != null)
                                 {
                                     var missing = chRoute.specsForMissingComponents(secondList);
                                     nodeSpecs = nodeSpecs.Concat(missing.Item1).ToList();
                                     edgeSpecs = edgeSpecs.Concat(missing.Item2).ToList();
                                 }
+                                secondList.reloadNodeAndReqSpecs(tempSpecs);
                             }
                             nodeReqSpecs = overallList;
                         }
