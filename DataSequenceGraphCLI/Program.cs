@@ -96,6 +96,10 @@ namespace DataSequenceGraphCLI
                 {
                     Console.Out.WriteLine("Secondary graph data file must be paired with a values text file.");
                 }
+                else if (arguments.OutChunkFile != null && arguments.Chunk == -1)
+                {
+                    Console.Out.WriteLine("Chunk output file name requires the chunk # parameter -c ");
+                }
                 else
                 {
                     if (arguments.OutDatFile == null && arguments.OutTxtFile == null && arguments.OutXMLFile == null)
@@ -199,24 +203,13 @@ namespace DataSequenceGraphCLI
                         }
                         else if (arguments.Missing)
                         {
-                            List<NodeAndReqSpec> overallList = new List<NodeAndReqSpec>();
-                            nodeReqSpecs = Enumerable.Empty<NodeAndReqSpec>().ToList();
-                            nodeSpecs = Enumerable.Empty<NodeSpec>().ToList();
-                            edgeSpecs = Enumerable.Empty<EdgeRouteSpec>().ToList();
-                            IList<NodeAndReqSpec> tempSpecs;
-                            foreach (DataChunkRoute<string> chRoute in firstList.enumerateDataChunkRoutes())
+                            nodeReqSpecs = firstList.getSpecsAbsentIn(secondList);
+                            if (arguments.OutXMLFile != null)
                             {
-                                tempSpecs = chRoute.comboSpecsForMissingComponents(secondList);
-                                overallList.AddRange(tempSpecs);
-                                if (arguments.OutXMLFile != null)
-                                {
-                                    var missing = chRoute.specsForMissingComponents(secondList);
-                                    nodeSpecs = nodeSpecs.Concat(missing.Item1).ToList();
-                                    edgeSpecs = edgeSpecs.Concat(missing.Item2).ToList();
-                                }
-                                secondList.reloadNodeAndReqSpecs(tempSpecs);
+                                var missing = firstList.getSegregatedSpecsAbsentIn(secondList);
+                                nodeSpecs = missing.Item1;
+                                edgeSpecs = missing.Item2;
                             }
-                            nodeReqSpecs = overallList;
                         }
                     }
                     else if (arguments.Chunk != -1)
@@ -247,11 +240,11 @@ namespace DataSequenceGraphCLI
                     {
                         printChunk(firstList.nthDataChunkRoute(arguments.Chunk - 1));
                     }
-                    if (arguments.Chunk != -1 && arguments.Verbose)
+                    if (arguments.Chunk != -1 && arguments.Verbose && nodeReqSpecs != null)
                     {
                         nodeAndReqOutput(nodeReqSpecs);
                     }
-                    if (arguments.Missing && !arguments.Quiet)
+                    if (arguments.Missing && !arguments.Quiet && nodeReqSpecs != null)
                     {
                         nodeAndReqOutput(nodeReqSpecs);
                     }
@@ -275,11 +268,24 @@ namespace DataSequenceGraphCLI
                         BinaryAndTXTFormat<string> outOth = new BinaryAndTXTFormat<string>(arguments.OutDatFile, arguments.OutTxtFile);
                         if (nodeReqSpecs != null)
                         {
-                            outOth.ToBinaryAndTXTFiles(firstList,secondList, nodeReqSpecs);
+                            outOth.ToBinaryAndTXTFiles(firstList, secondList, nodeReqSpecs);
                         }
                         else
                         {
                             outOth.ToBinaryAndTXTFiles(firstList);
+                        }
+                    }
+
+                    if (arguments.Chunk != -1 && arguments.OutChunkFile != null)
+                    {
+                        DataChunkRoute<string> dumpedChunk = firstList.nthDataChunkRoute(arguments.Chunk - 1);
+                        using (TextWriter textWriter = new StreamWriter(new FileStream(arguments.OutChunkFile, FileMode.Create)))
+                        {
+                            foreach (var dumpVal in dumpedChunk.dataChunk)
+                            {
+                                textWriter.Write(dumpVal + " ");
+                            }
+                            textWriter.Write(".");
                         }
                     }
                 }
