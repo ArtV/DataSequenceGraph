@@ -171,6 +171,16 @@ namespace DataSequenceGraph
             return newNode;
         }
 
+        public IEnumerable<IEnumerable<T>> dataChunksLaterThan(MasterNodeList<T> pastList)
+        {
+            for (int i = pastList.DataChunkCount - 1; i <= gateNodeList.Count - 1; i++)
+            {
+                DataChunkRoute<T> chunkRoute = nthDataChunkRoute(i);
+                chunkRoute.followToEnd();
+                yield return chunkRoute.dataChunk;
+            }
+        }
+
         public IEnumerable<IEnumerable<T>> enumerateDataChunks()
         {
             foreach (DataChunkRoute<T> route in enumerateDataChunkRoutes())

@@ -39,7 +39,7 @@ namespace DataSequenceGraphCLI
         [Option("c", "chunk", HelpText = "Process only the nth stored chunk of the primary graph (clashes with -m, -s).")]
         public int Chunk = -1;
 
-        [Option("C", "chunktext", HelpText = "Output file for the full chunk text (requires -c).")]
+        [Option("C", "chunktext", HelpText = "Output file for the full chunk text.")]
         public string OutChunkFile = null;
 
         [Option("y", "load2xml", HelpText = "XML graph file to load as secondary/smaller.")]
@@ -71,7 +71,8 @@ namespace DataSequenceGraphCLI
             txt.AddPreOptionsLine("  * -s adds the new chunks from the source file to the primary graph if specified, else a new graph.");
             txt.AddPreOptionsLine("  * -s and -m sends to output the nodes/edges that need to be added for the chunks from the source file.");
             txt.AddPreOptionsLine("  * Without -c or -m, the secondary graph will be merged into the primary graph.");
-            txt.AddPreOptionsLine("  * With -c or -m, output is the nodes/edges from the primary graph absent from the secondary/destination graph.");            
+            txt.AddPreOptionsLine("  * With -c or -m, output is the nodes/edges from the primary graph absent from the secondary/destination graph.");
+            txt.AddPreOptionsLine("  * -C with -c or -m sends the full chunk text to the filename. (This file can be reloaded later with -s.) ");
             txt.AddOptions(this);
             return txt;
         }

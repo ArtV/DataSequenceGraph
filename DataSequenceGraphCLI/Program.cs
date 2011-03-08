@@ -60,7 +60,7 @@ namespace DataSequenceGraphCLI
                     Console.Out.WriteLine("Must specify a primary graph, and/or a sentence source file to split.");
                 }
                 else if (arguments.Quiet && arguments.OutXMLFile == null && arguments.OutDatFile == null &&
-                    arguments.OutTxtFile == null)
+                    arguments.OutTxtFile == null && arguments.OutChunkFile == null)
                 {
                     Console.Out.WriteLine("Quiet display and nowhere to send file output. Nothing to do.");
                 }
@@ -96,13 +96,10 @@ namespace DataSequenceGraphCLI
                 {
                     Console.Out.WriteLine("Secondary graph data file must be paired with a values text file.");
                 }
-                else if (arguments.OutChunkFile != null && arguments.Chunk == -1)
-                {
-                    Console.Out.WriteLine("Chunk output file name requires the chunk # parameter -c ");
-                }
                 else
                 {
-                    if (arguments.OutDatFile == null && arguments.OutTxtFile == null && arguments.OutXMLFile == null)
+                    if (arguments.OutDatFile == null && arguments.OutTxtFile == null && 
+                        arguments.OutXMLFile == null && arguments.OutChunkFile == null)
                     {
                         arguments.Verbose = true;
                     }
@@ -276,16 +273,28 @@ namespace DataSequenceGraphCLI
                         }
                     }
 
-                    if (arguments.Chunk != -1 && arguments.OutChunkFile != null)
+                    if (arguments.OutChunkFile != null)
                     {
-                        DataChunkRoute<string> dumpedChunk = firstList.nthDataChunkRoute(arguments.Chunk - 1);
+                        IEnumerable<IEnumerable<string>> dumpChunks = Enumerable.Empty<IEnumerable<string>>();
+                        if (arguments.Chunk != -1)
+                        {
+                            DataChunkRoute<string> dumpedChunk = firstList.nthDataChunkRoute(arguments.Chunk - 1);
+                            dumpChunks = new List<IEnumerable<string>>() { dumpedChunk.dataChunk };
+                        }
+                        else if (arguments.Missing)
+                        {
+                            dumpChunks = firstList.dataChunksLaterThan(secondList);
+                        }
                         using (TextWriter textWriter = new StreamWriter(new FileStream(arguments.OutChunkFile, FileMode.Create)))
                         {
-                            foreach (var dumpVal in dumpedChunk.dataChunk)
+                            foreach (var dumpChunk in dumpChunks)
                             {
-                                textWriter.Write(dumpVal + " ");
+                                foreach (var dumpVal in dumpChunk)
+                                {
+                                    textWriter.Write(dumpVal + " ");
+                                }
+                                textWriter.WriteLine(".");
                             }
-                            textWriter.Write(".");
                         }
                     }
                 }
