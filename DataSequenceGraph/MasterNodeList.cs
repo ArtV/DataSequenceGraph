@@ -285,14 +285,17 @@ namespace DataSequenceGraph
                     }
                 }                
             }
-            edgeSpec = new EdgeRouteSpec()
+            if (specs.Count >= 2)
             {
-                FromNumber = specs[specs.Count - 1].fromNode.SequenceNumber,
-                ToNumber = lastGateNodeIndex,
-                RequisiteFromNumber = lastGateNodeIndex,
-                RequisiteToNumber = specs[1].fromNode.SequenceNumber
-            };
-            routeFactory.newRoutesFromSpecs(new List<EdgeRouteSpec>() { edgeSpec });
+                edgeSpec = new EdgeRouteSpec()
+                {
+                    FromNumber = specs[specs.Count - 1].fromNode.SequenceNumber,
+                    ToNumber = lastGateNodeIndex,
+                    RequisiteFromNumber = lastGateNodeIndex,
+                    RequisiteToNumber = specs[1].fromNode.SequenceNumber
+                };
+                routeFactory.newRoutesFromSpecs(new List<EdgeRouteSpec>() { edgeSpec });
+            }
         }
 
         public bool trySetNode(NodeSpec spec)
