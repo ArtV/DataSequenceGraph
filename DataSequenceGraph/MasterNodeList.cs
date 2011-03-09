@@ -173,7 +173,7 @@ namespace DataSequenceGraph
 
         public IEnumerable<IEnumerable<T>> dataChunksLaterThan(MasterNodeList<T> pastList)
         {
-            for (int i = pastList.DataChunkCount - 1; i <= gateNodeList.Count - 1; i++)
+            for (int i = pastList.DataChunkCount; i <= gateNodeList.Count - 1; i++)
             {
                 DataChunkRoute<T> chunkRoute = nthDataChunkRoute(i);
                 chunkRoute.followToEnd();
