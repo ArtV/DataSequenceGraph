@@ -330,15 +330,19 @@ namespace DataSequenceGraph.Format
 
         public MasterNodeList<NodeValType> ToNodeListFromFiles()
         {
-            return ToNodeListFromFiles(new MasterNodeList<NodeValType>());
+            MasterNodeList<NodeValType> retList = new MasterNodeList<NodeValType>();
+            ToNodeListFromFiles(retList);
+            return retList;
         }
 
         public MasterNodeList<NodeValType> ToNodeListFromStreams()
         {
-            return ToNodeListFromStreams(new MasterNodeList<NodeValType>());
+            MasterNodeList<NodeValType> retList = new MasterNodeList<NodeValType>();
+            ToNodeListFromStreams(retList);
+            return retList;
         }
 
-        public MasterNodeList<NodeValType> ToNodeListFromFiles(MasterNodeList<NodeValType> srcList)
+        public void ToNodeListFromFiles(MasterNodeList<NodeValType> srcList)
         {
             if (binaryFileName == null || binaryFileName.Equals("") ||
                 textFileName == null || textFileName.Equals(""))
@@ -351,13 +355,13 @@ namespace DataSequenceGraph.Format
                 {
                     binaryIn = fs;
                     TXTIn = textReader;
-                    return ToNodeListFromStreams(srcList);
+                    ToNodeListFromStreams(srcList);
                 }
             }
 
         }
 
-        public MasterNodeList<NodeValType> ToNodeListFromStreams(MasterNodeList<NodeValType> srcList)
+        public void ToNodeListFromStreams(MasterNodeList<NodeValType> srcList)
         {
             IList<NodeValType> nodeValues = FromTXT();
 
@@ -365,8 +369,6 @@ namespace DataSequenceGraph.Format
             {
                 NodesFromBinary(srcList, nodeValues, r);
             }
-
-            return srcList;
         }
 
         private void  NodesFromBinary(MasterNodeList<NodeValType> refList, IList<NodeValType> nodeValues, BinaryReader r)
