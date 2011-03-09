@@ -39,6 +39,9 @@ namespace DataSequenceGraphCLI
         [Option("c", "chunk", HelpText = "Process only the nth stored chunk of the primary graph (clashes with -m, -s).")]
         public int Chunk = -1;
 
+        [Option("l", "leastchunk", HelpText = "Like -c but include all chunks starting with the nth (clashes with -c).")]
+        public int LeastChunk = -1;
+
         [Option("C", "chunktext", HelpText = "Output file for the full chunk text.")]
         public string OutChunkFile = null;
 

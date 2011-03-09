@@ -74,11 +74,28 @@ namespace DataSequenceGraph
             }
         }
 
+        public IList<NodeAndReqSpec> getRoutePartsForChunksStarting(int startIndex)
+        {
+            return getRoutePartsAbsentIn(new MasterNodeList<T>(),
+                chunkRoutesStartingAt(startIndex));
+        }
+
+        public Tuple<IList<NodeSpec>, IList<EdgeRouteSpec>> getSegregatedRoutePartsForChunksStarting(int startIndex)
+        {
+            return getSegregatedRoutePartsAbsentIn(new MasterNodeList<T>(),
+                chunkRoutesStartingAt(startIndex));
+        }
+
         public IList<NodeAndReqSpec> getSpecsAbsentIn(MasterNodeList<T> otherList)
+        {
+            return getRoutePartsAbsentIn(otherList, enumerateDataChunkRoutes());
+        }
+
+        private IList<NodeAndReqSpec> getRoutePartsAbsentIn(MasterNodeList<T> otherList, IEnumerable<DataChunkRoute<T>> whichRoutes)
         {
             IList<NodeAndReqSpec> specs;
             List<NodeAndReqSpec> overallList = new List<NodeAndReqSpec>();
-            foreach (DataChunkRoute<T> route in enumerateDataChunkRoutes())
+            foreach (DataChunkRoute<T> route in whichRoutes)
             {
                 specs = route.comboSpecsForMissingComponents(otherList);
                 overallList.AddRange(specs);
@@ -89,9 +106,14 @@ namespace DataSequenceGraph
 
         public Tuple<IList<NodeSpec>, IList<EdgeRouteSpec>> getSegregatedSpecsAbsentIn(MasterNodeList<T> otherList)
         {
+            return getSegregatedRoutePartsAbsentIn(otherList, enumerateDataChunkRoutes());
+        }
+
+        private Tuple<IList<NodeSpec>, IList<EdgeRouteSpec>> getSegregatedRoutePartsAbsentIn(MasterNodeList<T> otherList, IEnumerable<DataChunkRoute<T>> whichRoutes)
+        {
             IList<NodeSpec> nodeSpecs = Enumerable.Empty<NodeSpec>().ToList();
             IList<EdgeRouteSpec> edgeSpecs = Enumerable.Empty<EdgeRouteSpec>().ToList();
-            foreach (DataChunkRoute<T> route in enumerateDataChunkRoutes())
+            foreach (DataChunkRoute<T> route in whichRoutes)
             {
                 var missing = route.specsForMissingComponents(otherList);
                 nodeSpecs = nodeSpecs.Concat(missing.Item1).ToList();
@@ -182,11 +204,19 @@ namespace DataSequenceGraph
 
         public IEnumerable<IEnumerable<T>> dataChunksLaterThan(MasterNodeList<T> pastList)
         {
-            for (int i = pastList.DataChunkCount; i <= gateNodeList.Count - 1; i++)
+            foreach (var route in chunkRoutesStartingAt(pastList.DataChunkCount))
+            {
+                yield return route.dataChunk;
+            } 
+        }
+
+        public IEnumerable<DataChunkRoute<T>> chunkRoutesStartingAt(int pastCount)
+        {
+            for (int i = pastCount; i <= gateNodeList.Count - 1; i++)
             {
                 DataChunkRoute<T> chunkRoute = nthDataChunkRoute(i);
                 chunkRoute.followToEnd();
-                yield return chunkRoute.dataChunk;
+                yield return chunkRoute;
             }
         }
 

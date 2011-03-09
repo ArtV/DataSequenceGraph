@@ -193,7 +193,7 @@ namespace DataSequenceGraphCLI
                             firstList.addLaterChunksThanBaseToOtherList(commonBaseList, secondList);
                             firstList = secondList;
                         }
-                        else if (arguments.Chunk == -1 && !arguments.Missing)
+                        else if (arguments.Chunk == -1 && !arguments.Missing && arguments.LeastChunk == -1)
                         {
                             tempList = inXml2.ToNodeListFromFile();
                             secondList.reloadNodesThenRoutesFromSpecs(tempList.AllNodeSpecs, tempList.AllEdgeSpecs);
@@ -213,7 +213,7 @@ namespace DataSequenceGraphCLI
                             firstList.addLaterChunksThanBaseToOtherList(commonBaseList, secondList);
                             firstList = secondList;
                         }
-                        else if (arguments.Chunk == -1 && !arguments.Missing)
+                        else if (arguments.Chunk == -1 && !arguments.Missing && arguments.LeastChunk == -1)
                         {
                             inOth2.ToNodeListFromFiles(firstList);   // means to merge 2nd into 1st
                         }
@@ -273,10 +273,24 @@ namespace DataSequenceGraphCLI
                         }
                         secondList = new MasterNodeList<string>();
                     }
+                    else if (arguments.LeastChunk != -1)
+                    {
+                        if (arguments.OutDatFile != null || arguments.OutXMLFile == null)
+                        {
+                            nodeReqSpecs = firstList.getRoutePartsForChunksStarting(arguments.LeastChunk - 1);
+                        }
+                        if (arguments.OutXMLFile != null)
+                        {
+                            var missing = firstList.getSegregatedRoutePartsForChunksStarting(arguments.LeastChunk - 1);
+                            nodeSpecs = missing.Item1;
+                            edgeSpecs = missing.Item2;
+                        }
+                        secondList = new MasterNodeList<string>();
+                    }
 
 
                     // ---- stage 3                    
-                    if (arguments.Verbose && arguments.Chunk == -1)
+                    if (arguments.Verbose && arguments.Chunk == -1 && arguments.LeastChunk == -1)
                     {
                         defaultTestOutput(firstList);
                         printEnumeratedChunks(firstList);
@@ -285,7 +299,15 @@ namespace DataSequenceGraphCLI
                     {
                         printChunk(firstList.nthDataChunkRoute(arguments.Chunk - 1));
                     }
-                    if (arguments.Chunk != -1 && arguments.Verbose && nodeReqSpecs != null)
+                    if (arguments.LeastChunk != -1 && !arguments.Quiet)
+                    {
+                        foreach (var chRoute in firstList.chunkRoutesStartingAt(arguments.LeastChunk - 1))
+                        {
+                            printChunk(chRoute);
+                        }
+                    }
+                    if ((arguments.Chunk != -1 || arguments.LeastChunk != -1) && 
+                        arguments.Verbose && nodeReqSpecs != null)
                     {
                         nodeAndReqOutput(nodeReqSpecs);
                     }
@@ -328,6 +350,11 @@ namespace DataSequenceGraphCLI
                         {
                             DataChunkRoute<string> dumpedChunk = firstList.nthDataChunkRoute(arguments.Chunk - 1);
                             dumpChunks = new List<IEnumerable<string>>() { dumpedChunk.dataChunk };
+                        }
+                        else if (arguments.LeastChunk != -1)
+                        {
+                            dumpChunks = firstList.chunkRoutesStartingAt(arguments.LeastChunk - 1)
+                                .Select(chRoute => chRoute.dataChunk);
                         }
                         else if (arguments.Missing)
                         {
