@@ -190,7 +190,10 @@ namespace DataSequenceGraphCLI
                         if (arguments.Chunk != -1)
                         {
                             DataChunkRoute<string> nthRoute = firstList.nthDataChunkRoute(arguments.Chunk - 1);
-                            nodeReqSpecs = nthRoute.comboSpecsForMissingComponents(secondList);
+                            if (arguments.OutDatFile != null || arguments.OutXMLFile == null)
+                            {
+                                nodeReqSpecs = nthRoute.comboSpecsForMissingComponents(secondList);
+                            }
                             if (arguments.OutXMLFile != null)
                             {
                                 var missing = nthRoute.specsForMissingComponents(secondList);
@@ -200,7 +203,10 @@ namespace DataSequenceGraphCLI
                         }
                         else if (arguments.Missing)
                         {
-                            nodeReqSpecs = firstList.getSpecsAbsentIn(secondList);
+                            if (arguments.OutDatFile != null || arguments.OutXMLFile == null)
+                            {
+                                nodeReqSpecs = firstList.getSpecsAbsentIn(secondList);
+                            }
                             if (arguments.OutXMLFile != null)
                             {
                                 var missing = firstList.getSegregatedSpecsAbsentIn(secondList);
