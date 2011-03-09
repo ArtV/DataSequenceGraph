@@ -161,19 +161,61 @@ namespace DataSequenceGraphCLI
                     IList<NodeAndReqSpec> nodeReqSpecs = null;
                     IList<NodeSpec> nodeSpecs = null;
                     IList<EdgeRouteSpec> edgeSpecs = null;
+                    MasterNodeList<string> commonBaseList = null;
+                    if (arguments.BaseXMLFile != null ||
+                        (arguments.BaseDatFile != null && arguments.BaseTxtFile != null))
+                    {
+                        if (arguments.BaseXMLFile != null)
+                        {
+                            XMLGraphFormat<string> inXml3 = new XMLGraphFormat<string>(arguments.BaseXMLFile);
+                            inXml3.nodeValueParser = new StringNodeValueParser();
+                            commonBaseList = inXml3.ToNodeListFromFile();
+                            secondList = inXml3.ToNodeListFromFile();
+                        }
+                        else if (arguments.BaseDatFile != null && arguments.BaseTxtFile != null)
+                        {
+                            BinaryAndTXTFormat<string> inOth3 = new BinaryAndTXTFormat<string>(arguments.BaseDatFile, arguments.BaseTxtFile);
+                            inOth3.nodeValueParser = new StringNodeValueParser();
+                            commonBaseList = inOth3.ToNodeListFromFiles();
+                            secondList = inOth3.ToNodeListFromFiles();
+                        }
+
+                    } 
                     if (arguments.InXMLFile2 != null)
                     {
                         XMLGraphFormat<string> inXml2 = new XMLGraphFormat<string>(arguments.InXMLFile2);
                         inXml2.nodeValueParser = new StringNodeValueParser();
-                        secondList = inXml2.ToNodeListFromFile();
+                        MasterNodeList<string> tempList;
+                        if (commonBaseList != null)
+                        {
+                            tempList = inXml2.ToNodeListFromFile();
+                            secondList.reloadNodesThenRoutesFromSpecs(tempList.AllNodeSpecs, tempList.AllEdgeSpecs);
+                            firstList.addLaterChunksThanBaseToOtherList(commonBaseList, secondList);
+                            firstList = secondList;
+                        }
+                        else if (arguments.Chunk == -1 && !arguments.Missing)
+                        {
+                            tempList = inXml2.ToNodeListFromFile();
+                            secondList.reloadNodesThenRoutesFromSpecs(tempList.AllNodeSpecs, tempList.AllEdgeSpecs);
+                        }
+                        else
+                        {
+                            secondList = inXml2.ToNodeListFromFile();
+                        }
                     }
                     else if (arguments.InDatFile2 != null && arguments.InTxtFile2 != null)
                     {
                         BinaryAndTXTFormat<string> inOth2 = new BinaryAndTXTFormat<string>(arguments.InDatFile2, arguments.InTxtFile2);
                         inOth2.nodeValueParser = new StringNodeValueParser();
-                        if (arguments.Chunk == -1 && !arguments.Missing)  // means to merge 2nd into 1st
+                        if (commonBaseList != null)
                         {
-                            inOth2.ToNodeListFromFiles(firstList);
+                            inOth2.ToNodeListFromFiles(secondList);
+                            firstList.addLaterChunksThanBaseToOtherList(commonBaseList, secondList);
+                            firstList = secondList;
+                        }
+                        else if (arguments.Chunk == -1 && !arguments.Missing)
+                        {
+                            inOth2.ToNodeListFromFiles(firstList);   // means to merge 2nd into 1st
                         }
                         else
                         {
@@ -185,7 +227,7 @@ namespace DataSequenceGraphCLI
                     {
                         loadFile(arguments.InSrcFile, firstList, arguments.Quiet);
                     }
-                    if (secondList != null)
+                    if (secondList != null && commonBaseList == null)
                     {
                         if (arguments.Chunk != -1)
                         {

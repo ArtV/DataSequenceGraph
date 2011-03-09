@@ -171,6 +171,15 @@ namespace DataSequenceGraph
             return newNode;
         }
 
+        public void addLaterChunksThanBaseToOtherList(MasterNodeList<T> baseList,MasterNodeList<T> otherList)
+        {
+            foreach (IEnumerable<T> chunk in dataChunksLaterThan(baseList))
+            {
+                DataChunkRouteBlazer<T> newBlazer = new DataChunkRouteBlazer<T>(chunk, otherList);
+                newBlazer.computeFullRoute();
+            }
+        }
+
         public IEnumerable<IEnumerable<T>> dataChunksLaterThan(MasterNodeList<T> pastList)
         {
             for (int i = pastList.DataChunkCount; i <= gateNodeList.Count - 1; i++)

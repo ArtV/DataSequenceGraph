@@ -53,10 +53,15 @@ namespace DataSequenceGraphCLI
 
         [Option("m", "missing", HelpText = "Instead of adding and sending the result to output, find the difference or missing parts. (conflicts with -c).")]
         public bool Missing = false;
-/* future idea?
-        [Option("r", "rebase", HelpText = "Apply the secondary graph after this chunk# and then reapply the primary graph's later chunks afterward.")]
-        public int Rebase = -1;
-*/       
+
+        [Option("z", "basexml", HelpText = "XML graph file to load as a common base of primary and secondary graphs.")]
+        public string BaseXMLFile = null;
+
+        [Option("g", "baseedges", HelpText = "Binary file of graph edges to load as a common base of primary and secondary graphs.")]
+        public string BaseDatFile = null;
+
+        [Option("w", "basevalues", HelpText = "Text file of graph data values to load as a common base of primary and secondary graphs.")]
+        public string BaseTxtFile = null;
 
         [Option("h", "hc", HelpText = "Use the numbered hand/hard-coded graph as the primary.")]
         public int HandCodedList = -1;
@@ -73,6 +78,8 @@ namespace DataSequenceGraphCLI
             txt.AddPreOptionsLine("  * Without -c or -m, the secondary graph will be merged into the primary graph.");
             txt.AddPreOptionsLine("  * With -c or -m, output is the nodes/edges from the primary graph absent from the secondary/destination graph.");
             txt.AddPreOptionsLine("  * -C with -c or -m sends the full chunk text to the filename. (This file can be reloaded later with -s.) ");
+            txt.AddPreOptionsLine("  * Passing primary, secondary, and base graphs produces the result of adding the secondary to the base and then " +
+                "re-applying the chunks in primary that were added to the base.");
             txt.AddOptions(this);
             return txt;
         }
