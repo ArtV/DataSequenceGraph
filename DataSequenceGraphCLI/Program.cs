@@ -186,7 +186,7 @@ namespace DataSequenceGraphCLI
                         XMLGraphFormat<string> inXml2 = new XMLGraphFormat<string>(arguments.InXMLFile2);
                         inXml2.nodeValueParser = new StringNodeValueParser();
                         MasterNodeList<string> tempList;
-                        if (commonBaseList != null)
+                        if (commonBaseList != null && !arguments.ReapplyLater)
                         {
                             tempList = inXml2.ToNodeListFromFile();
                             secondList.reloadNodesThenRoutesFromSpecs(tempList.AllNodeSpecs, tempList.AllEdgeSpecs);
@@ -207,13 +207,14 @@ namespace DataSequenceGraphCLI
                     {
                         BinaryAndTXTFormat<string> inOth2 = new BinaryAndTXTFormat<string>(arguments.InDatFile2, arguments.InTxtFile2);
                         inOth2.nodeValueParser = new StringNodeValueParser();
-                        if (commonBaseList != null)
+                        if (commonBaseList != null && !arguments.ReapplyLater)
                         {
                             inOth2.ToNodeListFromFiles(secondList);
                             firstList.addLaterChunksThanBaseToOtherList(commonBaseList, secondList);
                             firstList = secondList;
                         }
-                        else if (arguments.Chunk == -1 && !arguments.Missing && arguments.LeastChunk == -1)
+                        else if (arguments.Chunk == -1 && !arguments.Missing && arguments.LeastChunk == -1 &&
+                            !arguments.ReapplyLater)
                         {
                             inOth2.ToNodeListFromFiles(firstList);   // means to merge 2nd into 1st
                         }
@@ -286,6 +287,10 @@ namespace DataSequenceGraphCLI
                             edgeSpecs = missing.Item2;
                         }
                         secondList = new MasterNodeList<string>();
+                    }
+                    else if (arguments.ReapplyLater && commonBaseList != null)
+                    {
+                        secondList.addLaterChunksThanBaseToOtherList(commonBaseList, firstList);
                     }
 
 
