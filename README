@@ -1,3 +1,15 @@
-Data Sequence Graph represents one or more data value sequences (IEnumerable<>), called "chunks", as nodes and edges in a common graph. The singular MasterNodeList for the graph stores every node, and each node stores its outgoing edges to other nodes. The computeFullRoute() method of the DataChunkRouteBlazer object, constructed with the original data value sequence and the desired MasterNodeList, will make all necessary changes to encode the chunk in the graph. 
-
-More details in the introductory blog post: http://ripplingbrainwaves.blogspot.com/2011/03/introduction-to-data-sequence-graph.html .
+Data Sequence Graph represents a collection of data value sequences (IEnumerable<T>), 
+called "chunks", as possibly overlapping one-way routes in a single graph. The singular 
+MasterNodeList for the graph stores every node, and each node stores its outgoing edges 
+to other nodes. The computeFullRoute() method of the DataChunkRouteBlazer object, 
+constructed with the original data value sequence and the desired MasterNodeList, 
+will make all necessary changes to encode the chunk in the graph. 
+--------------------------------------------------------------------------------------------
+EXTERNAL DEPENDENCIES! :
+   * Test projects depend on the nunit.framework.dll assembly from 
+     NUnit http://www.nunit.org/
+   * The DataSequenceGraphCLI project depends on CommandLine.dll assembly from 
+     Command Line Parser Library http://commandline.codeplex.com/     
+--------------------------------------------------------------------------------------------
+More details in the introductory blog post: 
+http://ripplingbrainwaves.blogspot.com/2011/03/introduction-to-data-sequence-graph.html .
