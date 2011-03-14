@@ -29,20 +29,11 @@ namespace DataSequenceGraph.CommunicationTests
         [Test]
         public void testCreateRequest()
         {
-            /*
-            using (FileStream fileStream = new FileStream("test.tar.gz", FileMode.Create))
-            {
-                DeltaRequest req = new DeltaRequest(new DeltaDirectory(Directory.GetCurrentDirectory()),
-                    fileStream);
-                req.createAndWrite();
-            } */
-
-//            string newFile = deltaDir.DirectoryPath + @"\" + deltaDir.CurrentBase + ".base";
             MemoryStream resStream = new MemoryStream();
             byte[] resBytes = new byte[0];
             using (TextWriter textWriter = new StreamWriter(resStream))
             {
-                DeltaRequest.createAndWrite(deltaDir, textWriter);
+                new DeltaRequest(deltaDir).writeDefaultRequest(textWriter);
                 resBytes = resStream.ToArray();
             }
             Assert.AreNotEqual(0, resBytes.Length);
@@ -55,9 +46,9 @@ namespace DataSequenceGraph.CommunicationTests
         public void testFutureBaseRequest()
         {
             StringReader rdr = new StringReader("0030-2011-03-13T05-38-00Z");
-            ResultKind result = DeltaRequestHandler.handleDeltaRequest(deltaDir, new MasterNodeList<int>(), 
+            DeltaRequestResultKind result = DeltaRequestHandler.handleDeltaRequest(deltaDir, new MasterNodeList<int>(), 
                 new MasterNodeList<int>(), new ToStringNodeValueExporter<int>(),rdr, new MemoryStream());
-            Assert.AreEqual(ResultKind.Empty, result);
+            Assert.AreEqual(DeltaRequestResultKind.Empty, result);
         }
 
         [Test]
@@ -65,12 +56,12 @@ namespace DataSequenceGraph.CommunicationTests
         {
             StringReader rdr = new StringReader("0025-2011-03-13T05-33-00Z");
             MemoryStream resStream = new MemoryStream();
-            ResultKind result = DeltaRequestHandler.handleDeltaRequest(deltaDir, new MasterNodeList<int>(),
+            DeltaRequestResultKind result = DeltaRequestHandler.handleDeltaRequest(deltaDir, new MasterNodeList<int>(),
                 new MasterNodeList<int>(), new ToStringNodeValueExporter<int>(), rdr, resStream);
             StreamReader resRdr = new StreamReader(new MemoryStream(resStream.ToArray()));
             Assert.AreNotEqual(0, resStream.Length);
             string[] deltArr = DeltaList.readList(resRdr);
-            Assert.AreEqual(ResultKind.Mismatch, result);
+            Assert.AreEqual(DeltaRequestResultKind.Mismatch, result);
             Assert.AreEqual(2, deltArr.Length);
         }
 
@@ -79,9 +70,9 @@ namespace DataSequenceGraph.CommunicationTests
         {
             StringReader rdr = new StringReader("0023-2011-03-13T05-33-55Z");
             MemoryStream resStream = new MemoryStream();
-            ResultKind result = DeltaRequestHandler.handleDeltaRequest(deltaDir, new MasterNodeList<int>(), 
+            DeltaRequestResultKind result = DeltaRequestHandler.handleDeltaRequest(deltaDir, new MasterNodeList<int>(), 
                 new MasterNodeList<int>(), new ToStringNodeValueExporter<int>(), rdr, resStream);
-            Assert.AreEqual(ResultKind.Deltas, result);            
+            Assert.AreEqual(DeltaRequestResultKind.Deltas, result);            
             using (FileStream fileStream = new FileStream("testOld.tar.gz", FileMode.Create))
             {
                 new MemoryStream(resStream.ToArray()).CopyTo(fileStream);
@@ -96,13 +87,13 @@ namespace DataSequenceGraph.CommunicationTests
 
             StringReader rdr = new StringReader(DeltaDirectoryTest.CURBASE);
             MemoryStream resStream = new MemoryStream();
-            ResultKind result = DeltaRequestHandler.handleDeltaRequest(deltaDir, new MasterNodeList<string>(),
+            DeltaRequestResultKind result = DeltaRequestHandler.handleDeltaRequest(deltaDir, new MasterNodeList<string>(),
                 localNodeList, new ToStringNodeValueExporter<string>(), rdr, resStream);
-            Assert.AreEqual(ResultKind.Deltas, result);
+            Assert.AreEqual(DeltaRequestResultKind.Deltas, result);
             using (FileStream fileStream = new FileStream("testNew.tar.gz", FileMode.Create))
             {
                 new MemoryStream(resStream.ToArray()).CopyTo(fileStream);
             } 
-        } 
+        }  
     }
 }

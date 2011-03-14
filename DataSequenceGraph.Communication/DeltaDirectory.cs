@@ -54,5 +54,21 @@ namespace DataSequenceGraph.Communication
         {
             return allDeltaFilenames.SkipWhile(fname => fname.CompareTo(otherDelta) <= 0);
         }
+
+        public Tuple<int, string> findCommonBase(string[] otherDeltas)
+        {
+            string earliestCandidateBase = otherDeltas[0];
+            int foundIndex = -1;
+            for (int i = 0; i <= otherDeltas.Length - 1; i++)
+            {
+                earliestCandidateBase = otherDeltas[i];
+                foundIndex = Array.BinarySearch(allDeltaFilenames, earliestCandidateBase);
+                if (foundIndex >= 0)
+                {
+                    break;
+                }
+            }
+            return Tuple.Create(foundIndex,earliestCandidateBase);
+        }
     }
 }

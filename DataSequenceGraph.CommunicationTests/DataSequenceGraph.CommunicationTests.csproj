@@ -47,6 +47,7 @@
     <Compile Include="DeltaDirectoryTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RequestTest.cs" />
+    <Compile Include="ResponseTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DataSequenceGraph.Communication\DataSequenceGraph.Communication.csproj">
@@ -73,6 +74,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="0027-2011-03-13T05-36-00Z.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="testNewDelt.tar.gz">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

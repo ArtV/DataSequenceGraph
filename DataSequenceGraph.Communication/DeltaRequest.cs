@@ -10,11 +10,23 @@ namespace DataSequenceGraph.Communication
 {
     public class DeltaRequest
     {
-        public static void createAndWrite(DeltaDirectory deltaDirectory, TextWriter outWriter)
-        { 
+        private DeltaDirectory deltaDirectory { get; set; }
+
+        public DeltaRequest(DeltaDirectory deltaDirectory)
+        {
+            this.deltaDirectory = deltaDirectory;
+        }
+
+        public void writeDefaultRequest(TextWriter outWriter)
+        {
+            writeRequestUsingDelta(deltaDirectory.CurrentBase, outWriter);
+        }
+
+        public void writeRequestUsingDelta(string oldDelta, TextWriter outWriter)
+        {
             IEnumerable<string> fiveDeltas = deltaDirectory.getDeltasBeforeOrEqual(
-                deltaDirectory.CurrentBase, 5);
+                oldDelta, 5);
             DeltaList.writeList(fiveDeltas, outWriter);            
-        } 
+        }
     }
 }

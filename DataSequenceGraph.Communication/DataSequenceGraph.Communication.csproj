@@ -47,6 +47,7 @@
     <Compile Include="DeltaList.cs" />
     <Compile Include="DeltaRequest.cs" />
     <Compile Include="DeltaRequestHandler.cs" />
+    <Compile Include="DeltaResponseHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
