@@ -10,29 +10,11 @@ namespace DataSequenceGraph.Communication
 {
     public class DeltaRequest
     {
-        public DeltaDirectory deltaDirectory { get; set; }
-        public Stream outStream { get; set; }
-
-        public DeltaRequest(DeltaDirectory deltaDirectory, Stream outStream)
-        {
-            this.deltaDirectory = deltaDirectory;
-            this.outStream = outStream;
-        }
-
-        public void createAndWrite()
-        {
-            TarArchive requestTar = TarArchive.CreateOutputTarArchive(new GZipOutputStream(outStream));
-            string curBase = deltaDirectory.CurrentBase;
-
-            DeltaListFile baseFile = new DeltaListFile(new List<string> { curBase },
-                deltaDirectory.DirectoryPath);
-            string newName = baseFile.writeFile();
-
-            requestTar.WriteEntry(TarEntry.CreateEntryFromFile(newName), false);
-
-            requestTar.Close();
-
-            File.Delete(newName);
+        public static void createAndWrite(DeltaDirectory deltaDirectory, TextWriter outWriter)
+        { 
+            IEnumerable<string> fiveDeltas = deltaDirectory.getDeltasBeforeOrEqual(
+                deltaDirectory.CurrentBase, 5);
+            DeltaList.writeList(fiveDeltas, outWriter);            
         } 
     }
 }

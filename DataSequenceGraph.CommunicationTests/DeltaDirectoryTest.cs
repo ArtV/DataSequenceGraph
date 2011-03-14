@@ -24,10 +24,11 @@ namespace DataSequenceGraph.CommunicationTests
         [Test]
         public void testDeltasBefore()
         {
-            IEnumerable<string> deltas = dir.getDeltasBefore(MIDSTR);
+            IEnumerable<string> deltas = dir.getDeltasBeforeOrEqual(MIDSTR,2);
             Assert.AreEqual(-1, deltas.First().CompareTo(MIDSTR));
             Assert.AreEqual(2, deltas.Count());
-            Assert.AreEqual(4, dir.getDeltasBefore(CURBASE).Count());
+            Assert.AreNotEqual(true, deltas.Contains(MIDSTR));
+            Assert.AreEqual(2, dir.getDeltasBeforeOrEqual(CURBASE,2).Count());
         }
 
         [Test]
@@ -42,7 +43,7 @@ namespace DataSequenceGraph.CommunicationTests
             IEnumerable<string> deltas = dir.getDeltasAfter(MIDSTR);
             Assert.AreEqual(1, deltas.First().CompareTo(MIDSTR));
             Assert.AreEqual(2, deltas.Count());
-            Assert.AreEqual(1, dir.getDeltasAfter(CURBASE).Count());
+            Assert.AreEqual(0, dir.getDeltasAfter(CURBASE).Count());
         }
     }
 }

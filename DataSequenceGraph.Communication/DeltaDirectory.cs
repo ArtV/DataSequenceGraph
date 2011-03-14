@@ -9,7 +9,7 @@ namespace DataSequenceGraph.Communication
     public class DeltaDirectory
     {
         public string DirectoryPath { get; private set; }
-        private string[] allDeltaFilenames;
+        public string[] allDeltaFilenames { get; private set; }
 
         public string CurrentBase
         {
@@ -32,14 +32,22 @@ namespace DataSequenceGraph.Communication
             }            
         }
 
-        public IEnumerable<string> getDeltasBefore(string otherDelta)
+        public IEnumerable<string> getDeltasBeforeOrEqual(string otherDelta,int maxCount)
         {
-            return allDeltaFilenames.TakeWhile(fname => fname.CompareTo(otherDelta) <= 0);
+            int returnCount = 0;
+            for (int i = allDeltaFilenames.Length - 1; i >= 0 && returnCount < maxCount; i--)
+            {
+                if (allDeltaFilenames[i].CompareTo(otherDelta) <= 0)
+                {
+                    yield return allDeltaFilenames[i];
+                    returnCount++;
+                }
+            }
         }
 
         public IEnumerable<string> getDeltasAfter(string otherDelta)
         {
-            return allDeltaFilenames.SkipWhile(fname => fname.CompareTo(otherDelta) < 0);
+            return allDeltaFilenames.SkipWhile(fname => fname.CompareTo(otherDelta) <= 0);
         }
     }
 }
