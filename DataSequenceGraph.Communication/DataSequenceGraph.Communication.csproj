@@ -49,6 +49,16 @@
     <Compile Include="DeltaRequestHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BinaryAndTXTFormat\BinaryAndTXTFormat.csproj">
+      <Project>{77357CCB-D871-4007-85D8-DE5C2DB17043}</Project>
+      <Name>BinaryAndTXTFormat</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DataSequenceGraph\DataSequenceGraph.csproj">
+      <Project>{55CB11B6-B07B-4308-93E3-F95F74B069E2}</Project>
+      <Name>DataSequenceGraph</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

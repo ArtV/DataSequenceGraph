@@ -23,7 +23,12 @@ namespace DataSequenceGraph.Communication
         {
             this.DirectoryPath = directoryPath;
 
-            string[] deltaFilenames = Directory.GetFiles(directoryPath, "*.dat");
+            reloadDirectory();
+        }
+
+        public void reloadDirectory()
+        {
+            string[] deltaFilenames = Directory.GetFiles(this.DirectoryPath, "*.dat");
             Array.Sort(deltaFilenames);
             this.allDeltaFilenames = new string[deltaFilenames.Length];
             for (int i = 0; i <= deltaFilenames.Length - 1; i++)

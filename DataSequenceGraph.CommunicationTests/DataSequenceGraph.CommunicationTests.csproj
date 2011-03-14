@@ -53,32 +53,40 @@
       <Project>{B479D0BE-E5A9-43FA-B085-F56445AE0C2B}</Project>
       <Name>DataSequenceGraph.Communication</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DataSequenceGraphTests\DataSequenceGraphTests.csproj">
+      <Project>{7C4FA147-1D23-46CB-B9F2-B48EC68B5B67}</Project>
+      <Name>DataSequenceGraphTests</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DataSequenceGraph\DataSequenceGraph.csproj">
+      <Project>{55CB11B6-B07B-4308-93E3-F95F74B069E2}</Project>
+      <Name>DataSequenceGraph</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="20-2011-03-13T05-31-55Z.dat">
+    <None Include="0020-2011-03-13T05-31-55Z.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="23-2011-03-13T05-33-55Z.dat">
+    <None Include="0023-2011-03-13T05-33-55Z.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="26-2011-03-13T05-35-55Z.dat">
+    <None Include="0026-2011-03-13T05-35-55Z.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="27-2011-03-13T05-36-00Z.dat">
+    <None Include="0027-2011-03-13T05-36-00Z.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="20-2011-03-13T05-31-55Z.txt">
+    <Content Include="0020-2011-03-13T05-31-55Z.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="23-2011-03-13T05-33-55Z.txt">
+    <Content Include="0023-2011-03-13T05-33-55Z.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="26-2011-03-13T05-35-55Z.txt">
+    <Content Include="0026-2011-03-13T05-35-55Z.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="27-2011-03-13T05-36-00Z.txt">
+    <Content Include="0027-2011-03-13T05-36-00Z.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
