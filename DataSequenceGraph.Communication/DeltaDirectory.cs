@@ -90,6 +90,14 @@ namespace DataSequenceGraph.Communication
             return Tuple.Create(foundIndex,earliestCandidateBase,i);
         }
 
+        public MasterNodeList<NodeValType> getLastFullGraph<NodeValType>(
+            NodeValueParser<NodeValType> nodeValueParser)
+        {
+            BinaryAndTXTFormat<NodeValType> fmt = setupFormat(allFullGraphs[allFullGraphs.Count - 1], 
+                nodeValueParser, null);
+            return fmt.ToNodeListFromFiles();
+        }
+
         public Tuple<string,MasterNodeList<NodeValType>> getFullGraphBefore<NodeValType>(string delta,
               NodeValueParser<NodeValType> nodeValueParser)
         {

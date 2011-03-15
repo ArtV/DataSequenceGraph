@@ -59,7 +59,6 @@ namespace DataSequenceGraph.Communication
                 fmt.ToBinaryAndTXTFiles(localNodeList, baseNodeList, nodeReqSpecs);
                 writeDeltaArchive(new List<string> { stemDeltaFilename }, deltaDirectory.DirectoryPath, 
                     outS, actualRequestBase);
-                // NOTE caller should overwrite base node list with local node list!!!
             }
 
             return returnResult;
