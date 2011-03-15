@@ -41,11 +41,12 @@ namespace DataSequenceGraph.CommunicationTests
             MasterNodeList<string> localNodeList = new MasterNodeList<string>();
             DataChunkRouteBlazerTest.threeThreeChunks(localNodeList, new Dictionary<Node, List<Route>>());
             MasterNodeList<string> baseNodeList = new MasterNodeList<string>();
+            MasterNodeList<string> newLocalNodeList;
 
             using (FileStream fileStream = new FileStream("testNewDelt.tar.gz", FileMode.Open))
             {
-                DeltaResponseResultKind result = DeltaResponseHandler.handleDeltaArchiveResponse(deltaDir, baseNodeList,
-                    new StringNodeValueParser(), new ToStringNodeValueExporter<string>(), fileStream);
+                DeltaResponseResultKind result = DeltaResponseHandler.handleDeltaArchiveResponse(localNodeList, deltaDir, baseNodeList,
+                    new StringNodeValueParser(), new ToStringNodeValueExporter<string>(), fileStream,out newLocalNodeList);
                 Assert.AreEqual(DeltaResponseResultKind.Acceptance, result);
                 Assert.Greater(baseNodeList.DataChunkCount, 0);
             }
@@ -55,14 +56,19 @@ namespace DataSequenceGraph.CommunicationTests
         public void testRewriteResponse()
         {
             MasterNodeList<string> localNodeList = new MasterNodeList<string>();
-            DataChunkRouteBlazerTest.threeThreeChunks(localNodeList, new Dictionary<Node, List<Route>>());
+            Dictionary<Node, List<Route>> dict = new Dictionary<Node,List<Route>>();
+            localNodeList.nodeRoutesDictionary = dict;
+            DataChunkRouteBlazerTest.threeThreeChunks(localNodeList,dict);
             MasterNodeList<string> baseNodeList = new MasterNodeList<string>();
+            MasterNodeList<string> newLocalNodeList;
 
+            // testRewrite contains a delta archive for the threeThreeChunks graph
             using (FileStream fileStream = new FileStream("testRewrite.tar.gz", FileMode.Open))
             {
-                DeltaResponseResultKind result = DeltaResponseHandler.handleDeltaArchiveResponse(deltaDir, baseNodeList,
-                    new StringNodeValueParser(), new ToStringNodeValueExporter<string>(), fileStream);
+                DeltaResponseResultKind result = DeltaResponseHandler.handleDeltaArchiveResponse(localNodeList, deltaDir, baseNodeList,
+                    new StringNodeValueParser(), new ToStringNodeValueExporter<string>(), fileStream, out newLocalNodeList);
                 Assert.AreEqual(DeltaResponseResultKind.Rewrite, result);
+                Assert.Greater(newLocalNodeList.DataChunkCount, localNodeList.DataChunkCount);
             }
         }
     }

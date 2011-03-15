@@ -33,13 +33,14 @@ namespace DataSequenceGraph.Communication
             return result;
         }
 
-        // NOTE: caller must execute one of the add*Chunks methods, and keep around a copy
-        //  of the old base to reapply local chunks after the new base is created here
-        public static DeltaResponseResultKind handleDeltaArchiveResponse<NodeValType>(DeltaDirectory deltaDirectory,
-            MasterNodeList<NodeValType> baseNodeList,NodeValueParser<NodeValType> nodeValueParser,
-            NodeValueExporter<NodeValType> nodeValueExporter, Stream deltaArchiveResponse)
+        public static DeltaResponseResultKind 
+            handleDeltaArchiveResponse<NodeValType>(MasterNodeList<NodeValType> originalLocalNodeList,
+            DeltaDirectory deltaDirectory,MasterNodeList<NodeValType> baseNodeList,
+            NodeValueParser<NodeValType> nodeValueParser,NodeValueExporter<NodeValType> nodeValueExporter, 
+            Stream deltaArchiveResponse,out MasterNodeList<NodeValType> newLocalNodeList)
         {
             DeltaResponseResultKind result = DeltaResponseResultKind.Dismissal;
+            newLocalNodeList = null;
 
             string tempDir = extractDeltaArchive(deltaArchiveResponse);
             string[] datFiles = Directory.GetFiles(tempDir, "*.dat");
@@ -61,7 +62,10 @@ namespace DataSequenceGraph.Communication
                 if (commonBase.Equals(currentBase))
                 {
                     result = DeltaResponseResultKind.Acceptance;
+                    int baseIndexBefore = baseNodeList.DataChunkCount;                
                     copyAndApplyDeltas(tempDir,deltaDirectory,baseNodeList,nodeValueParser,nodeValueExporter);
+                    originalLocalNodeList.addChunksStartingAtIndexToOtherList(baseIndexBefore, baseNodeList);
+                    newLocalNodeList = baseNodeList;
                 }
                 else
                 {
@@ -72,11 +76,14 @@ namespace DataSequenceGraph.Communication
                     }
                     else
                     {
-                        result = DeltaResponseResultKind.Rewrite;
+                        result = DeltaResponseResultKind.Rewrite;                       
                         MasterNodeList<NodeValType> oldCommonBase = 
                             reconstructGraph(deltaDirectory, commonBase, nodeValueParser,nodeValueExporter);
+                        int baseIndexBefore = oldCommonBase.DataChunkCount;
                         deltaDirectory.junkFilesAfter(commonBase);
                         copyAndApplyDeltas(tempDir, deltaDirectory, oldCommonBase, nodeValueParser, nodeValueExporter);
+                        originalLocalNodeList.addChunksStartingAtIndexToOtherList(baseIndexBefore, oldCommonBase);
+                        newLocalNodeList = oldCommonBase;
                     }
                 }
             }
@@ -121,7 +128,7 @@ namespace DataSequenceGraph.Communication
         {
             string[] datFiles = Directory.GetFiles(srcPath, "*.dat");
             Array.Sort(datFiles);
-            int baseIndexBefore = baseNodeList.DataChunkCount;                
+
             foreach (string datFileName in datFiles)
             {
                 string stemName = Path.GetFileName(datFileName);
