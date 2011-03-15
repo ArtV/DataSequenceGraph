@@ -141,5 +141,28 @@ namespace DataSequenceGraph.Communication
             fmt.nodeValueExporter = nodeValueExporter;
             return fmt;
         }
+
+        public void junkFilesAfter(string exclusiveStart)
+        {
+            string[] allFilenames = Directory.GetFiles(this.DirectoryPath);
+            Dictionary<string, string> oldToNewExtension = new Dictionary<string, string>()
+            {
+                { ".dat", ".datx" },
+                { ".txt", ".txtx" }
+            };
+            foreach (string fname in allFilenames)
+            {
+                if (Path.GetExtension(fname).Equals(".dat") || 
+                    Path.GetExtension(fname).Equals(".txt"))
+                {
+                    if (Path.GetFileNameWithoutExtension(fname).CompareTo(exclusiveStart) > 0)
+                    {
+                        File.Move(fname, fname.Substring(0,fname.Length - 4) + 
+                            oldToNewExtension[Path.GetExtension(fname)]);
+                    }
+                }
+            }
+            reloadDirectory();
+        }
     }
 }

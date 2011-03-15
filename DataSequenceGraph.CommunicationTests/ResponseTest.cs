@@ -17,11 +17,7 @@ namespace DataSequenceGraph.CommunicationTests
         [SetUp]
         public void SetUp()
         {
-            string[] testProducedFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "0003*.*");
-            foreach (string testFile in testProducedFiles)
-            {
-                File.Delete(testFile);
-            }
+            DeltaDirectoryTest.resetDeltaDir();
             deltaDir = new DeltaDirectory(Directory.GetCurrentDirectory());
         }
 
@@ -53,6 +49,21 @@ namespace DataSequenceGraph.CommunicationTests
                 Assert.AreEqual(DeltaResponseResultKind.Acceptance, result);
                 Assert.Greater(baseNodeList.DataChunkCount, 0);
             }
-        } 
+        }
+
+        [Test]
+        public void testRewriteResponse()
+        {
+            MasterNodeList<string> localNodeList = new MasterNodeList<string>();
+            DataChunkRouteBlazerTest.threeThreeChunks(localNodeList, new Dictionary<Node, List<Route>>());
+            MasterNodeList<string> baseNodeList = new MasterNodeList<string>();
+
+            using (FileStream fileStream = new FileStream("testRewrite.tar.gz", FileMode.Open))
+            {
+                DeltaResponseResultKind result = DeltaResponseHandler.handleDeltaArchiveResponse(deltaDir, baseNodeList,
+                    new StringNodeValueParser(), new ToStringNodeValueExporter<string>(), fileStream);
+                Assert.AreEqual(DeltaResponseResultKind.Rewrite, result);
+            }
+        }
     }
 }

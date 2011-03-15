@@ -42,22 +42,22 @@ namespace DataSequenceGraph.Communication
             DeltaResponseResultKind result = DeltaResponseResultKind.Dismissal;
 
             string tempDir = extractDeltaArchive(deltaArchiveResponse);
-
+            string[] datFiles = Directory.GetFiles(tempDir, "*.dat");
+            Array.Sort(datFiles);
+            string theirCandidateDelta = Path.GetFileNameWithoutExtension(datFiles[0]);
             string[] baseFiles = Directory.GetFiles(tempDir, "*.base");
-            string[] allDeltas = null;
+            string actualRequestBase = null;
             using (TextReader textReader = new StreamReader(new FileStream(baseFiles[0], FileMode.Open, FileAccess.Read)))
             {
-                allDeltas = DeltaList.readList(textReader);
+                actualRequestBase = DeltaList.readList(textReader)[0];
             }
-            string actualRequestBase = allDeltas[0];
             string currentBase = deltaDirectory.CurrentBase;
 
-            var foundBase = deltaDirectory.findCommonBase(allDeltas);
+            var foundBase = deltaDirectory.findCommonBase(new string[] { actualRequestBase });
             if (foundBase.Item1 >= 0)
             {
                 int foundIndex = foundBase.Item1;
                 string commonBase = foundBase.Item2;
-                int allDeltasIndex = foundBase.Item3;
                 if (commonBase.Equals(currentBase))
                 {
                     result = DeltaResponseResultKind.Acceptance;
@@ -66,7 +66,6 @@ namespace DataSequenceGraph.Communication
                 else
                 {
                     string myCandidateDelta = deltaDirectory.allDeltaFilenames[foundIndex + 1];
-                    string theirCandidateDelta = allDeltas[allDeltasIndex + 1];
                     if (myCandidateDelta.CompareTo(theirCandidateDelta) < 0)
                     {
                         result = DeltaResponseResultKind.Dismissal;
@@ -76,6 +75,8 @@ namespace DataSequenceGraph.Communication
                         result = DeltaResponseResultKind.Rewrite;
                         MasterNodeList<NodeValType> oldCommonBase = 
                             reconstructGraph(deltaDirectory, commonBase, nodeValueParser,nodeValueExporter);
+                        deltaDirectory.junkFilesAfter(commonBase);
+                        copyAndApplyDeltas(tempDir, deltaDirectory, oldCommonBase, nodeValueParser, nodeValueExporter);
                     }
                 }
             }
@@ -86,9 +87,19 @@ namespace DataSequenceGraph.Communication
         private static MasterNodeList<NodeValType> reconstructGraph<NodeValType>(DeltaDirectory deltaDirectory, string lastDeltaApplied, 
             NodeValueParser<NodeValType> nodeValueParser, NodeValueExporter<NodeValType> nodeValueExporter)
         {
-            var fullGraphInfo = deltaDirectory.getFullGraphBefore(lastDeltaApplied, nodeValueParser);
-            string graphStemName = fullGraphInfo.Item1;
-            MasterNodeList<NodeValType> startingGraph = fullGraphInfo.Item2;
+            var fullGraphInfo = deltaDirectory.getFullGraphBefore(lastDeltaApplied, nodeValueParser);            
+            string graphStemName;
+            MasterNodeList<NodeValType> startingGraph;
+            if (fullGraphInfo == null)
+            {
+                graphStemName = " ";
+                startingGraph = new MasterNodeList<NodeValType>();
+            }
+            else
+            {
+                graphStemName = fullGraphInfo.Item1;
+                startingGraph = fullGraphInfo.Item2;
+            }
             deltaDirectory.applyDeltaSeriesToNodeList(
                 deltaDirectory.getDeltasAfterButUpTo(graphStemName, lastDeltaApplied),
                 startingGraph, nodeValueParser, nodeValueExporter);

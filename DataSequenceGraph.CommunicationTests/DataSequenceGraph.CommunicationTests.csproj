@@ -82,6 +82,9 @@
     <None Include="testNewDelt.tar.gz">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="testRewrite.tar.gz">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="0020-delta-2011-03-13T05-31-55Z.txt">

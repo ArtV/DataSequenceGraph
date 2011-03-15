@@ -18,11 +18,7 @@ namespace DataSequenceGraph.CommunicationTests
         [SetUp]
         public void SetUp()
         {
-            string[] testProducedFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "000*.*");
-            foreach (string testFile in testProducedFiles)
-            {
-                File.Delete(testFile);
-            }
+            DeltaDirectoryTest.resetDeltaDir();
             deltaDir = new DeltaDirectory(Directory.GetCurrentDirectory());
         }
 
