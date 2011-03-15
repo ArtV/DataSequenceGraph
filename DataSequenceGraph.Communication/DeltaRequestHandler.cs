@@ -32,7 +32,7 @@ namespace DataSequenceGraph.Communication
             }
             else if (comp < 0)
             { 
-                Tuple<int, string> foundBase = deltaDirectory.findCommonBase(allDeltas);
+                Tuple<int, string, int> foundBase = deltaDirectory.findCommonBase(allDeltas);
                 if (foundBase.Item1 >= 0)
                 {
                     returnResult = DeltaRequestResultKind.Deltas;

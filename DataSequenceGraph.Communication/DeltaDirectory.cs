@@ -3,21 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using DataSequenceGraph.Format;
 
 namespace DataSequenceGraph.Communication
 {
     public class DeltaDirectory
     {
         public string DirectoryPath { get; private set; }
-        public string[] allDeltaFilenames { get; private set; }
+        public List<string> allDeltaFilenames { get; private set; }
+        public List<string> allFullGraphs { get; private set; }
 
         public string CurrentBase
         {
             get
             {
-                return allDeltaFilenames[allDeltaFilenames.Length - 1];
+                return allDeltaFilenames[allDeltaFilenames.Count - 1];
             }
-        }
+        }        
 
         public DeltaDirectory(string directoryPath)
         {
@@ -28,19 +30,29 @@ namespace DataSequenceGraph.Communication
 
         public void reloadDirectory()
         {
-            string[] deltaFilenames = Directory.GetFiles(this.DirectoryPath, "*delta*.dat");
+            string[] deltaFilenames = Directory.GetFiles(this.DirectoryPath, "*.dat");
             Array.Sort(deltaFilenames);
-            this.allDeltaFilenames = new string[deltaFilenames.Length];
+            this.allDeltaFilenames = new List<string>();
+            this.allFullGraphs = new List<string>();
+            string baseName;
             for (int i = 0; i <= deltaFilenames.Length - 1; i++)
             {
-                this.allDeltaFilenames[i] = Path.GetFileNameWithoutExtension(deltaFilenames[i]);
+                baseName = Path.GetFileNameWithoutExtension(deltaFilenames[i]);
+                if (baseName.IndexOf("delta") >= 0)
+                {
+                    this.allDeltaFilenames.Add(baseName);
+                }
+                else
+                {
+                    this.allFullGraphs.Add(baseName);
+                }
             }            
         }
 
         public IEnumerable<string> getDeltasBeforeOrEqual(string otherDelta,int maxCount)
         {
             int returnCount = 0;
-            for (int i = allDeltaFilenames.Length - 1; i >= 0 && returnCount < maxCount; i--)
+            for (int i = allDeltaFilenames.Count - 1; i >= 0 && returnCount < maxCount; i--)
             {
                 if (allDeltaFilenames[i].CompareTo(otherDelta) <= 0)
                 {
@@ -55,20 +67,79 @@ namespace DataSequenceGraph.Communication
             return allDeltaFilenames.SkipWhile(fname => fname.CompareTo(otherDelta) <= 0);
         }
 
-        public Tuple<int, string> findCommonBase(string[] otherDeltas)
+        public IEnumerable<string> getDeltasAfterButUpTo(string exclusiveBase, string inclusiveLast)
+        {
+            return allDeltaFilenames.SkipWhile(fname => fname.CompareTo(exclusiveBase) <= 0).
+                TakeWhile(fname => fname.CompareTo(inclusiveLast) <= 0);
+        }
+
+        public Tuple<int, string, int> findCommonBase(string[] otherDeltas)
         {
             string earliestCandidateBase = otherDeltas[0];
             int foundIndex = -1;
-            for (int i = 0; i <= otherDeltas.Length - 1; i++)
+            int i = -1;
+            for (i = 0; i <= otherDeltas.Length - 1; i++)
             {
                 earliestCandidateBase = otherDeltas[i];
-                foundIndex = Array.BinarySearch(allDeltaFilenames, earliestCandidateBase);
+                foundIndex = allDeltaFilenames.FindIndex(fname => fname.Equals(earliestCandidateBase));
                 if (foundIndex >= 0)
                 {
                     break;
                 }
             }
-            return Tuple.Create(foundIndex,earliestCandidateBase);
+            return Tuple.Create(foundIndex,earliestCandidateBase,i);
+        }
+
+        public Tuple<string,MasterNodeList<NodeValType>> getFullGraphBefore<NodeValType>(string delta,
+              NodeValueParser<NodeValType> nodeValueParser)
+        {
+            string foundGraph = null;
+            for (int i = allFullGraphs.Count - 1; i > 0; i--)
+            {
+                if (allFullGraphs.ElementAt(i).CompareTo(delta) < 0)
+                {
+                    foundGraph = allFullGraphs.ElementAt(i);
+                    break;
+                }
+            }
+            if (foundGraph == null)
+            {
+                return null;
+            }
+            BinaryAndTXTFormat<NodeValType> fmt = setupFormat(foundGraph, nodeValueParser, null);
+            return Tuple.Create(foundGraph,fmt.ToNodeListFromFiles());
+        }
+
+        public void applyDeltaSeriesToNodeList<NodeValType>(IEnumerable<string> deltaSeries,
+            MasterNodeList<NodeValType> nodeList, NodeValueParser<NodeValType> nodeValueParser,
+            NodeValueExporter<NodeValType> nodeValueExporter)
+        {
+            foreach (string delt in deltaSeries)
+            {
+                applyDeltaToNodeList(delt, nodeList, nodeValueParser, nodeValueExporter);
+            }
+        }
+
+        public void applyDeltaToNodeList<NodeValType>(string whichDelta, MasterNodeList<NodeValType> nodeList, 
+            NodeValueParser<NodeValType> nodeValueParser, NodeValueExporter<NodeValType> nodeValueExporter)
+        {
+            BinaryAndTXTFormat<NodeValType> fmt = setupFormat(whichDelta, nodeValueParser, nodeValueExporter);
+            fmt.ToNodeListFromFiles(nodeList);
+
+            BinaryAndTXTFormat<NodeValType> newBaseFmt = setupFormat(
+                nodeList.DataChunkCount.ToString("0000"), nodeValueParser, nodeValueExporter);
+            newBaseFmt.ToBinaryAndTXTFiles(nodeList);
+        }
+
+        private BinaryAndTXTFormat<NodeValType> setupFormat<NodeValType>(string whichStemName,
+            NodeValueParser<NodeValType> nodeValueParser, NodeValueExporter<NodeValType> nodeValueExporter)
+        {
+            BinaryAndTXTFormat<NodeValType> fmt = new BinaryAndTXTFormat<NodeValType>(
+                DirectoryPath + @"\" + whichStemName + ".dat",
+                DirectoryPath + @"\" + whichStemName + ".txt",
+                nodeValueParser);
+            fmt.nodeValueExporter = nodeValueExporter;
+            return fmt;
         }
     }
 }

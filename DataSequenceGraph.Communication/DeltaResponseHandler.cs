@@ -9,7 +9,7 @@ using ICSharpCode.SharpZipLib.GZip;
 
 namespace DataSequenceGraph.Communication
 {
-    public enum DeltaResponseResultKind { UpdateRequest,Dismissal,Acceptance }
+    public enum DeltaResponseResultKind { UpdateRequest,Dismissal,Acceptance,Rewrite }
 
     public class DeltaResponseHandler
     {
@@ -34,7 +34,7 @@ namespace DataSequenceGraph.Communication
         }
 
         // NOTE: caller must execute one of the add*Chunks methods, and keep around a copy
-        //  of the old base to reapply local chunks after the base is updated here
+        //  of the old base to reapply local chunks after the new base is created here
         public static DeltaResponseResultKind handleDeltaArchiveResponse<NodeValType>(DeltaDirectory deltaDirectory,
             MasterNodeList<NodeValType> baseNodeList,NodeValueParser<NodeValType> nodeValueParser,
             NodeValueExporter<NodeValType> nodeValueExporter, Stream deltaArchiveResponse)
@@ -57,6 +57,7 @@ namespace DataSequenceGraph.Communication
             {
                 int foundIndex = foundBase.Item1;
                 string commonBase = foundBase.Item2;
+                int allDeltasIndex = foundBase.Item3;
                 if (commonBase.Equals(currentBase))
                 {
                     result = DeltaResponseResultKind.Acceptance;
@@ -64,10 +65,34 @@ namespace DataSequenceGraph.Communication
                 }
                 else
                 {
+                    string myCandidateDelta = deltaDirectory.allDeltaFilenames[foundIndex + 1];
+                    string theirCandidateDelta = allDeltas[allDeltasIndex + 1];
+                    if (myCandidateDelta.CompareTo(theirCandidateDelta) < 0)
+                    {
+                        result = DeltaResponseResultKind.Dismissal;
+                    }
+                    else
+                    {
+                        result = DeltaResponseResultKind.Rewrite;
+                        MasterNodeList<NodeValType> oldCommonBase = 
+                            reconstructGraph(deltaDirectory, commonBase, nodeValueParser,nodeValueExporter);
+                    }
                 }
             }
 
             return result;
+        }
+
+        private static MasterNodeList<NodeValType> reconstructGraph<NodeValType>(DeltaDirectory deltaDirectory, string lastDeltaApplied, 
+            NodeValueParser<NodeValType> nodeValueParser, NodeValueExporter<NodeValType> nodeValueExporter)
+        {
+            var fullGraphInfo = deltaDirectory.getFullGraphBefore(lastDeltaApplied, nodeValueParser);
+            string graphStemName = fullGraphInfo.Item1;
+            MasterNodeList<NodeValType> startingGraph = fullGraphInfo.Item2;
+            deltaDirectory.applyDeltaSeriesToNodeList(
+                deltaDirectory.getDeltasAfterButUpTo(graphStemName, lastDeltaApplied),
+                startingGraph, nodeValueParser, nodeValueExporter);
+            return startingGraph;
         }
 
         private static string extractDeltaArchive(Stream deltaArchive)
@@ -88,20 +113,14 @@ namespace DataSequenceGraph.Communication
             int baseIndexBefore = baseNodeList.DataChunkCount;                
             foreach (string datFileName in datFiles)
             {
+                string stemName = Path.GetFileName(datFileName);
+                stemName = stemName.Substring(0,stemName.Length - 4);
                 string txtFileName = datFileName.Substring(0,datFileName.Length - 3) + "txt";
-                BinaryAndTXTFormat<NodeValType> fmt = new BinaryAndTXTFormat<NodeValType>(datFileName, txtFileName);
-                fmt.nodeValueParser = nodeValueParser;
-                fmt.ToNodeListFromFiles(baseNodeList);
 
                 File.Move(datFileName, deltaDir.DirectoryPath + @"\" + Path.GetFileName(datFileName));
                 File.Move(txtFileName, deltaDir.DirectoryPath + @"\" + Path.GetFileName(txtFileName));
+                deltaDir.applyDeltaToNodeList(stemName, baseNodeList,nodeValueParser, nodeValueExporter);
             }
-            string newBaseStemFileName = baseNodeList.DataChunkCount.ToString("0000");
-            BinaryAndTXTFormat<NodeValType> newBaseFmt = new BinaryAndTXTFormat<NodeValType>(
-                deltaDir.DirectoryPath + @"\" + newBaseStemFileName + ".dat",
-                deltaDir.DirectoryPath + @"\" + newBaseStemFileName + ".txt",
-                nodeValueExporter);
-            newBaseFmt.ToBinaryAndTXTFiles(baseNodeList);
         }
     }
 }
