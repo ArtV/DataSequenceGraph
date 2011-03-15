@@ -11,8 +11,8 @@ namespace DataSequenceGraph.CommunicationTests
     [TestFixture]
     public class DeltaDirectoryTest
     {
-        public const string CURBASE = "0027-2011-03-13T05-36-00Z";
-        public const string MIDSTR = "0025-2011-03-13T05-34-00Z";
+        public const string CURBASE = "0027-delta-2011-03-13T05-36-00Z";
+        public const string MIDSTR = "0025-delta-2011-03-13T05-34-00Z";
         private DeltaDirectory dir;
 
         [SetUp]

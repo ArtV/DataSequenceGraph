@@ -48,9 +48,10 @@ namespace DataSequenceGraph.Communication
             else
             {
                 returnResult = DeltaRequestResultKind.Deltas;
+                int beforeBaseNodeCount = baseNodeList.DataChunkCount;
                 IList<NodeAndReqSpec> nodeReqSpecs = localNodeList.getSpecsAbsentIn(baseNodeList);
-                string stemDeltaFilename = baseNodeList.DataChunkCount.ToString("0000") +
-                    "-" + DateTime.Now.ToString("yyyy-MM-dd'T'HH-mm-ss'Z'");
+                string stemDeltaFilename = beforeBaseNodeCount.ToString("0000") +
+                    "-delta-" + DateTime.Now.ToString("yyyy-MM-dd'T'HH-mm-ss'Z'");
                 string stemNameWithPath = deltaDirectory.DirectoryPath + @"\" + stemDeltaFilename;
                 BinaryAndTXTFormat<NodeValType> fmt =
                     new BinaryAndTXTFormat<NodeValType>(stemNameWithPath + ".dat", stemNameWithPath + ".txt",

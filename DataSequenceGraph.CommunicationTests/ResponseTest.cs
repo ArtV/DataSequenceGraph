@@ -28,7 +28,7 @@ namespace DataSequenceGraph.CommunicationTests
         [Test]
         public void testMismatchResponse()
         {
-            StringReader rdr = new StringReader("0025-2011-03-13T05-33-00Z");
+            StringReader rdr = new StringReader("0025-delta-2011-03-13T05-33-00Z");
             MemoryStream resStream = new MemoryStream();
             DeltaResponseResultKind result = DeltaResponseHandler.handleDeltaBaseResponse(deltaDir,
                 rdr, new StreamWriter(resStream));
@@ -49,7 +49,7 @@ namespace DataSequenceGraph.CommunicationTests
             using (FileStream fileStream = new FileStream("testNewDelt.tar.gz", FileMode.Open))
             {
                 DeltaResponseResultKind result = DeltaResponseHandler.handleDeltaArchiveResponse(deltaDir, baseNodeList,
-                    new StringNodeValueParser(), fileStream);
+                    new StringNodeValueParser(), new ToStringNodeValueExporter<string>(), fileStream);
                 Assert.AreEqual(DeltaResponseResultKind.Acceptance, result);
                 Assert.Greater(baseNodeList.DataChunkCount, 0);
             }

@@ -18,7 +18,7 @@ namespace DataSequenceGraph.CommunicationTests
         [SetUp]
         public void SetUp()
         {
-            string[] testProducedFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "0003*.*");
+            string[] testProducedFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "000*.*");
             foreach (string testFile in testProducedFiles)
             {
                 File.Delete(testFile);
@@ -45,7 +45,7 @@ namespace DataSequenceGraph.CommunicationTests
         [Test]
         public void testFutureBaseRequest()
         {
-            StringReader rdr = new StringReader("0030-2011-03-13T05-38-00Z");
+            StringReader rdr = new StringReader("0030-delta-2011-03-13T05-38-00Z");
             DeltaRequestResultKind result = DeltaRequestHandler.handleDeltaRequest(deltaDir, new MasterNodeList<int>(), 
                 new MasterNodeList<int>(), new ToStringNodeValueExporter<int>(),rdr, new MemoryStream());
             Assert.AreEqual(DeltaRequestResultKind.Empty, result);
@@ -54,7 +54,7 @@ namespace DataSequenceGraph.CommunicationTests
         [Test]
         public void testMismatchRequest()
         {
-            StringReader rdr = new StringReader("0025-2011-03-13T05-33-00Z");
+            StringReader rdr = new StringReader("0025-delta-2011-03-13T05-33-00Z");
             MemoryStream resStream = new MemoryStream();
             DeltaRequestResultKind result = DeltaRequestHandler.handleDeltaRequest(deltaDir, new MasterNodeList<int>(),
                 new MasterNodeList<int>(), new ToStringNodeValueExporter<int>(), rdr, resStream);
@@ -68,7 +68,7 @@ namespace DataSequenceGraph.CommunicationTests
         [Test]
         public void testHaveOldDeltas()
         {
-            StringReader rdr = new StringReader("0023-2011-03-13T05-33-55Z");
+            StringReader rdr = new StringReader("0023-delta-2011-03-13T05-33-55Z");
             MemoryStream resStream = new MemoryStream();
             DeltaRequestResultKind result = DeltaRequestHandler.handleDeltaRequest(deltaDir, new MasterNodeList<int>(), 
                 new MasterNodeList<int>(), new ToStringNodeValueExporter<int>(), rdr, resStream);

@@ -36,7 +36,8 @@ namespace DataSequenceGraph.Communication
         // NOTE: caller must execute one of the add*Chunks methods, and keep around a copy
         //  of the old base to reapply local chunks after the base is updated here
         public static DeltaResponseResultKind handleDeltaArchiveResponse<NodeValType>(DeltaDirectory deltaDirectory,
-            MasterNodeList<NodeValType> baseNodeList,NodeValueParser<NodeValType> nodeValueParser, Stream deltaArchiveResponse)
+            MasterNodeList<NodeValType> baseNodeList,NodeValueParser<NodeValType> nodeValueParser,
+            NodeValueExporter<NodeValType> nodeValueExporter, Stream deltaArchiveResponse)
         {
             DeltaResponseResultKind result = DeltaResponseResultKind.Dismissal;
 
@@ -59,7 +60,7 @@ namespace DataSequenceGraph.Communication
                 if (commonBase.Equals(currentBase))
                 {
                     result = DeltaResponseResultKind.Acceptance;
-                    copyAndApplyDeltas(tempDir,deltaDirectory,baseNodeList,nodeValueParser);
+                    copyAndApplyDeltas(tempDir,deltaDirectory,baseNodeList,nodeValueParser,nodeValueExporter);
                 }
                 else
                 {
@@ -80,9 +81,8 @@ namespace DataSequenceGraph.Communication
         }
 
         private static void copyAndApplyDeltas<NodeValType>(string srcPath, DeltaDirectory deltaDir, MasterNodeList<NodeValType> baseNodeList,
-            NodeValueParser<NodeValType> nodeValueParser)
+            NodeValueParser<NodeValType> nodeValueParser, NodeValueExporter<NodeValType> nodeValueExporter)
         {
-            // TODO apply all deltas, no conflict
             string[] datFiles = Directory.GetFiles(srcPath, "*.dat");
             Array.Sort(datFiles);
             int baseIndexBefore = baseNodeList.DataChunkCount;                
@@ -96,9 +96,12 @@ namespace DataSequenceGraph.Communication
                 File.Move(datFileName, deltaDir.DirectoryPath + @"\" + Path.GetFileName(datFileName));
                 File.Move(txtFileName, deltaDir.DirectoryPath + @"\" + Path.GetFileName(txtFileName));
             }
-
-//            newLocalNodeList 
-            // TODO reapply local node list chunks
+            string newBaseStemFileName = baseNodeList.DataChunkCount.ToString("0000");
+            BinaryAndTXTFormat<NodeValType> newBaseFmt = new BinaryAndTXTFormat<NodeValType>(
+                deltaDir.DirectoryPath + @"\" + newBaseStemFileName + ".dat",
+                deltaDir.DirectoryPath + @"\" + newBaseStemFileName + ".txt",
+                nodeValueExporter);
+            newBaseFmt.ToBinaryAndTXTFiles(baseNodeList);
         }
     }
 }

@@ -64,16 +64,19 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="0020-2011-03-13T05-31-55Z.dat">
+    <None Include="0020-delta-2011-03-13T05-31-55Z.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="0023-2011-03-13T05-33-55Z.dat">
+    <None Include="0023-delta-2011-03-13T05-33-55Z.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="0026-2011-03-13T05-35-55Z.dat">
+    <None Include="0026-delta-2011-03-13T05-35-55Z.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="0027-2011-03-13T05-36-00Z.dat">
+    <None Include="0026.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="0027-delta-2011-03-13T05-36-00Z.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="testNewDelt.tar.gz">
@@ -81,16 +84,19 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="0020-2011-03-13T05-31-55Z.txt">
+    <Content Include="0020-delta-2011-03-13T05-31-55Z.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="0023-2011-03-13T05-33-55Z.txt">
+    <Content Include="0023-delta-2011-03-13T05-33-55Z.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="0026-2011-03-13T05-35-55Z.txt">
+    <Content Include="0026-delta-2011-03-13T05-35-55Z.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="0027-2011-03-13T05-36-00Z.txt">
+    <Content Include="0026.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="0027-delta-2011-03-13T05-36-00Z.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
