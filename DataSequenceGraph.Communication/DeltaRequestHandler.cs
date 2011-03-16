@@ -57,8 +57,7 @@ namespace DataSequenceGraph.Communication
                 }
                 else
                 {
-                    string stemDeltaFilename = beforeBaseNodeCount.ToString("0000") +
-                        "-delta-" + DateTime.Now.ToString("yyyy-MM-dd'T'HH-mm-ss'Z'");
+                    string stemDeltaFilename = DeltaList.generateNewDeltaFilename(beforeBaseNodeCount);
                     string stemNameWithPath = deltaDirectory.DirectoryPath + @"\" + stemDeltaFilename;
                     BinaryAndTXTFormat<NodeValType> fmt =
                         new BinaryAndTXTFormat<NodeValType>(stemNameWithPath + ".dat", stemNameWithPath + ".txt",

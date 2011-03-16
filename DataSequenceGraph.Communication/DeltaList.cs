@@ -30,5 +30,11 @@ namespace DataSequenceGraph.Communication
             string entireText = inReader.ReadToEnd();
             return entireText.Split(new char[] { '|' });
         }
+
+        public static string generateNewDeltaFilename(int dataChunkCountBeforeDelta)
+        {
+            return dataChunkCountBeforeDelta.ToString("0000") +
+                        "-delta-" + DateTime.Now.ToString("yyyy-MM-dd'T'HH-mm-ss'Z'");
+        }
     }
 }
