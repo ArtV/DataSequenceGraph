@@ -340,11 +340,18 @@ namespace DataSequenceGraphCLI
                                 {
                                     StreamReader resRdr = new StreamReader(new MemoryStream(outReq.ToArray()));
                                     string[] deltArr = DeltaList.readList(resRdr);
-                                    using (FileStream fileStream = new FileStream(deltArr[0] + ".base", FileMode.Create))
+                                    if (File.Exists(deltArr[0] + ".base"))
                                     {
-                                        new MemoryStream(outReq.ToArray()).CopyTo(fileStream);
+                                        Console.Out.WriteLine("New delta request already exists: " + deltArr[0] + ".base");
                                     }
-                                    Console.Out.WriteLine("Wrote .base counter-request response to " + deltArr[0] + ".base");
+                                    else
+                                    {
+                                        using (FileStream fileStream = new FileStream(deltArr[0] + ".base", FileMode.Create))
+                                        {
+                                            new MemoryStream(outReq.ToArray()).CopyTo(fileStream);
+                                        }
+                                        Console.Out.WriteLine("Wrote .base counter-request response " + deltArr[0] + ".base");
+                                    }
                                 }
                             }
                         }
