@@ -10,6 +10,8 @@ EXTERNAL DEPENDENCIES! :
      NUnit http://www.nunit.org/
    * The DataSequenceGraphCLI project depends on CommandLine.dll assembly from 
      Command Line Parser Library http://commandline.codeplex.com/     
+   * The DataSequenceGraph.Communications project depends on ICSharpCode.SharpZipLib.dll
+     assembly from SharpZipLib http://www.sharpdevelop.net/OpenSource/SharpZipLib/
 --------------------------------------------------------------------------------------------
 More details in the introductory blog post: 
 http://ripplingbrainwaves.blogspot.com/2011/03/introduction-to-data-sequence-graph.html .
