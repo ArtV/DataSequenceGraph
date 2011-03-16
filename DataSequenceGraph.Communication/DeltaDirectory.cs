@@ -37,6 +37,11 @@ namespace DataSequenceGraph.Communication
             string baseName;
             for (int i = 0; i <= deltaFilenames.Length - 1; i++)
             {
+                // must check for .dat because of GetFiles 3-letter extension behavior
+                if (!Path.GetExtension(deltaFilenames[i]).Equals(".dat"))
+                {
+                    continue;
+                }
                 baseName = Path.GetFileNameWithoutExtension(deltaFilenames[i]);
                 if (baseName.IndexOf("delta") >= 0)
                 {

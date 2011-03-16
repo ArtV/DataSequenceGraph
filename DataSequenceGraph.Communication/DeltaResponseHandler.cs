@@ -45,7 +45,9 @@ namespace DataSequenceGraph.Communication
             string tempDir = extractDeltaArchive(deltaArchiveResponse);
             string[] datFiles = Directory.GetFiles(tempDir, "*.dat");
             Array.Sort(datFiles);
-            string theirCandidateDelta = Path.GetFileNameWithoutExtension(datFiles[0]);
+            // must check for .dat because of GetFiles behavior for 3-letter extensions
+            string theirCandidateDelta = Path.GetFileNameWithoutExtension(
+                datFiles.First(fname => Path.GetExtension(fname).Equals(".dat")));
             string[] baseFiles = Directory.GetFiles(tempDir, "*.base");
             string actualRequestBase = null;
             using (TextReader textReader = new StreamReader(new FileStream(baseFiles[0], FileMode.Open, FileAccess.Read)))
@@ -131,6 +133,11 @@ namespace DataSequenceGraph.Communication
 
             foreach (string datFileName in datFiles)
             {
+                // must check for .dat because of GetFiles 3-letter extension behavior
+                if (!Path.GetExtension(datFileName).Equals(".dat"))
+                {
+                    continue;
+                }
                 string stemName = Path.GetFileName(datFileName);
                 stemName = stemName.Substring(0,stemName.Length - 4);
                 string txtFileName = datFileName.Substring(0,datFileName.Length - 3) + "txt";
