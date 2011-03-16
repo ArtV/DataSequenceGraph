@@ -155,6 +155,14 @@ namespace DataSequenceGraph.Communication
             newBaseFmt.ToBinaryAndTXTFiles(nodeList);
         }
 
+        public void dumpAsFullGraph<NodeValType>(MasterNodeList<NodeValType> nodeList,
+            NodeValueExporter<NodeValType> nodeValueExporter)
+        {
+            BinaryAndTXTFormat<NodeValType> newBaseFmt = setupFormat(
+                nodeList.DataChunkCount.ToString("0000"), null, nodeValueExporter);
+            newBaseFmt.ToBinaryAndTXTFiles(nodeList);
+        }
+
         private BinaryAndTXTFormat<NodeValType> setupFormat<NodeValType>(string whichStemName,
             NodeValueParser<NodeValType> nodeValueParser, NodeValueExporter<NodeValType> nodeValueExporter)
         {

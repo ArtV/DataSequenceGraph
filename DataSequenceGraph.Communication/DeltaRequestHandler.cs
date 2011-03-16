@@ -65,6 +65,7 @@ namespace DataSequenceGraph.Communication
                     fmt.ToBinaryAndTXTFiles(localNodeList, baseNodeList, nodeReqSpecs);
                     writeDeltaArchive(new List<string> { stemDeltaFilename }, deltaDirectory.DirectoryPath,
                         outS, actualRequestBase);
+                    deltaDirectory.dumpAsFullGraph(localNodeList, nodeValueExporter);
                 }
             }
 
