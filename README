@@ -5,7 +5,8 @@ to other nodes. The computeFullRoute() method of the DataChunkRouteBlazer object
 constructed with the original data value sequence and the desired MasterNodeList, 
 will make all necessary changes to encode the chunk in the graph. 
 --------------------------------------------------------------------------------------------
-EXTERNAL DEPENDENCIES! :
+EXTERNAL DEPENDENCIES
+Completely unmodified binaries are redistributed in /lib as permitted by the licenses:
    * Test projects depend on the nunit.framework.dll assembly from 
      NUnit http://www.nunit.org/
    * The DataSequenceGraphCLI project depends on CommandLine.dll assembly from 
