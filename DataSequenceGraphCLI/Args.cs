@@ -75,6 +75,9 @@ namespace DataSequenceGraphCLI
         [Option("d", "deltadir", HelpText = "Directory that stores incoming/outgoing graph deltas.")]
         public string DeltaDirectory = null;
 
+        [Option("n", "newdeltadir", HelpText = "Initialize the delta directory (must already exist) with the primary graph (requires -d).")]
+        public bool InitDeltaDirectory = false;
+
         [Option("R", "reqdeltas", HelpText = "Generate a new request for deltas (requires -d).")]
         public bool MakeDeltaRequest = false;
 

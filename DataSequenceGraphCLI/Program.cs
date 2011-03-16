@@ -99,8 +99,11 @@ namespace DataSequenceGraphCLI
                 }
                 else
                 {
+                    // automatically switch on verbose graph reporting if no other output
+                    // passing delta directory parameter will produce its own output/effects                    
                     if (arguments.OutDatFile == null && arguments.OutTxtFile == null && 
-                        arguments.OutXMLFile == null && arguments.OutChunkFile == null)
+                        arguments.OutXMLFile == null && arguments.OutChunkFile == null &&
+                        arguments.DeltaDirectory == null)  
                     {
                         arguments.Verbose = true;
                     }
@@ -301,7 +304,12 @@ namespace DataSequenceGraphCLI
                         DeltaRequestResultKind requestResultKind;
                         DeltaResponseResultKind responseResultKind;
                         MasterNodeList<string> newLocalNodeList;
-                        if (arguments.MakeDeltaRequest)
+                        if (arguments.InitDeltaDirectory)
+                        {
+                            deltaDir.initDirectory(firstList, nodeValueExporter);
+                            Console.Out.WriteLine("Initialized delta directory ");
+                        }
+                        else if (arguments.MakeDeltaRequest)
                         {
                             DeltaRequest newReq = new DeltaRequest(deltaDir);
                             string newFilename = deltaDir.CurrentBase + ".base";
@@ -337,7 +345,7 @@ namespace DataSequenceGraphCLI
                                         new MemoryStream(outReq.ToArray()).CopyTo(fileStream);
                                     }
                                     Console.Out.WriteLine("Wrote .base counter-request response to " + deltArr[0] + ".base");
-                                } 
+                                }
                             }
                         }
                         else if (arguments.BaseResponseToRequest != null)
@@ -350,11 +358,18 @@ namespace DataSequenceGraphCLI
                                 {
                                     StreamReader resRdr = new StreamReader(new MemoryStream(outReq.ToArray()));
                                     string[] deltArr = DeltaList.readList(resRdr);
-                                    using (FileStream fileStream = new FileStream(deltArr[0] + ".base", FileMode.Create))
+                                    if (File.Exists(deltArr[0] + ".base"))
                                     {
-                                        new MemoryStream(outReq.ToArray()).CopyTo(fileStream);
+                                        Console.Out.WriteLine("New delta request already exists: " + deltArr[0] + ".base");
                                     }
-                                    Console.Out.WriteLine("Wrote new delta request to " + deltArr[0] + ".base");
+                                    else
+                                    {
+                                        using (FileStream fileStream = new FileStream(deltArr[0] + ".base", FileMode.Create))
+                                        {
+                                            new MemoryStream(outReq.ToArray()).CopyTo(fileStream);
+                                        }
+                                        Console.Out.WriteLine("Wrote new delta request to " + deltArr[0] + ".base");
+                                    }
                                 }
                                 else
                                 {

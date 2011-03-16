@@ -26,6 +26,10 @@ namespace DataSequenceGraph.Communication
         {
             IEnumerable<string> fiveDeltas = deltaDirectory.getDeltasBeforeOrEqual(
                 oldDelta, 5);
+            if (fiveDeltas.Count() == 0)
+            {
+                fiveDeltas = new List<string> { oldDelta };
+            }
             DeltaList.writeList(fiveDeltas, outWriter);            
         }
     }

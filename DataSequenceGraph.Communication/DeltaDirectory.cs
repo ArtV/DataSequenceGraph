@@ -54,6 +54,17 @@ namespace DataSequenceGraph.Communication
             }            
         }
 
+        public void initDirectory<NodeValType>(MasterNodeList<NodeValType> nodeList,
+            NodeValueExporter<NodeValType> nodeValueExporter)
+        {
+            BinaryAndTXTFormat<NodeValType> fmt = setupFormat(
+                nodeList.DataChunkCount.ToString("0000"),null, nodeValueExporter);
+            fmt.ToBinaryAndTXTFiles(nodeList);
+
+            fmt = setupFormat(DeltaList.generateNewDeltaFilename(0), null, nodeValueExporter);
+            fmt.ToBinaryAndTXTFiles(nodeList);
+        }
+
         public IEnumerable<string> getDeltasBeforeOrEqual(string otherDelta,int maxCount)
         {
             int returnCount = 0;
