@@ -193,6 +193,15 @@ namespace DataSequenceGraph
             return newNode;
         }
 
+        public void addChunksStartingAtIndexToOtherList(int baseIndex, MasterNodeList<T> otherList)
+        {
+            foreach (var chunk in dataChunksAtOrLaterThanIndex(baseIndex))
+            {
+                DataChunkRouteBlazer<T> newBlazer = new DataChunkRouteBlazer<T>(chunk, otherList);
+                newBlazer.computeFullRoute();
+            }
+        }
+
         public void addLaterChunksThanBaseToOtherList(MasterNodeList<T> baseList,MasterNodeList<T> otherList)
         {
             foreach (IEnumerable<T> chunk in dataChunksLaterThan(baseList))
@@ -202,12 +211,17 @@ namespace DataSequenceGraph
             }
         }
 
-        public IEnumerable<IEnumerable<T>> dataChunksLaterThan(MasterNodeList<T> pastList)
-        {
-            foreach (var route in chunkRoutesStartingAt(pastList.DataChunkCount))
+        public IEnumerable<IEnumerable<T>> dataChunksAtOrLaterThanIndex(int chunkIndex)
+        {            
+            foreach (var route in chunkRoutesStartingAt(chunkIndex))
             {
                 yield return route.dataChunk;
             } 
+        }
+
+        public IEnumerable<IEnumerable<T>> dataChunksLaterThan(MasterNodeList<T> pastList)
+        {
+            return dataChunksAtOrLaterThanIndex(pastList.DataChunkCount);
         }
 
         public IEnumerable<DataChunkRoute<T>> chunkRoutesStartingAt(int pastCount)

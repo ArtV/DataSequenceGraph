@@ -73,11 +73,23 @@ namespace DataSequenceGraph.Format
             this.TXTOut = TXTOut;
         }
 
-        public BinaryAndTXTFormat(Stream binaryIn, TextReader TXTIn, NodeValueParser<NodeValType> nodeValueParser)
+        public BinaryAndTXTFormat(Stream binaryIn, TextReader TXTIn, NodeValueParser<NodeValType> nodeValueParser):
+            this(nodeValueParser)
         {
             this.binaryIn = binaryIn;
             this.TXTIn = TXTIn;
+        }
+
+        public BinaryAndTXTFormat(NodeValueParser<NodeValType> nodeValueParser)
+        {
             this.nodeValueParser = nodeValueParser;
+        }
+
+        public BinaryAndTXTFormat(string binaryFileName, string textFileName, NodeValueParser<NodeValType> nodeValueParser) :
+            this(nodeValueParser)
+        {
+            this.binaryFileName = binaryFileName;
+            this.textFileName = textFileName;
         }
 
         public void ToBinaryAndTXTFiles(MasterNodeList<NodeValType> nodeList)

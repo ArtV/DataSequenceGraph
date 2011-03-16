@@ -2,20 +2,18 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{DF38CA9C-66F4-4CF1-A629-C809FF0DDF67}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{B479D0BE-E5A9-43FA-B085-F56445AE0C2B}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DataSequenceGraphCLI</RootNamespace>
-    <AssemblyName>DataSequenceGraphCLI</AssemblyName>
+    <RootNamespace>DataSequenceGraph.Communication</RootNamespace>
+    <AssemblyName>DataSequenceGraph.Communication</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,8 +22,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -34,8 +31,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CommandLine">
-      <HintPath>.\CommandLine.dll</HintPath>
+    <Reference Include="ICSharpCode.SharpZipLib">
+      <HintPath>.\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -46,8 +43,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Args.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="DeltaDirectory.cs" />
+    <Compile Include="DeltaList.cs" />
+    <Compile Include="DeltaRequest.cs" />
+    <Compile Include="DeltaRequestHandler.cs" />
+    <Compile Include="DeltaResponseHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -55,21 +55,9 @@
       <Project>{77357CCB-D871-4007-85D8-DE5C2DB17043}</Project>
       <Name>BinaryAndTXTFormat</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DataSequenceGraph.Communication\DataSequenceGraph.Communication.csproj">
-      <Project>{B479D0BE-E5A9-43FA-B085-F56445AE0C2B}</Project>
-      <Name>DataSequenceGraph.Communication</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DataSequenceGraph\DataSequenceGraph.csproj">
       <Project>{55CB11B6-B07B-4308-93E3-F95F74B069E2}</Project>
       <Name>DataSequenceGraph</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SentenceChunkLoader\SentenceChunkLoader.csproj">
-      <Project>{FD4B2F07-6C20-43AE-A0E1-E5874CD46EE6}</Project>
-      <Name>SentenceChunkLoader</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\XMLGraphFormat\XMLGraphFormat.csproj">
-      <Project>{E9C47BF8-4F91-4B0E-ACA3-AB521C466190}</Project>
-      <Name>XMLGraphFormat</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

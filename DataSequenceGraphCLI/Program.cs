@@ -8,6 +8,7 @@ using System.Xml;
 using System.IO;
 using DataSequenceGraph.Chunk;
 using CommandLine;
+using DataSequenceGraph.Communication;
 
 namespace DataSequenceGraphCLI
 {
@@ -98,8 +99,11 @@ namespace DataSequenceGraphCLI
                 }
                 else
                 {
+                    // automatically switch on verbose graph reporting if no other output
+                    // passing delta directory parameter will produce its own output/effects                    
                     if (arguments.OutDatFile == null && arguments.OutTxtFile == null && 
-                        arguments.OutXMLFile == null && arguments.OutChunkFile == null)
+                        arguments.OutXMLFile == null && arguments.OutChunkFile == null &&
+                        arguments.DeltaDirectory == null)  
                     {
                         arguments.Verbose = true;
                     }
@@ -292,6 +296,113 @@ namespace DataSequenceGraphCLI
                     {
                         secondList.addLaterChunksThanBaseToOtherList(commonBaseList, firstList);
                     }
+                    else if (arguments.DeltaDirectory != null)
+                    {
+                        NodeValueParser<string> nodeValueParser = new StringNodeValueParser();
+                        NodeValueExporter<string> nodeValueExporter = new ToStringNodeValueExporter<string>();
+                        DeltaDirectory deltaDir = new DeltaDirectory(arguments.DeltaDirectory);
+                        DeltaRequestResultKind requestResultKind;
+                        DeltaResponseResultKind responseResultKind;
+                        MasterNodeList<string> newLocalNodeList;
+                        if (arguments.InitDeltaDirectory)
+                        {
+                            deltaDir.initDirectory(firstList, nodeValueExporter);
+                            Console.Out.WriteLine("Initialized delta directory ");
+                        }
+                        else if (arguments.MakeDeltaRequest)
+                        {
+                            DeltaRequest newReq = new DeltaRequest(deltaDir);
+                            string newFilename = deltaDir.CurrentBase + ".base";
+                            using (TextWriter textWriter = new StreamWriter(new FileStream(newFilename, FileMode.Create)))
+                            {
+                                newReq.writeDefaultRequest(textWriter);
+                            }
+                            Console.Out.WriteLine("Wrote new delta request to " + newFilename);
+                        }
+                        else if (arguments.DeltaRequest != null)
+                        {
+                            using (TextReader textReader = new StreamReader(new FileStream(arguments.DeltaRequest, FileMode.Open, FileAccess.Read)))
+                            {
+                                MemoryStream outReq = new MemoryStream();
+                                requestResultKind = DeltaRequestHandler.handleDeltaRequest(deltaDir,
+                                    deltaDir.getLastFullGraph(nodeValueParser), firstList,
+                                    nodeValueExporter, textReader, outReq);
+                                if (requestResultKind == DeltaRequestResultKind.Deltas)
+                                {
+                                    string newFilename = DateTime.Now.ToString("yyyy-MM-dd'T'HH-mm-ss'Z'") + ".tar.gz";
+                                    using (FileStream fileStream = new FileStream(newFilename, FileMode.Create))
+                                    {
+                                        new MemoryStream(outReq.ToArray()).CopyTo(fileStream);
+                                    }
+                                    Console.Out.WriteLine("Wrote archive response to " + newFilename);
+                                }
+                                else
+                                {
+                                    StreamReader resRdr = new StreamReader(new MemoryStream(outReq.ToArray()));
+                                    string[] deltArr = DeltaList.readList(resRdr);
+                                    if (File.Exists(deltArr[0] + ".base"))
+                                    {
+                                        Console.Out.WriteLine("New delta request already exists: " + deltArr[0] + ".base");
+                                    }
+                                    else
+                                    {
+                                        using (FileStream fileStream = new FileStream(deltArr[0] + ".base", FileMode.Create))
+                                        {
+                                            new MemoryStream(outReq.ToArray()).CopyTo(fileStream);
+                                        }
+                                        Console.Out.WriteLine("Wrote .base counter-request response " + deltArr[0] + ".base");
+                                    }
+                                }
+                            }
+                        }
+                        else if (arguments.BaseResponseToRequest != null)
+                        {
+                            using (TextReader textReader = new StreamReader(new FileStream(arguments.BaseResponseToRequest, FileMode.Open, FileAccess.Read)))
+                            {
+                                MemoryStream outReq = new MemoryStream();
+                                responseResultKind = DeltaResponseHandler.handleDeltaBaseResponse(deltaDir, textReader, new StreamWriter(outReq));
+                                if (responseResultKind == DeltaResponseResultKind.UpdateRequest)
+                                {
+                                    StreamReader resRdr = new StreamReader(new MemoryStream(outReq.ToArray()));
+                                    string[] deltArr = DeltaList.readList(resRdr);
+                                    if (File.Exists(deltArr[0] + ".base"))
+                                    {
+                                        Console.Out.WriteLine("New delta request already exists: " + deltArr[0] + ".base");
+                                    }
+                                    else
+                                    {
+                                        using (FileStream fileStream = new FileStream(deltArr[0] + ".base", FileMode.Create))
+                                        {
+                                            new MemoryStream(outReq.ToArray()).CopyTo(fileStream);
+                                        }
+                                        Console.Out.WriteLine("Wrote new delta request to " + deltArr[0] + ".base");
+                                    }
+                                }
+                                else
+                                {
+                                    Console.Out.WriteLine("Matching .base response indicates no new deltas. No action taken.");
+                                }
+                            }
+                        }
+                        else if (arguments.ArchiveResponseToRequest != null)
+                        {
+                            using (FileStream fs = new FileStream(arguments.ArchiveResponseToRequest, FileMode.Open, FileAccess.Read))
+                            {
+                                responseResultKind = DeltaResponseHandler.handleDeltaArchiveResponse(firstList, deltaDir,
+                                     nodeValueParser, nodeValueExporter, fs, out newLocalNodeList);
+                                if (responseResultKind == DeltaResponseResultKind.Acceptance ||
+                                    responseResultKind == DeltaResponseResultKind.Rewrite)
+                                {
+                                    Console.Out.WriteLine("Delta archive has been loaded.");
+                                    firstList = newLocalNodeList;
+                                }
+                                else
+                                {
+                                    Console.Out.WriteLine("Delta archive has been ignored.");
+                                }
+                            }
+                        }
+                    }
 
 
                     // ---- stage 3                    
@@ -377,6 +488,8 @@ namespace DataSequenceGraphCLI
                             }
                         }
                     }
+
+
                 }
             }
         }
