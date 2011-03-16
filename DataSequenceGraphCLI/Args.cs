@@ -72,6 +72,21 @@ namespace DataSequenceGraphCLI
         [Option("h", "hc", HelpText = "Use the numbered hand/hard-coded graph as the primary.")]
         public int HandCodedList = -1;
 
+        [Option("d", "deltadir", HelpText = "Directory that stores incoming/outgoing graph deltas.")]
+        public string DeltaDirectory = null;
+
+        [Option("R", "reqdeltas", HelpText = "Generate a new request for deltas (requires -d).")]
+        public bool MakeDeltaRequest = false;
+
+        [Option("i", "incomingreq", HelpText = "Respond to an incoming request for deltas (requires -d).")]
+        public string DeltaRequest = null;
+
+        [Option("b", "baseresp", HelpText = "Received .base file response to a request for deltas (requires -d).")]
+        public string BaseResponseToRequest = null;
+
+        [Option("a", "archresp", HelpText = "Received .tar.gz archive response to a request for deltas (requires -d).")]
+        public string ArchiveResponseToRequest = null;
+
         [HelpOption(HelpText = "Display this help screen.")]
         public string GetUsage()
         {            

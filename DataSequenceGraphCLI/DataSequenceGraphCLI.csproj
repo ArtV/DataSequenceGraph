@@ -55,6 +55,10 @@
       <Project>{77357CCB-D871-4007-85D8-DE5C2DB17043}</Project>
       <Name>BinaryAndTXTFormat</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DataSequenceGraph.Communication\DataSequenceGraph.Communication.csproj">
+      <Project>{B479D0BE-E5A9-43FA-B085-F56445AE0C2B}</Project>
+      <Name>DataSequenceGraph.Communication</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DataSequenceGraph\DataSequenceGraph.csproj">
       <Project>{55CB11B6-B07B-4308-93E3-F95F74B069E2}</Project>
       <Name>DataSequenceGraph</Name>

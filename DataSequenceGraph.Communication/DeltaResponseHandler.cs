@@ -33,6 +33,17 @@ namespace DataSequenceGraph.Communication
             return result;
         }
 
+        public static DeltaResponseResultKind
+            handleDeltaArchiveResponse<NodeValType>(MasterNodeList<NodeValType> originalLocalNodeList,
+            DeltaDirectory deltaDirectory,
+            NodeValueParser<NodeValType> nodeValueParser, NodeValueExporter<NodeValType> nodeValueExporter,
+            Stream deltaArchiveResponse, out MasterNodeList<NodeValType> newLocalNodeList)
+        {
+            return handleDeltaArchiveResponse(originalLocalNodeList, deltaDirectory,
+                deltaDirectory.getLastFullGraph(nodeValueParser), nodeValueParser,
+                nodeValueExporter, deltaArchiveResponse, out newLocalNodeList);
+        }
+
         public static DeltaResponseResultKind 
             handleDeltaArchiveResponse<NodeValType>(MasterNodeList<NodeValType> originalLocalNodeList,
             DeltaDirectory deltaDirectory,MasterNodeList<NodeValType> baseNodeList,

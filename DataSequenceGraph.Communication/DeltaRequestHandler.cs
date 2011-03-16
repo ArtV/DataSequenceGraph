@@ -50,15 +50,23 @@ namespace DataSequenceGraph.Communication
                 returnResult = DeltaRequestResultKind.Deltas;
                 int beforeBaseNodeCount = baseNodeList.DataChunkCount;
                 IList<NodeAndReqSpec> nodeReqSpecs = localNodeList.getSpecsAbsentIn(baseNodeList);
-                string stemDeltaFilename = beforeBaseNodeCount.ToString("0000") +
-                    "-delta-" + DateTime.Now.ToString("yyyy-MM-dd'T'HH-mm-ss'Z'");
-                string stemNameWithPath = deltaDirectory.DirectoryPath + @"\" + stemDeltaFilename;
-                BinaryAndTXTFormat<NodeValType> fmt =
-                    new BinaryAndTXTFormat<NodeValType>(stemNameWithPath + ".dat", stemNameWithPath + ".txt",
-                        nodeValueExporter);
-                fmt.ToBinaryAndTXTFiles(localNodeList, baseNodeList, nodeReqSpecs);
-                writeDeltaArchive(new List<string> { stemDeltaFilename }, deltaDirectory.DirectoryPath, 
-                    outS, actualRequestBase);
+                if (nodeReqSpecs.Count == 0)
+                {
+                    returnResult = DeltaRequestResultKind.Empty;
+                    new DeltaRequest(deltaDirectory).writeDefaultRequest(new StreamWriter(outS));
+                }
+                else
+                {
+                    string stemDeltaFilename = beforeBaseNodeCount.ToString("0000") +
+                        "-delta-" + DateTime.Now.ToString("yyyy-MM-dd'T'HH-mm-ss'Z'");
+                    string stemNameWithPath = deltaDirectory.DirectoryPath + @"\" + stemDeltaFilename;
+                    BinaryAndTXTFormat<NodeValType> fmt =
+                        new BinaryAndTXTFormat<NodeValType>(stemNameWithPath + ".dat", stemNameWithPath + ".txt",
+                            nodeValueExporter);
+                    fmt.ToBinaryAndTXTFiles(localNodeList, baseNodeList, nodeReqSpecs);
+                    writeDeltaArchive(new List<string> { stemDeltaFilename }, deltaDirectory.DirectoryPath,
+                        outS, actualRequestBase);
+                }
             }
 
             return returnResult;
@@ -76,6 +84,9 @@ namespace DataSequenceGraph.Communication
             Stream outStream, string requestedBase)
         {
             TarArchive requestTar = TarArchive.CreateOutputTarArchive(new GZipOutputStream(outStream));
+            requestTar.RootPath = deltaPath.Replace('\\', '/');
+            if (requestTar.RootPath.EndsWith("/"))
+                requestTar.RootPath = requestTar.RootPath.Remove(requestTar.RootPath.Length - 1);
 
             string baseFile = deltaPath + @"\" + requestedBase + ".base";
             using (TextWriter textWriter = new StreamWriter(new FileStream(baseFile, FileMode.Create)))
