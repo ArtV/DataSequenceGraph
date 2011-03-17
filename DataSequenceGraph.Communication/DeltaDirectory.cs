@@ -91,19 +91,19 @@ namespace DataSequenceGraph.Communication
 
         public Tuple<int, string, int> findCommonBase(string[] otherDeltas)
         {
-            string earliestCandidateBase = otherDeltas[0];
+            string candidateBase = otherDeltas[0];
             int foundIndex = -1;
             int i = -1;
             for (i = 0; i <= otherDeltas.Length - 1; i++)
             {
-                earliestCandidateBase = otherDeltas[i];
-                foundIndex = allDeltaFilenames.FindIndex(fname => fname.Equals(earliestCandidateBase));
+                candidateBase = otherDeltas[i];
+                foundIndex = allDeltaFilenames.FindIndex(fname => fname.Equals(candidateBase));
                 if (foundIndex >= 0)
                 {
                     break;
                 }
             }
-            return Tuple.Create(foundIndex,earliestCandidateBase,i);
+            return Tuple.Create(foundIndex,candidateBase,i);
         }
 
         public MasterNodeList<NodeValType> getLastFullGraph<NodeValType>(

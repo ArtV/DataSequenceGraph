@@ -26,9 +26,17 @@ namespace DataSequenceGraph.Communication
             if (comp != 0)
             {
                 result = DeltaResponseResultKind.UpdateRequest;
-                var foundBase = deltaDirectory.findCommonBase(allDeltas);               
-                new DeltaRequest(deltaDirectory).writeRequestUsingDelta(
-                    foundBase.Item2,updateRequestWriter);
+                var foundBase = deltaDirectory.findCommonBase(allDeltas);
+                if (foundBase.Item1 >= 0)
+                {
+                    new DeltaRequest(deltaDirectory).writeRequestUsingDelta(
+                        foundBase.Item2, updateRequestWriter);
+                }
+                else
+                {
+                    DeltaList.writeList(deltaDirectory.getDeltasBeforeOrEqual(foundBase.Item2, 5),
+                        updateRequestWriter);
+                }
             }
             return result;
         }
