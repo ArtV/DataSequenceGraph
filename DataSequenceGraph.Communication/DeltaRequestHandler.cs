@@ -25,12 +25,7 @@ namespace DataSequenceGraph.Communication
             string currentBase = deltaDirectory.CurrentBase;
 
             int comp = actualRequestBase.CompareTo(currentBase);
-            if (comp > 0)
-            {
-                returnResult = DeltaRequestResultKind.Empty;
-                new DeltaRequest(deltaDirectory).writeDefaultRequest(new StreamWriter(outS));
-            }
-            else if (comp < 0)
+            if (comp != 0)
             { 
                 Tuple<int, string, int> foundBase = deltaDirectory.findCommonBase(allDeltas);
                 if (foundBase.Item1 >= 0)

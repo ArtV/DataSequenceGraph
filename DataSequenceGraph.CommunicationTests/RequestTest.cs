@@ -44,7 +44,7 @@ namespace DataSequenceGraph.CommunicationTests
             StringReader rdr = new StringReader("0030-delta-2011-03-13T05-38-00Z");
             DeltaRequestResultKind result = DeltaRequestHandler.handleDeltaRequest(deltaDir, new MasterNodeList<int>(), 
                 new MasterNodeList<int>(), new ToStringNodeValueExporter<int>(),rdr, new MemoryStream());
-            Assert.AreEqual(DeltaRequestResultKind.Empty, result);
+            Assert.AreEqual(DeltaRequestResultKind.Mismatch, result);
         }
 
         [Test]
