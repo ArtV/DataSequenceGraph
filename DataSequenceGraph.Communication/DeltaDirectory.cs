@@ -107,11 +107,30 @@ namespace DataSequenceGraph.Communication
         }
 
         public MasterNodeList<NodeValType> getLastFullGraph<NodeValType>(
-            NodeValueParser<NodeValType> nodeValueParser)
+            NodeValueParser<NodeValType> nodeValueParser, NodeValueExporter<NodeValType> nodeValueExporter)
         {
-            BinaryAndTXTFormat<NodeValType> fmt = setupFormat(allFullGraphs[allFullGraphs.Count - 1], 
-                nodeValueParser, null);
-            return fmt.ToNodeListFromFiles();
+            return reconstructGraph(CurrentBase, nodeValueParser, nodeValueExporter);
+        }
+
+        public MasterNodeList<NodeValType> reconstructGraph<NodeValType>(string lastDeltaApplied,
+            NodeValueParser<NodeValType> nodeValueParser, NodeValueExporter<NodeValType> nodeValueExporter)
+        {
+            var fullGraphInfo = getFullGraphBefore(lastDeltaApplied, nodeValueParser);
+            string graphStemName;
+            MasterNodeList<NodeValType> startingGraph;
+            if (fullGraphInfo == null)
+            {
+                graphStemName = " ";
+                startingGraph = new MasterNodeList<NodeValType>();
+            }
+            else
+            {
+                graphStemName = fullGraphInfo.Item1;
+                startingGraph = fullGraphInfo.Item2;
+            }
+            applyDeltaSeriesToNodeList(getDeltasAfterButUpTo(graphStemName, lastDeltaApplied),
+                startingGraph, nodeValueParser, nodeValueExporter);
+            return startingGraph;
         }
 
         public Tuple<string,MasterNodeList<NodeValType>> getFullGraphBefore<NodeValType>(string delta,

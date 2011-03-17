@@ -40,7 +40,7 @@ namespace DataSequenceGraph.Communication
             Stream deltaArchiveResponse, out MasterNodeList<NodeValType> newLocalNodeList)
         {
             return handleDeltaArchiveResponse(originalLocalNodeList, deltaDirectory,
-                deltaDirectory.getLastFullGraph(nodeValueParser), nodeValueParser,
+                deltaDirectory.getLastFullGraph(nodeValueParser,nodeValueExporter), nodeValueParser,
                 nodeValueExporter, deltaArchiveResponse, out newLocalNodeList);
         }
 
@@ -89,9 +89,9 @@ namespace DataSequenceGraph.Communication
                     }
                     else
                     {
-                        result = DeltaResponseResultKind.Rewrite;                       
-                        MasterNodeList<NodeValType> oldCommonBase = 
-                            reconstructGraph(deltaDirectory, commonBase, nodeValueParser,nodeValueExporter);
+                        result = DeltaResponseResultKind.Rewrite;
+                        MasterNodeList<NodeValType> oldCommonBase = deltaDirectory.reconstructGraph(
+                            commonBase, nodeValueParser, nodeValueExporter);
                         int baseIndexBefore = oldCommonBase.DataChunkCount;
                         deltaDirectory.junkFilesAfter(commonBase);
                         copyAndApplyDeltas(tempDir, deltaDirectory, oldCommonBase, nodeValueParser, nodeValueExporter);
@@ -102,28 +102,6 @@ namespace DataSequenceGraph.Communication
             }
 
             return result;
-        }
-
-        private static MasterNodeList<NodeValType> reconstructGraph<NodeValType>(DeltaDirectory deltaDirectory, string lastDeltaApplied, 
-            NodeValueParser<NodeValType> nodeValueParser, NodeValueExporter<NodeValType> nodeValueExporter)
-        {
-            var fullGraphInfo = deltaDirectory.getFullGraphBefore(lastDeltaApplied, nodeValueParser);            
-            string graphStemName;
-            MasterNodeList<NodeValType> startingGraph;
-            if (fullGraphInfo == null)
-            {
-                graphStemName = " ";
-                startingGraph = new MasterNodeList<NodeValType>();
-            }
-            else
-            {
-                graphStemName = fullGraphInfo.Item1;
-                startingGraph = fullGraphInfo.Item2;
-            }
-            deltaDirectory.applyDeltaSeriesToNodeList(
-                deltaDirectory.getDeltasAfterButUpTo(graphStemName, lastDeltaApplied),
-                startingGraph, nodeValueParser, nodeValueExporter);
-            return startingGraph;
         }
 
         private static string extractDeltaArchive(Stream deltaArchive)

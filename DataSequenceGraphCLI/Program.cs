@@ -325,7 +325,7 @@ namespace DataSequenceGraphCLI
                             {
                                 MemoryStream outReq = new MemoryStream();
                                 requestResultKind = DeltaRequestHandler.handleDeltaRequest(deltaDir,
-                                    deltaDir.getLastFullGraph(nodeValueParser), firstList,
+                                    deltaDir.getLastFullGraph(nodeValueParser, nodeValueExporter), firstList,
                                     nodeValueExporter, textReader, outReq);
                                 if (requestResultKind == DeltaRequestResultKind.Deltas)
                                 {
