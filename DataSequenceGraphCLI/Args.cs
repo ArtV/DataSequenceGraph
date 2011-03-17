@@ -106,6 +106,8 @@ namespace DataSequenceGraphCLI
                 "re-applying the chunks in primary that were formerly added to the base.");
             txt.AddPreOptionsLine("  * -r with primary, secondary, and base graphs produces the result of applying, to the primary graph, the " +
                 "chunks that the secondary graph formerly added on top of the base graph.");
+            txt.AddPreOptionsLine("  * -d and the parameters that require it may result in changes to the passed directory of graph deltas " +
+                "or in new output files written to the current directory.");
             txt.AddOptions(this);
             return txt;
         }
