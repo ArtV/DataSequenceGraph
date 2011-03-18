@@ -200,7 +200,7 @@ namespace DataSequenceGraphCLI
                         else if (arguments.Chunk == -1 && !arguments.Missing && arguments.LeastChunk == -1)
                         {
                             tempList = inXml2.ToNodeListFromFile();
-                            secondList.reloadNodesThenRoutesFromSpecs(tempList.AllNodeSpecs, tempList.AllEdgeSpecs);
+                            firstList.reloadNodesThenRoutesFromSpecs(tempList.AllNodeSpecs, tempList.AllEdgeSpecs);
                         }
                         else
                         {
