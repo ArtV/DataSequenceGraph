@@ -9,6 +9,7 @@ namespace DataSequenceGraph.Format
 {
     public class BinaryAndTXTFormat<NodeValType>
     {
+        private const int NODEINDEXMAXIMUM = 3838;
         private const short LINECHARLIMIT = 120;
         private const string DELIMITER = "|";
 
@@ -132,7 +133,6 @@ namespace DataSequenceGraph.Format
             BinaryWriter writer)
         {
             List<NodeValType> newValues = new List<NodeValType>();
-            ushort seqNumber;
             byte flags;
             NodeAndReqSpec lastSpec = null;
             NodeAndReqSpec currentNodeSpec = null;
@@ -140,15 +140,21 @@ namespace DataSequenceGraph.Format
             bool useStartEdgeAsReq = false;
             DataChunkRoute<NodeValType> writtenRoute = null;
             EdgeRoute reqEdge;
+            int lastNewSequenceNumber = -1;
             for (int i = 0; i <= specs.Count - 1; i++)
             {
                 currentNodeSpec = specs[i];
-                seqNumber = indexToUshort(currentNodeSpec.fromNode.SequenceNumber);
+                if (currentNodeSpec.fromNode.SequenceNumber > NODEINDEXMAXIMUM)
+                {
+                    throw new Exception("Node index " + currentNodeSpec.fromNode.SequenceNumber +
+                        " is over the supported maximum " + NODEINDEXMAXIMUM);
+                }
                 if (currentNodeSpec.fromNode.kind != NodeKind.ValueNode)
                 {
                     flags = NOTVALUENODE;
-                    writer.Write(ANDHalfByte(seqNumber,flags));
+                    writeSeqNumberAndFlags(writer, currentNodeSpec.fromNode.SequenceNumber, flags, lastNewSequenceNumber);
                     writtenRoute = sourceList.dataChunkRouteStartingAt((GateNode) sourceList.nodeByNumber(currentNodeSpec.fromNode.SequenceNumber));
+                    lastNewSequenceNumber = currentNodeSpec.fromNode.SequenceNumber;
                     // skip writing requisite node numbers since those must be -1, -1
                 }
                 else
@@ -167,7 +173,8 @@ namespace DataSequenceGraph.Format
                     }
                     if (!currentNodeSpec.insertFrom)
                     {
-                        writeExistingNode(writer, seqNumber, currentNodeSpec, usePreviousEdgeAsReq, useStartEdgeAsReq);
+                        writeExistingNode(writer, currentNodeSpec.fromNode.SequenceNumber, 
+                            currentNodeSpec, usePreviousEdgeAsReq, useStartEdgeAsReq, lastNewSequenceNumber);
                     }
                     else
                     {
@@ -176,12 +183,15 @@ namespace DataSequenceGraph.Format
                             destinationNodeList.getValueNodesByValue(valSpec.Value).Select(node => node.SequenceNumber);
                         if (nodeIndexesWithValue.Count() > 0 && currentNodeSpec.fromNode.SequenceNumber != nodeIndexesWithValue.First())
                         {
-                            writeNewDuplicateValueNode(writer, seqNumber, currentNodeSpec, usePreviousEdgeAsReq, useStartEdgeAsReq, nodeIndexesWithValue.First());
+                            writeNewDuplicateValueNode(writer, currentNodeSpec.fromNode.SequenceNumber, 
+                                currentNodeSpec, usePreviousEdgeAsReq, useStartEdgeAsReq, nodeIndexesWithValue.First(),lastNewSequenceNumber);
                         }
                         else
                         {
-                            writeNewUnduplicatedValueNode(writer, newValues, seqNumber, currentNodeSpec, usePreviousEdgeAsReq, useStartEdgeAsReq, valSpec);
+                            writeNewUnduplicatedValueNode(writer, newValues, currentNodeSpec.fromNode.SequenceNumber, 
+                                currentNodeSpec, usePreviousEdgeAsReq, useStartEdgeAsReq, valSpec, lastNewSequenceNumber);
                         }
+                        lastNewSequenceNumber = currentNodeSpec.fromNode.SequenceNumber;
                     }
                     if (!usePreviousEdgeAsReq && currentNodeSpec.reqFromRouteIndex != -1 &&
                         !useStartEdgeAsReq)
@@ -195,7 +205,8 @@ namespace DataSequenceGraph.Format
             return newValues;
         }
 
-        private void writeExistingNode(BinaryWriter writer, ushort seqNumber, NodeAndReqSpec currentNodeSpec, bool usePreviousEdgeAsReq, bool useStartEdgeAsReq)
+        private void writeExistingNode(BinaryWriter writer, int seqNumber, NodeAndReqSpec currentNodeSpec, 
+            bool usePreviousEdgeAsReq, bool useStartEdgeAsReq, int lastNewSequenceNumber)
         {
             byte flags;
             if (currentNodeSpec.reqFromRouteIndex == -1)
@@ -214,10 +225,11 @@ namespace DataSequenceGraph.Format
             {
                 flags = EXISTINGVALUENODE;
             }
-            writer.Write(ANDHalfByte(seqNumber, flags));
+            writeSeqNumberAndFlags(writer, seqNumber, flags, lastNewSequenceNumber);
         }
 
-        private void writeNewDuplicateValueNode(BinaryWriter writer, ushort seqNumber, NodeAndReqSpec currentNodeSpec, bool usePreviousEdgeAsReq, bool useStartEdgeAsReq, int existingNodeWithValue)
+        private void writeNewDuplicateValueNode(BinaryWriter writer, int seqNumber, NodeAndReqSpec currentNodeSpec, 
+            bool usePreviousEdgeAsReq, bool useStartEdgeAsReq, int existingNodeWithValue, int lastNewSequenceNumber)
         {
             byte flags;
             if (currentNodeSpec.reqFromRouteIndex == -1)
@@ -236,11 +248,13 @@ namespace DataSequenceGraph.Format
             {
                 flags = DUPLICATEVALUENODE;
             }
-            writer.Write(ANDHalfByte(seqNumber, flags));
+            writeSeqNumberAndFlags(writer, seqNumber, flags, lastNewSequenceNumber);
             writer.Write(indexToUshort(existingNodeWithValue));
         }
 
-        private void writeNewUnduplicatedValueNode(BinaryWriter writer, List<NodeValType> newValues, ushort seqNumber, NodeAndReqSpec currentNodeSpec, bool usePreviousEdgeAsReq, bool useStartEdgeAsReq, ValueNodeSpec<NodeValType> valSpec)
+        private void writeNewUnduplicatedValueNode(BinaryWriter writer, List<NodeValType> newValues, int seqNumber, 
+            NodeAndReqSpec currentNodeSpec, bool usePreviousEdgeAsReq, bool useStartEdgeAsReq, 
+            ValueNodeSpec<NodeValType> valSpec, int lastNewSequenceNumber)
         {
             byte flags;
             if (currentNodeSpec.reqFromRouteIndex == -1)
@@ -259,7 +273,7 @@ namespace DataSequenceGraph.Format
             {
                 flags = NEWVALUENODE;
             }
-            writer.Write(ANDHalfByte(seqNumber, flags));
+            writeSeqNumberAndFlags(writer, seqNumber, flags, lastNewSequenceNumber);
             int prevNewValueEntry = newValues.FindIndex(newVal => newVal.Equals(valSpec.Value));
             if (prevNewValueEntry != -1)
             {
@@ -273,6 +287,25 @@ namespace DataSequenceGraph.Format
             }
         }
 
+        private void writeSeqNumberAndFlags(BinaryWriter writer, int sequenceNumber, byte flags, int lastNewSequenceNumber)
+        {
+            ushort seqNumber = indexToUshort(sequenceNumber);
+            var nextBytes = ushortAndHalfByteToSwappedBytes(seqNumber, flags);
+            if (lastNewSequenceNumber != -1 &&
+                sequenceNumber == lastNewSequenceNumber + 1)
+            {
+                // this is a signal to skip reading the second
+                //   sequence number byte and instead increment
+                //   the # for the last added node and use that
+                writer.Write(switchOnLowerHalf(nextBytes.Item1));
+            }
+            else
+            {
+                writer.Write(nextBytes.Item1);
+                writer.Write(nextBytes.Item2);
+            }
+        }
+
         private ushort indexToUshort(int ind)
         {
             return Convert.ToUInt16(ind + 1);
@@ -281,36 +314,6 @@ namespace DataSequenceGraph.Format
         private int UshortToIndex(ushort shorty)
         {
             return Convert.ToInt32(shorty - 1);
-        }
-
-        private void writeTwoUshortsToThreeBytes(ushort first,ushort second,BinaryWriter writer)
-        {
-            byte[] outBytes = twoUshortToThreeBytes(first, second);
-            foreach (byte byt in outBytes)
-            {
-                writer.Write(byt);
-            }
-        }
-
-        private byte[] twoUshortToThreeBytes(ushort first, ushort second)
-        {
-            byte[] firstBytes = BitConverter.GetBytes(first);
-            byte[] secondBytes = BitConverter.GetBytes(second);
-
-            byte byteThree = (byte)(firstBytes[1] | (secondBytes[1] << 4));
-
-            return new byte[] { firstBytes[0], secondBytes[0], byteThree };
-        }
-
-        private ushort[] threeBytesToTwoUshort(byte first, byte second, byte third)
-        {
-            byte[] firstBytes = new byte[2];
-            firstBytes[0] = first;
-            byte[] secondBytes = new byte[2];
-            secondBytes[0] = second;
-            secondBytes[1] = (byte)(third >> 4);
-            firstBytes[1] = (byte)(third & 15);
-            return new ushort[] { BitConverter.ToUInt16(firstBytes, 0), BitConverter.ToUInt16(secondBytes, 0) };
         }
 
         private void ToTXT(IList<NodeValType> nodeValues)
@@ -396,11 +399,24 @@ namespace DataSequenceGraph.Format
             int prevFromIndex = -1;
             int startNodeIndex = -1;
             int secondNodeIndex = -1;
+            int lastAddedSequenceNumber = -1;
+            byte seqUpperHalfByte;
             while (r.BaseStream.Position != r.BaseStream.Length)
             {
-                var seqAndFlags = ReadAndSplitSeqAndFlags(r);
-                seqNum = seqAndFlags.Item1;
-                seqNumInt = UshortToIndex(seqNum);
+                var seqAndFlags = splitOutHalfBytes(r.ReadByte());
+                flags = seqAndFlags.Item2;
+                seqUpperHalfByte = seqAndFlags.Item1;
+                // 15 is a signal to skip reading the next byte of the sequence number
+                //   and instead just use the # of the last added node + 1
+                if (seqUpperHalfByte == 15)
+                {
+                    seqNumInt = lastAddedSequenceNumber + 1;
+                }
+                else
+                {
+                    seqNum = swappedUshortToPlainUshort(seqUpperHalfByte, r.ReadByte());
+                    seqNumInt = UshortToIndex(seqNum);
+                }
                 if (startNodeIndex == -1)
                 {
                     startNodeIndex = seqNumInt;
@@ -416,9 +432,9 @@ namespace DataSequenceGraph.Format
                     usePrevEdgeAsReq = false,
                     useStartEdgeAsReq = false,                    
                 };
-                flags = seqAndFlags.Item2;
                 if (flags == NOTVALUENODE)
                 {
+                    lastAddedSequenceNumber = seqNumInt;
                     if (newSpecs.Count > 1)
                     {
                         refList.reloadNodeAndReqSpecs(newSpecs);
@@ -441,6 +457,7 @@ namespace DataSequenceGraph.Format
                     {
                         readNewValueNode(refList, r, flags, seqNumInt, prevFromIndex, startNodeIndex, secondNodeIndex, totalSpec);
                         loadedVal = loadValueFromIndex(refList, r, flags, nodeValues);
+                        lastAddedSequenceNumber = seqNumInt;
                     }
                     newValSpec = new ValueNodeSpec<NodeValType>()
                     {
@@ -511,35 +528,28 @@ namespace DataSequenceGraph.Format
             }
         }
 
-        private Tuple<ushort, byte> ReadAndSplitSeqAndFlags(BinaryReader r)
+        private Tuple<byte, byte> splitOutHalfBytes(byte orig)
         {
-            return SplitOutHalfByte(r.ReadUInt16());
+            byte upperHalf = (byte)(orig >> 4);
+            byte lowerHalf = (byte)(orig & 15);
+            return Tuple.Create(lowerHalf, upperHalf);
         }
 
-        private ushort[] readTwoUshortsInThreeBytes(BinaryReader r)
-        {
-            byte[] threeStoredBytes = new byte[3];
-            for (int i = 0; i <= 2; i++)
-            {
-                threeStoredBytes[i] = r.ReadByte();
-            }
-
-            return threeBytesToTwoUshort(threeStoredBytes[0], threeStoredBytes[1], threeStoredBytes[2]);
-        }
-
-        private ushort ANDHalfByte(ushort orig, byte upper)
+        private Tuple<byte,byte> ushortAndHalfByteToSwappedBytes(ushort orig, byte halfByte)
         {
             byte[] origBytes = BitConverter.GetBytes(orig);
-            origBytes[1] = (byte)(origBytes[1] | (upper << 4));
-            return BitConverter.ToUInt16(origBytes, 0);
+            origBytes[1] = (byte)(origBytes[1] | (halfByte << 4));
+            return Tuple.Create(origBytes[1], origBytes[0]);
         }
 
-        private Tuple<ushort, byte> SplitOutHalfByte(ushort orig)
+        private ushort swappedUshortToPlainUshort(byte orig, byte orig2)
         {
-            byte[] origBytes = BitConverter.GetBytes(orig);
-            byte upper = (byte)(origBytes[1] >> 4);
-            origBytes[1] = (byte)(origBytes[1] & 15);
-            return Tuple.Create(BitConverter.ToUInt16(origBytes, 0), upper);
+            return BitConverter.ToUInt16(new byte[] { orig2, orig }, 0);
+        }
+
+        private byte switchOnLowerHalf(byte orig)
+        {
+            return (byte)(orig | 15);
         }
 
         private IList<NodeValType> FromTXT()
