@@ -27,6 +27,9 @@ namespace DataSequenceGraphCLI
         [Option("s", "splittext", HelpText = "Text file to be split into sentence chunks made of word values (clashes with -c, -y, -f, -u).")]
         public string InSrcFile = null;
 
+        [Option("S", "lettersplit", HelpText = "Text file to be split into word chunks made of letter values")]
+        public string InSrcLetterFile = null;
+
         [Option("X", "outxml", HelpText = "XML graph file for output.")]
         public string OutXMLFile = null;
 

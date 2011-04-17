@@ -56,7 +56,7 @@ namespace DataSequenceGraphCLI
                     Console.Out.WriteLine("Hand-coded graph is in place of loading a primary graph.");
                 }
                 else if (arguments.HandCodedList == -1 && arguments.InXMLFile == null && arguments.InDatFile == null
-                    && arguments.InSrcFile == null)
+                    && arguments.InSrcFile == null && arguments.InSrcLetterFile == null)
                 {
                     Console.Out.WriteLine("Must specify a primary graph, and/or a sentence source file to split.");
                 }
@@ -83,8 +83,8 @@ namespace DataSequenceGraphCLI
                 {
                     Console.Out.WriteLine("Output edge data file must be paired with a values text file.");
                 }
-                else if (arguments.InSrcFile != null && (arguments.InXMLFile2 != null || arguments.InDatFile2 != null
-                    || arguments.InTxtFile2 != null))
+                else if ((arguments.InSrcFile != null || arguments.InSrcLetterFile != null) && 
+                    (arguments.InXMLFile2 != null || arguments.InDatFile2 != null || arguments.InTxtFile2 != null))
                 {
                     Console.Out.WriteLine("Sentence source file cannot be processed simultaneously with a secondary graph.");
                 }
@@ -112,7 +112,8 @@ namespace DataSequenceGraphCLI
                     MasterNodeList<string> firstList;
                     MasterNodeList<string> secondList = null;
                     bool dupeList = false;
-                    if (arguments.InSrcFile != null && arguments.Missing)
+                    if ((arguments.InSrcFile != null || arguments.InSrcLetterFile != null) 
+                        && arguments.Missing)
                     {
                         dupeList = true;
                     }
@@ -228,9 +229,11 @@ namespace DataSequenceGraphCLI
                         }
                     }
 
-                    if (arguments.InSrcFile != null)
+                    if (arguments.InSrcFile != null || arguments.InSrcLetterFile != null)
                     {
-                        loadFile(arguments.InSrcFile, firstList, arguments.Quiet);
+                        string inFileNym = (arguments.InSrcFile != null ? arguments.InSrcFile : arguments.InSrcLetterFile);
+                        loadFile(inFileNym, firstList, arguments.Quiet, 
+                            arguments.InSrcLetterFile != null);
                     }
                     if (secondList != null && commonBaseList == null)
                     {
@@ -494,7 +497,15 @@ namespace DataSequenceGraphCLI
             }
         }
 
-        static void loadFile(string filename,MasterNodeList<string> masterNodeList,bool quiet)
+        static IEnumerable<string> charStringsOf(string fullString)
+        {
+            foreach (char ch in fullString)
+            {
+                yield return ch.ToString();
+            }
+        }
+
+        static void loadFile(string filename,MasterNodeList<string> masterNodeList,bool quiet,bool splitLetters)
         {
             List<string> sentences;
             List<string> words;
@@ -506,12 +517,25 @@ namespace DataSequenceGraphCLI
             foreach (string sentence in sentences)
             {
                 words = SentenceChunkLoader.ToWordValues(sentence);
-                blazer = new DataChunkRouteBlazer<string>(words, masterNodeList);
-                blazer.computeFullRoute();
-                if (!quiet)
+                if (splitLetters)
                 {
-                    Console.Out.WriteLine("Added sentence starting with " + words.First() + " at start node " +
-                        blazer.chunkRoute.startNode.SequenceNumber);
+                    foreach (string wordChunk in words)
+                    {
+                        blazer = new DataChunkRouteBlazer<string>(charStringsOf(wordChunk), masterNodeList);
+                        blazer.computeFullRoute();
+                        Console.Out.WriteLine("Added word starting with " + wordChunk.Substring(0,1) + " at start node " +
+                            blazer.chunkRoute.startNode.SequenceNumber);
+                    }
+                }
+                else
+                {
+                    blazer = new DataChunkRouteBlazer<string>(words, masterNodeList);                
+                    blazer.computeFullRoute();
+                    if (!quiet)
+                    {
+                        Console.Out.WriteLine("Added sentence starting with " + words.First() + " at start node " +
+                            blazer.chunkRoute.startNode.SequenceNumber);
+                    }
                 }
             }
         }
